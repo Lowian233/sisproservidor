@@ -1,0 +1,192 @@
+[18-Aug-2024 08:26:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/RequerimientosCliente.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/RequerimientosCliente.php on line 7
+[18-Aug-2024 08:26:18 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/departamento.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/departamento.php on line 7
+[18-Aug-2024 08:26:24 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/SolicitudServicio.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/SolicitudServicio.php on line 7
+[18-Aug-2024 08:26:31 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/TRangos.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/TRangos.php on line 7
+[18-Aug-2024 08:26:46 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/SolicitudResiduo.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/SolicitudResiduo.php on line 7
+[18-Aug-2024 08:27:02 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/DataDefinition.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/DataDefinition.php on line 7
+[18-Aug-2024 08:27:30 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Role.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Role.php on line 7
+[18-Aug-2024 08:28:12 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Quotation.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Quotation.php on line 7
+[18-Aug-2024 08:29:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Vehiculo.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Vehiculo.php on line 7
+[18-Aug-2024 08:30:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/VerificationCode.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/VerificationCode.php on line 7
+[18-Aug-2024 08:32:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/ProgramacionVehiculo.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/ProgramacionVehiculo.php on line 7
+[18-Aug-2024 08:33:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/QrCode2.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/QrCode2.php on line 7
+[18-Aug-2024 08:34:12 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Cliente.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Cliente.php on line 7
+[18-Aug-2024 08:35:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/CategoriaActivo.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/CategoriaActivo.php on line 7
+[18-Aug-2024 08:36:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/sede.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/sede.php on line 7
+[18-Aug-2024 08:37:32 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/CertificadoExpress.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/CertificadoExpress.php on line 7
+[18-Aug-2024 08:38:15 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Manifiesto.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Manifiesto.php on line 7
+[18-Aug-2024 08:40:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Requerimiento.php:6
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Requerimiento.php on line 6
+[18-Aug-2024 08:41:12 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Manifdato.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Manifdato.php on line 7
+[18-Aug-2024 08:42:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Subcategoryrespelpublic.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Subcategoryrespelpublic.php on line 7
+[18-Aug-2024 08:43:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Cargo.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Cargo.php on line 7
+[18-Aug-2024 08:44:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Recurso.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Recurso.php on line 7
+[18-Aug-2024 08:45:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Observacion.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Observacion.php on line 7
+[18-Aug-2024 08:46:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Pretratamiento.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Pretratamiento.php on line 7
+[18-Aug-2024 08:47:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/CertExpressdato.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/CertExpressdato.php on line 7
+[18-Aug-2024 08:48:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/orderCompra.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/orderCompra.php on line 7
+[18-Aug-2024 08:49:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/GenerSede.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/GenerSede.php on line 7
+[18-Aug-2024 08:50:12 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Tarifa.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Tarifa.php on line 7
+[18-Aug-2024 08:51:13 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/generador.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/generador.php on line 7
+[18-Aug-2024 08:52:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Respelpublic.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Respelpublic.php on line 7
+[18-Aug-2024 08:54:16 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/ManifiestoCarga.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/ManifiestoCarga.php on line 7
+[18-Aug-2024 09:17:07 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/VerificationCode.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/VerificationCode.php on line 7
+[18-Aug-2024 09:17:11 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/departamento.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/departamento.php on line 7
+[18-Aug-2024 09:17:16 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/orderCompra.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/orderCompra.php on line 7
+[18-Aug-2024 09:17:20 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Cliente.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Cliente.php on line 7
+[18-Aug-2024 09:17:35 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Vehiculo.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Vehiculo.php on line 7
+[18-Aug-2024 09:17:37 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/sede.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/sede.php on line 7
+[18-Aug-2024 09:17:47 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Observacion.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Observacion.php on line 7
+[18-Aug-2024 09:18:02 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Prefactura.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Prefactura.php on line 7
+[18-Aug-2024 09:18:24 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Certificado.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Certificado.php on line 7
+[18-Aug-2024 09:18:57 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/MantenimientoVehiculo.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/MantenimientoVehiculo.php on line 7
+[18-Aug-2024 09:19:47 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/audit.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/audit.php on line 7
+[18-Aug-2024 09:20:47 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/ManifiestoCarga.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/ManifiestoCarga.php on line 7
+[18-Aug-2024 09:22:47 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/ArticuloPorProveedor.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/ArticuloPorProveedor.php on line 7
+[18-Aug-2024 09:23:47 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/Certdato.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Certdato.php on line 7
+[18-Aug-2024 09:24:48 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/PrefacturaTratamiento.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/PrefacturaTratamiento.php on line 7
+[18-Aug-2024 09:25:47 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/PrefacturaResiduo.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/PrefacturaResiduo.php on line 7
+[18-Aug-2024 09:26:47 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Model" not found in /home/prosar7/sispro2.prosarc.com.co/app/SubcategoriaActivo.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/SubcategoriaActivo.php on line 7

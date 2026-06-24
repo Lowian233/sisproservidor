@@ -1,0 +1,414 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Requests\PersonalStoreRequest;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\userController;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
+use App\Area;
+use App\Cargo;
+use App\Personal;
+use App\audit;
+use App\Sede;
+use App\Permisos;
+use App\TrainingPersonal;
+
+
+class PersonalInternoController extends Controller
+{
+	/**
+	 * Display a listing of the resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function index(){
+		if(in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) || in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC)){
+			$Personals = DB::table('personals')
+				->join('cargos', 'personals.FK_PersCargo', '=', 'cargos.ID_Carg')
+				->join('areas', 'cargos.CargArea', '=', 'areas.ID_Area')
+				->join('sedes', 'areas.FK_AreaSede', '=', 'sedes.ID_Sede')
+				->join('clientes', 'sedes.FK_SedeCli', '=', 'clientes.ID_Cli')
+				->select('personals.PersDocType','personals.PersDocNumber','personals.PersFirstName','personals.PersSecondName','personals.PersLastName','personals.PersCellphone','personals.PersSlug','personals.PersEmail','cargos.CargName','personals.PersDelete','personals.ID_Pers', 'personals.PersParafiscales', 'personals.PersParafiscalesExpire', 'areas.AreaName', 'clientes.ID_Cli')
+				->where(function($query){
+					$id = userController::IDClienteSegunUsuario();
+					/*Validacion del Programador para ver todo el personal interno aun asi este eliminado*/
+					if(in_array(Auth::user()->UsRol, Permisos::PROGRAMADOR)){
+						$query->where('clientes.ID_Cli', '=', $id);
+					}
+					else{
+					/*Validacion para el Administrador ver el personal de Prosarc solo los que no esten eliminados*/
+						$query->where('clientes.ID_Cli', '=', $id);
+						$query->where('personals.PersDelete', '=', 0);
+					}
+				})
+				->get();
+			return view('personal.personalInterno.index', compact('Personals'));
+		}
+		/*Validacion para usuarios no permitidos en esta vista*/
+		else{
+			abort(403);
+		}
+	}
+
+	/**
+	 * Show the form for creating a new resource.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function create(){
+		/*Validacion para personas autorizadas a crear una persona*/
+		if(in_array(Auth::user()->UsRol, Permisos::PersInter1) || in_array(Auth::user()->UsRol2, Permisos::PersInter1)){
+			$Sedes = DB::table('sedes')
+				->select('SedeSlug', 'SedeName')
+				->where('FK_SedeCli', userController::IDClienteSegunUsuario())
+				->where('SedeDelete', '=', 0)
+				->get();
+			$Persona = new Personal(); // create: no hay registro existente
+			return view('personal.personalInterno.create', compact('Sedes', 'Persona'));
+		}
+		else{
+			abort(403);
+		}
+	}
+
+	/**
+	 * Store a newly created resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @return \Illuminate\Http\Response
+	 */
+	public function store(PersonalStoreRequest $request){
+		$NuevaArea = $request->input('NewArea');
+		$NuevoCargo =  $request->input('NewCargo');
+		if($request->input('CargArea') <> "NewArea"){
+			$NuevaArea = null;
+			if($request->input('FK_PersCargo') <> "NewCargo"){
+				$NuevoCargo = null;
+			}
+		}
+		/*Valida si se ha creado un nuevo cargo*/
+		if($NuevoCargo <> null){
+			/*Valida si se ha creado una nueva area*/
+			if($NuevaArea <> null){
+				$Sede = Sede::select('ID_Sede')->where('SedeSlug', $request->input('Sede'))->first();
+				$newArea = new Area();
+				$newArea->AreaName = $request->input('NewArea');
+				$newArea->FK_AreaSede = $Sede->ID_Sede;
+				$newArea->AreaDelete = 0;
+				$newArea->AreaSlug = hash('sha256', rand().time().$newArea->AreaName);
+				$newArea->save();
+
+				$newCargo = new Cargo();
+				$newCargo->CargName = $request->input('NewCargo');
+				$newCargo->CargArea = $newArea->ID_Area;
+				$newCargo->CargDelete = 0;
+				$newCargo->CargSlug = hash('sha256', rand().time().$newCargo->CargName);
+				$newCargo->save();
+				$Cargo = $newCargo->ID_Carg;
+			}
+			else{
+				$Area = Area::select('ID_Area')->where('AreaSlug', $request->input('CargArea'))->first();
+				$newCargo = new Cargo();
+				$newCargo->CargName = $request->input('NewCargo');
+				$newCargo->CargArea = $Area->ID_Area;
+				$newCargo->CargDelete = 0;
+				$newCargo->CargSlug = hash('sha256', rand().time().$newCargo->CargName);
+				$newCargo->save();
+				$Cargo = $newCargo->ID_Carg;
+			}
+		}
+		else{
+			$Cargo = Cargo::select('ID_Carg')->where('CargSlug', $request->input('FK_PersCargo'))->first()->ID_Carg;
+		}
+
+		$Personal = new Personal();
+		$Personal->PersType = 0;
+		$Personal->PersDocType = $request->input('PersDocType');
+		$Personal->PersDocNumber = $request->input('PersDocNumber');
+		$Personal->PersFirstName = $request->input('PersFirstName');
+		$Personal->PersSecondName = $request->input('PersSecondName');
+		$Personal->PersLastName = $request->input('PersLastName');
+		$Personal->PersEmail = $request->input('PersEmail');
+		$Personal->PersCellphone = $request->input('PersCellphone');
+		$Personal->PersAddress = $request->input('PersAddress');
+		$Personal->FK_PersCargo = $Cargo;
+		$Personal->PersBirthday = $request->input('PersBirthday');
+		$Personal->PersPhoneNumber = $request->input('PersPhoneNumber');
+		$Personal->PersEPS = $request->input('PersEPS');
+		$Personal->PersARL = $request->input('PersARL');
+		$Personal->PersLibreta = $request->input('PersLibreta');
+		$Personal->PersBank = $request->input('PersBank');
+		$Personal->PersBankAccaunt = $request->input('PersBankAccaunt');
+		$Personal->PersIngreso = $request->input('PersIngreso');
+		if($request->input('PersSalida') <> null){
+			$Personal->PersSalida = $request->input('PersSalida');
+		}
+		$Personal->PersPase = $request->input('PersPase');
+		$Personal->PersDelete = 0;
+		$Personal->PersSlug = hash('sha256', rand().time().$Personal->PersDocNumber);
+
+		if($request->hasFile('PersParafiscales')) {
+			if (Storage::disk('public')->exists($Personal->PersParafiscales)) {
+				Storage::delete($Personal->PersParafiscales);
+			}
+			$Personal->PersParafiscales = Storage::putFileAs('parafiscales', $request->file('PersParafiscales'), $Personal->PersDocNumber.'.pdf');
+			$Personal->PersParafiscalesExpire = $request->input('PersParafiscalesExpire');
+		}
+
+		if($request->hasFile('PersDocOpcional')) {
+			if (Storage::disk('public')->exists($Personal->PersDocOpcional)) {
+				Storage::delete($Personal->PersDocOpcional);
+			}
+			$Personal->PersDocOpcional = Storage::putFileAs('documentosOpcionales', $request->file('PersDocOpcional'), $Personal->PersDocNumber.'.pdf');
+		}
+
+		$Personal->save();
+
+		return redirect()->route('personalInterno.index');
+	}
+
+	/**
+	 * Display the specified resource.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function show($id){
+		$Personas = DB::table('personals')
+			->join('cargos', 'FK_PersCargo', '=', 'ID_Carg')
+			->join('areas', 'cargos.CargArea', '=', 'areas.ID_Area')
+			->join('sedes', 'areas.FK_AreaSede', '=', 'sedes.ID_Sede')
+			->join('clientes', 'sedes.FK_SedeCli', '=', 'clientes.ID_Cli')
+			->select('personals.*', 'cargos.CargName','sedes.SedeName','sedes.ID_Sede','clientes.ID_Cli')
+			->where('PersSlug',$id)
+			->get();
+		if (!$Personas || $Personas->isEmpty()) {
+			abort(404);
+		}
+		$personIds = $Personas->pluck('ID_Pers');
+		$cursosPorPersona = TrainingPersonal::whereIn('FK_Pers', $personIds)
+			->where('CapaPersDelete', 0)
+			->with(['training', 'sede'])
+			->orderBy('CapaPersExpire', 'desc')
+			->get()
+			->groupBy('FK_Pers');
+		$IDClienteSegunUsuario = userController::IDClienteSegunUsuario();
+		return view('personal.personalInterno.show', compact('Personas', 'IDClienteSegunUsuario', 'cursosPorPersona'));
+	}
+
+	/**
+	 * Show the form for editing the specified resource.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function edit($id){
+		if(in_array(Auth::user()->UsRol, Permisos::PersInter1) || in_array(Auth::user()->UsRol2, Permisos::PersInter1)){
+			$Persona = Personal::where('PersSlug', $id)->first();
+			if (!$Persona) {
+				abort(404);
+			}
+			$Sede = DB::table('sedes')
+				->join('areas', 'areas.FK_AreaSede', '=', 'sedes.ID_Sede')
+				->join('cargos', 'cargos.CargArea', '=', 'areas.ID_Area')
+				->select('sedes.ID_Sede', 'areas.ID_Area', 'cargos.ID_Carg')
+				->where('cargos.ID_Carg', $Persona->FK_PersCargo)
+				->first();
+			$Sedes = DB::table('sedes')
+				->select('ID_Sede', 'SedeSlug', 'SedeName')
+				->where('FK_SedeCli', userController::IDClienteSegunUsuario())
+				->where('SedeDelete', '=', 0)
+				->get();
+			$Areas = DB::table('areas')
+				->select('ID_Area', 'AreaSlug', 'AreaName')
+				->where('FK_AreaSede', $Sede->ID_Sede)
+				->where('AreaDelete', '=', 0)
+				->get();
+			$Cargos = DB::table('cargos')
+				->select('ID_Carg', 'CargSlug', 'CargName')
+				->where('CargArea', $Sede->ID_Area)
+				->where('CargDelete', '=', 0)
+				->get();
+			return view('personal.personalInterno.edit', compact('Persona', 'Sede', 'Cargos', 'Sedes', 'Areas'));
+		}
+		else{
+			abort(403);
+		}
+	}
+
+	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function update(Request $request, $id){
+		// return $request;
+		$Persona = Personal::where('PersSlug', $id)->first();
+		if (!$Persona) {
+			abort(404);
+		}
+		$validate = $request->validate([
+			'Sede'          => 'required',
+			'CargArea'      => 'required',
+			'FK_PersCargo'  => 'required_unless:CargArea,NewArea',
+            'NewArea'       => 'required_if:CargArea,NewArea',
+            'NewCargo'      => 'required_if:CargArea,NewArea|required_if:FK_PersCargo,NewCargo',
+			'PersDocType'   => 'required|in:CC,CE,NIT,RUT',
+			'PersDocNumber' => 'required|max:25|unique:personals,PersDocNumber,'.$request->input('PersDocNumber').',PersDocNumber',
+			'PersFirstName' => 'required|max:64',
+			'PersSecondName'=> 'max:64|nullable',
+			'PersLastName'  => 'required|max:64',
+			'PersEmail'     => 'required|email|max:255',
+			'PersCellphone' => 'required|min:12',
+			'PersAddress'   => 'max:255|nullable',
+			'PersPhoneNumber' => 'max:20|min:10|nullable',
+			'PersEPS'       => 'max:255|min:5|nullable',
+			'PersARL'       => 'max:255|min:4|nullable',
+			'PersLibreta'   => 'max:25',
+			'PersPase'      => 'max:25',
+			'PersBank'      => 'max:255',
+			'PersBankAccaunt' => 'max:64',
+			'PersIngreso'   => 'date',
+			'PersSalida'    => 'date|after:PersIngreso|nullable',
+			'PersSalida'    => 'date|after:PersIngreso|nullable',
+			'PersParafiscales'    => 'sometimes|max:1024|mimes:pdf',
+			'PersDocOpcional'    => 'sometimes|max:2048|mimes:pdf',
+			'PersParafiscalesExpire'    => 'date|after:yesterday|nullable',
+		],
+		[
+			'PersParafiscalesExpire.after' => 'la fecha de Parafiscales (vencimiento) debe ser a partir del dia de hoy...',
+			'PersParafiscales.max' => 'el peso del archivo Parafiscales (PDF) debe ser a menor a :max Mb',
+			'PersDocOpcional.max' => 'el peso del archivo Documento Opcional (PDF) debe ser a menor a :max Mb',
+			'PersParafiscales.mimes' => 'el tipo del archivo Parafiscales debe ser .pdf',
+			'PersDocOpcional.mimes' => 'el tipo del archivo Documento Opcional debe ser .pdf',
+		]
+		);
+		$NuevaArea = $request->input('NewArea');
+		$NuevoCargo =  $request->input('NewCargo');
+		if($request->input('CargArea') <> "NewArea"){
+			$NuevaArea = null;
+			if($request->input('FK_PersCargo') <> "NewCargo"){
+				$NuevoCargo = null;
+			}
+		}
+		if($NuevoCargo <> null){
+			if($NuevaArea <> null){
+				$Sede = Sede::select('ID_Sede')->where('SedeSlug', $request->input('Sede'))->first();
+				$newArea = new Area();
+				$newArea->AreaName = $request->input('NewArea');
+				$newArea->FK_AreaSede = $Sede->ID_Sede;
+				$newArea->AreaDelete = 0;
+				$newArea->AreaSlug = hash('sha256', rand().time().$newArea->AreaName);
+				$newArea->save();
+
+				$newCargo = new Cargo();
+				$newCargo->CargName = $request->input('NewCargo');
+				$newCargo->CargArea = $newArea->ID_Area;
+				$newCargo->CargDelete = 0;
+				$newCargo->CargSlug = hash('sha256', rand().time().$newCargo->CargName);
+				$newCargo->save();
+				$Cargo = $newCargo->ID_Carg;
+			}
+			else{
+				$Area = Area::select('ID_Area')->where('AreaSlug', $request->input('CargArea'))->first();
+				$newCargo = new Cargo();
+				$newCargo->CargName = $request->input('NewCargo');
+				$newCargo->CargArea = $Area->ID_Area;
+				$newCargo->CargDelete = 0;
+				$newCargo->CargSlug = hash('sha256', rand().time().$newCargo->CargName);
+				$newCargo->save();
+				$Cargo = $newCargo->ID_Carg;
+			}
+		}
+		else{
+			$Cargo = Cargo::select('ID_Carg')->where('CargSlug', $request->input('FK_PersCargo'))->first()->ID_Carg;
+		}
+		
+		$Persona->fill($request->except(['FK_PersCargo']));
+		$Persona->FK_PersCargo = $Cargo;
+
+
+		if($request->hasFile('PersParafiscales')) {
+			$Persona->PersParafiscales = Storage::putFileAs('parafiscales', $request->file('PersParafiscales'), $Persona->PersDocNumber.'.pdf');
+			$Persona->PersParafiscalesExpire = $request->input('PersParafiscalesExpire');
+		}
+
+		if($request->hasFile('PersDocOpcional')) {
+			$Persona->PersDocOpcional = Storage::putFileAs('documentosOpcionales', $request->file('PersDocOpcional'), $Persona->PersDocNumber.'.pdf');
+		}
+
+
+		$Persona->save();
+
+		$log = new audit();
+		$log->AuditTabla = "personals";
+		$log->AuditType = "Modificado";
+		$log->AuditRegistro = $Persona->ID_Pers;
+		$log->AuditUser = Auth::user()->email;
+		$log->Auditlog = $request->all();
+		$log->save();
+
+		return redirect()->route('personalInterno.show', ['personalInterno' => $id]);
+	}
+
+	/**
+	 * Remove the specified resource from storage.
+	 *
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function destroy($id){
+		$Persona = Personal::where('PersSlug', $id)->first();
+		if (!$Persona) {
+			abort(404);
+		}
+		// Solo Programador puede restaurar; solo HSEQ, Logística y Dirección Planta pueden eliminar
+		$rolesPuedenEliminar = Permisos::Jefes;
+		$puedeEliminar = in_array(Auth::user()->UsRol, $rolesPuedenEliminar) || in_array(Auth::user()->UsRol2, $rolesPuedenEliminar);
+		$puedeRestaurar = Auth::user()->UsRol === 'Programador' || Auth::user()->UsRol2 === 'Programador';
+		if ($Persona->PersDelete == 0 && !$puedeEliminar) {
+			abort(403, 'No tiene permiso para eliminar personal interno.');
+		}
+		if ($Persona->PersDelete == 1 && !$puedeRestaurar) {
+			abort(403, 'Solo Programador puede restaurar personal interno eliminado.');
+		}
+		$Cargo = Cargo::where('ID_Carg', $Persona->FK_PersCargo)->first();
+		$Area = Area::where('ID_Area', $Cargo->CargArea)->first();
+		if ($Persona->PersDelete == 0){
+			$Persona->PersDelete = 1;
+
+			$log = new audit();
+			$log->AuditTabla = "personals";
+			$log->AuditType = "Eliminado";
+			$log->AuditRegistro = $Persona->ID_Pers;
+			$log->AuditUser = Auth::user()->email;
+			$log->Auditlog = $Persona->PersDelete;
+			$log->save();
+		}
+		else{
+			$Persona->PersDelete = 0;
+			$Cargo->CargDelete = 0;
+			$Area->AreaDelete = 0;
+			$Cargo->save();
+			$Area->save();
+
+			$log = new audit();
+			$log->AuditTabla = "personals";
+			$log->AuditType = "Restaurado";
+			$log->AuditRegistro = $Persona->ID_Pers;
+			$log->AuditUser = Auth::user()->email;
+			$log->Auditlog = $Persona->PersDelete;
+			$log->save();
+		}
+		$Persona->save();
+
+		return redirect()->route('personalInterno.index');
+	}
+}

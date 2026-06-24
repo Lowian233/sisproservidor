@@ -1,0 +1,85 @@
+@extends('layouts.app')
+
+@section('htmlheader_title')
+{{ __('adminlte::message.areatitle') }}
+@endsection
+
+@section('contentheader_title')
+<span style="background-image: linear-gradient(40deg, #FFFFFF, #A3A2AE); padding-right:30vw; position:relative; overflow:hidden;">
+	{{ __('adminlte::message.areatitle') }}
+  <div style="background-color:#ecf0f5; position:absolute; height:145%; width:40vw; transform:rotate(30deg); right:-20vw; top:-45%;"></div>
+</span>
+@endsection
+
+@section('main-content')
+	<div class="container-fluid spark-screen">
+		<div class="row">
+			<div class="col-md-16 col-md-offset-0">
+				<div class="box">
+					<div class="box-header">
+						@component('layouts.partials.modal')
+							@slot('slug')
+								{{$Areas->AreaSlug}}
+							@endslot
+							@slot('textModal')
+								el área de <b>{{$Areas->AreaName}}</b>
+							@endslot
+						@endcomponent
+						<h3 class="box-title">{{ __('adminlte::message.editarea') }}</h3>
+						@if($Areas->ID_Area <> $AreaOne->ID_Area)
+							@if($Areas->AreaDelete == 0)
+								<a method='get' href='#' data-toggle='modal' data-target='#myModal{{$Areas->AreaSlug}}' class='btn btn-danger pull-right'><i class="fas fa-trash-alt"></i><b> {{ __('adminlte::message.delete') }}</b></a>
+								<form action='/areas/{{$Areas->AreaSlug}}' method='POST'>
+									@method('DELETE')
+									@csrf
+									<input  type="submit" id="Eliminar{{$Areas->AreaSlug}}" style="display: none;">
+								</form>
+							@else
+								<form action='/areas/{{$Areas->AreaSlug}}' method='POST' class="pull-right">
+									@method('DELETE')
+									@csrf
+									<button type="submit" class='btn btn-success btn-block'>{{ __('adminlte::message.add') }}</button>
+								</form>
+							@endif
+						@endif
+					</div>
+					<div class="box box-info">
+						<form role="form" action="/areas/{{$Areas->AreaSlug}}" method="POST" enctype="multipart/form-data" data-toggle="validator">
+							@method('PATCH')
+							@csrf
+							@if ($errors->any())
+								<div class="alert alert-danger" role="alert">
+									<ul>
+										@foreach ($errors->all() as $error)
+											<p>{{$error}}</p>
+										@endforeach
+									</ul>
+								</div>
+							@endif
+							<div class="box-body">
+								<div class="form-group col-xs-12 col-md-12">
+									<label for="SedeSelect">{{ __('adminlte::message.sclientsede') }}</label><small class="help-block with-errors">*</small>
+									<select name="FK_AreaSede" id="SedeSelect" class="form-control select" required>
+										@foreach($Sedes as $Sede)
+											<option value="{{$Sede->SedeSlug}}" {{$Areas->FK_AreaSede == $Sede->ID_Sede ? 'selected' : ''}}>{{$Sede->SedeName}}</option>
+										@endforeach
+									</select>
+								</div>
+								<div class="form-group col-xs-12 col-md-12">
+									<label for="AreaName" data-placement="auto" data-trigger="hover" data-html="true" data-toggle="popover" title="<b>{{ __('adminlte::message.areaname') }}</b>" data-content="{{ __('adminlte::message.persinfonewarea') }}"><i style="font-size: 1.7rem; color: Dodgerblue;" class="fas fa-info-circle fa-2x fa-spin"></i>{{ __('adminlte::message.areaname') }}</label>
+									<small class="help-block with-errors">*</small>
+									<input data-minlength="5" required="true" name="AreaName" autofocus="true" type="text" class="form-control inputText" id="NombreArea" value="{{$Areas->AreaName}}">
+								</div>
+							</div>
+							<div class="box box-info">
+								<div class="box-footer">
+									<button type="submit" class="btn btn-success pull-right">{{ __('adminlte::message.update') }}</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+@endsection

@@ -1,0 +1,61 @@
+# Dependencias
+/node_modules
+/vendor
+
+# Entorno
+.env
+.env.backup
+.env.dusk.local
+.env.dusk.testing
+env.dusk.testing
+
+# Laravel – storage (subidas, logs, caché)
+/storage/*.key
+/storage/app/*
+!/storage/app/.gitignore
+!/storage/app/public/
+/storage/app/public/*
+!/storage/app/public/.gitignore
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# Carpeta public (documentos, imágenes, storage enlazado)
+/public/
+
+# Archivos comprimidos pesados
+*.zip
+*.7z
+*.rar
+
+# Otras carpetas locales
+/public_img_SupportPay/
+/proscar-def.zip
+
+# IDE / sistema
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# PHPUnit / Dusk
+.phpunit.result.cache
+/tests/Browser/screenshots/*
+!/tests/Browser/screenshots/.gitignore
+/tests/Browser/console/*
+!/tests/Browser/console/.gitignore

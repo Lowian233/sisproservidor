@@ -1,0 +1,8 @@
+[18-Aug-2024 09:36:06 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Notifications\Notification" not found in /home/prosar7/sispro2.prosarc.com.co/app/Notifications/VerifyEmail.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Notifications/VerifyEmail.php on line 12
+[18-Aug-2024 09:36:08 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Notifications\Notification" not found in /home/prosar7/sispro2.prosarc.com.co/app/Notifications/ResetPasswordNotification.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/app/Notifications/ResetPasswordNotification.php on line 10

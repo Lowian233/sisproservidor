@@ -1,0 +1,58 @@
+<div class="col-md-12">
+	<div class="box box-primary">
+		<div class="box-body box-profile">
+			<div class="col-md-12 col-xs-12">
+				@component('layouts.partials.modal')
+					@slot('slug')
+						{{$manifiesto->cliente->ID_Cli}}
+					@endslot
+					@slot('textModal')
+						el transportador <b>{{$manifiesto->cliente->CliShortname}}</b>
+					@endslot
+				@endcomponent
+			</div>
+			<h3 class="profile-username text-center">{{$manifiesto->cliente->CliShortname}}</h3>
+			<li class="list-group-item">
+				<b>{{ __('adminlte::message.clientcategoría') }}</b> <a class="pull-right">{{$manifiesto->cliente->CliCategoria}}</a>
+			</li>
+			<li class="list-group-item">
+				<b>{{ __('adminlte::message.clirazonsoc') }}</b> <a class="pull-right">{{$manifiesto->cliente->CliName}}</a>
+			</li>
+			{{-- <li class="list-group-item">
+				<b>{{ __('adminlte::message.clientnombrecorto') }}</b> <a class="pull-right">{{$manifiesto->cliente->CliShortname}}</a>
+			</li> --}}
+			<li class="list-group-item">
+				<b>{{ __('adminlte::message.clientNIT') }}</b> <a class="pull-right">{{$manifiesto->cliente->CliNit}}</a>
+			</li>
+		</div>
+	   	@foreach($manifiesto->cliente->sedes as $cliSede)
+	   	@if($cliSede->ID_Sede == $manifiesto->sedegenerador->generadors->FK_GenerCli)
+		<div class="box-body box-profile">
+			<h3 class="profile-username text-center">{{ __('adminlte::message.sclientsede') }}</h3>
+			<li class="list-group-item">
+				<b>{{ __('adminlte::message.sclientnamesede') }}</b> <a class="pull-right">{{$cliSede->SedeName}}</a>
+			</li>
+			<li class="list-group-item">
+				<b>{{ __('adminlte::message.address') }}</b>
+				<a title="{{ __('adminlte::message.copy') }}" onclick="copiarAlPortapapeles('{{ __('adminlte::message.adddress') }}')"><i class="far fa-copy"></i></a>
+				<a href="#" class="pull-right textpopover" id="{{ __('adminlte::message.adddress') }}" title="{{ __('adminlte::message.address') }}" data-toggle="popover" data-trigger="focus" data-html="true" data-placement="bottom" data-content="<p class='textolargo'>{{$cliSede->SedeAddress}} ({{$cliSede->Municipios->MunName}} - {{$cliSede->Municipios->Departamento->DepartName}})</p>">{{$cliSede->SedeAddress}} ({{$cliSede->Municipios->MunName}} - {{$cliSede->Municipios->Departamento->DepartName}})</a>
+			</li>
+			<li class="list-group-item">
+				<b>{{ __('adminlte::message.phone') }}</b> <a class="pull-right">{{$cliSede->SedePhone1}} - {{$cliSede->SedeExt1}}</a>
+			</li>
+			<li class="list-group-item">
+				<b>{{ __('adminlte::message.phone') }} 2</b> <a class="pull-right">{{$cliSede->SedePhone2}} - {{$cliSede->SedeExt2}}</a>
+			</li>
+			<li class="list-group-item">
+				<b>{{ __('adminlte::message.email') }}</b>
+				<a title="{{ __('adminlte::message.copy') }}" onclick="copiarAlPortapapeles('{{ __('adminlte::message.emailaddress') }}')"><i class="far fa-copy"></i></a>
+				<a href="#" class="pull-right textpopover" id="{{ __('adminlte::message.emailaddress') }}" title="{{ __('adminlte::message.emailaddress') }}" data-toggle="popover" data-trigger="focus" data-html="true" data-placement="bottom" data-content="<p class='textolargo'>{{$cliSede->SedeEmail}}</p>">{{$cliSede->SedeEmail}}</a>
+			</li>
+			<li class="list-group-item">
+				<b>{{ __('adminlte::message.mobile') }}</b> <a class="pull-right">{{$cliSede->SedeCelular}}</a>
+			</li>
+		</div>
+	</div>
+	@endif
+	@endforeach
+</div>

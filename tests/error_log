@@ -1,0 +1,8 @@
+[18-Aug-2024 09:16:57 UTC] PHP Fatal error:  Uncaught Error: Class "Laravel\Dusk\TestCase" not found in /home/prosar7/sispro2.prosarc.com.co/tests/DuskTestCase.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/tests/DuskTestCase.php on line 10
+[18-Aug-2024 09:17:01 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Testing\TestCase" not found in /home/prosar7/sispro2.prosarc.com.co/tests/TestCase.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/prosar7/sispro2.prosarc.com.co/tests/TestCase.php on line 7
