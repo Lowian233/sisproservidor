@@ -38,49 +38,25 @@
                     </div>
                     <div class="col-sm-3">
                         <div class="form-group">
-                            <label>Fecha desde</label>
-                            <div class="input-group">
-                                <input type="text" name="fecha_desde" id="fecha_desde"
-                                       class="form-control datepicker"
-                                       placeholder="{{ now()->format('d/m/Y') }}"
-                                       value="{{ request('fecha_desde') }}" autocomplete="off">
-                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                        <div class="form-group">
-                            <label>Fecha hasta</label>
-                            <div class="input-group">
-                                <input type="text" name="fecha_hasta" id="fecha_hasta"
-                                       class="form-control datepicker"
-                                       placeholder="{{ now()->format('d/m/Y') }}"
-                                       value="{{ request('fecha_hasta') }}" autocomplete="off">
-                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-3">
-                        <div class="form-group">
                             <label>Servicio</label>
                             <input type="text" name="servicio" class="form-control"
-                                   placeholder="Servicio" value="{{ request('servicio') }}">
+                                   placeholder="Ej: Quimicos, Biosanitarios..." value="{{ request('servicio') }}">
                         </div>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                         <div class="form-group">
                             <label>Estado</label>
                             <select name="estado" class="form-control">
-                                <option value="">Seleccione...</option>
+                                <option value="">Todos</option>
                                 <option value="Pagado" {{ request('estado') == 'Pagado' ? 'selected' : '' }}>Pagado</option>
+                                <option value="En proceso" {{ request('estado') == 'En proceso' ? 'selected' : '' }}>En proceso</option>
+                                <option value="Rechazado" {{ request('estado') == 'Rechazado' ? 'selected' : '' }}>Rechazado</option>
                                 <option value="Pendiente" {{ request('estado') == 'Pendiente' ? 'selected' : '' }}>Pendiente</option>
                                 <option value="Cancelado" {{ request('estado') == 'Cancelado' ? 'selected' : '' }}>Cancelado</option>
                             </select>
                         </div>
                     </div>
-                    <div class="col-sm-6 text-right" style="padding-top: 19px;">
+                    <div class="col-sm-4 text-right" style="padding-top: 19px;">
                         <button type="submit" class="btn btn-info btn-sm">
                             <i class="fa fa-search"></i> Filtrar
                         </button>
@@ -105,15 +81,16 @@
             <h3 style="margin:0; font-size:16px; font-weight:600; color:#000;">
                 <i class="fas fa-user" style="color:#333; margin-right:8px;"></i> Solicitudes
             </h3>
-            {{-- <a href="{{ route('cotizacion-expres.create') }}" class="btn btn-success btn-sm" style="padding:8px 15px;">
-                <i class="fa fa-plus"></i> Crear
-            </a> --}}
+            <button type="button" id="btnEliminarSeleccion" class="btn btn-danger btn-sm" style="padding:6px 14px; display:none;" onclick="eliminarSeleccionados()">
+                <i class="fa fa-trash"></i> Eliminar seleccionados (<span id="countSeleccion">0</span>)
+            </button>
         </div>
         <div class="box-body no-padding">
             <div>
                 <table class="table table-hover" style="margin-bottom:0; font-size:13px; border-collapse:collapse;">
                     <thead style="background-color:#f4f4f4;">
                         <tr style="height:48px;">
+                            <th style="width:40px; padding:12px; vertical-align:middle;"></th>
                             <th style="width:70px; padding:12px; vertical-align:middle; text-align:center;">No. Sol.</th>
                             <th style="padding:12px; vertical-align:middle;">Empresa</th>
                             <th style="padding:12px; vertical-align:middle;">Teléfono</th>
@@ -124,7 +101,7 @@
                             <th style="padding:12px; vertical-align:middle; text-align:right;">Precio</th>
                             <th style="padding:12px; vertical-align:middle; text-align:center;">Req. Contrato Comercial</th>
                             <th style="padding:12px; vertical-align:middle; text-align:center;">Estado</th>
-                            <th style="width:90px; padding:12px; vertical-align:middle; text-align:center;">Acciones</th>
+                            <th style="width:120px; padding:12px; vertical-align:middle; text-align:center;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -138,7 +115,10 @@
                             };
                         @endphp
                         <tr style="border-bottom: 1px solid #f0f0f0; height:48px;">
-                            <td style="padding:12px; vertical-align:middle; text-align:center; font-weight:600; color:#0066cc;">
+                            <td style="padding:12px; vertical-align:middle; text-align:center;">
+                                <input type="checkbox" class="check-solicitud" value="{{ $item->idSolicitud }}" style="cursor:pointer;">
+                            </td>
+                            <td style="padding:12px; vertical-align:middle; text-align:center; font-weight:600; color:#0066cc;" data-order="{{ $item->idSolicitud }}">
                                 #{{ $item->idSolicitud }}
                             </td>
                             <td style="padding:12px; vertical-align:middle;">{{ $item->nombreEmpresa ?? '-' }}</td>
@@ -181,7 +161,7 @@
                                     {{ $item->estado ?? 'Pendiente' }}
                                 </span>
                             </td>
-                            <td style="padding:12px; text-align:center; vertical-align:middle; white-space:nowrap;">
+                            <td style="padding:12px 8px; text-align:center; vertical-align:middle; white-space:nowrap;">
                                 @php
                                     if ($item->idCliente) {
                                         $slugShow = \Illuminate\Support\Str::slug($item->nombreEmpresa ?? $item->nit ?? 'cliente') . '-' . $item->idCliente;
@@ -190,32 +170,40 @@
                                         $urlShow = route('cotizacion-expres.show', 'solicitud-' . $item->idSolicitud);
                                     }
                                 @endphp
+                                <div style="display:inline-flex; align-items:center; gap:4px;">
                                 <a href="{{ $urlShow }}"
-                                   class="btn btn-info btn-xs" style="padding:4px 8px;" title="Ver detalle">
-                                    <i class="fa fa-search"></i>
+                                   class="btn btn-info btn-xs" style="width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center;" title="Ver detalle">
+                                    <i class="fa fa-search" style="font-size:12px;"></i>
                                 </a>
                                 @if($item->idCliente)
                                 @php
                                     $slugDoc = \Illuminate\Support\Str::slug($item->nombreEmpresa ?? 'cliente') . '-' . $item->idCliente;
                                     $totalDocs = $documentosPorCliente[$item->idCliente] ?? 0;
                                 @endphp
-                                @if($totalDocs > 0)
                                 <a href="{{ route('cotizacion-expres.historial-documentos', $slugDoc) }}"
-                                   class="btn btn-warning btn-xs" style="padding:4px 8px; margin-left:3px;" title="Ver {{ $totalDocs }} documento(s)">
-                                    <i class="fa fa-folder-open"></i>
-                                    <span class="badge" style="background:#fff; color:#f39c12; margin-left:2px;">{{ $totalDocs }}</span>
+                                   class="btn btn-warning btn-xs" style="width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; position:relative;" title="Ver {{ $totalDocs }} documento(s)">
+                                    <i class="fa fa-folder-open" style="font-size:12px;"></i>
+                                    @if($totalDocs > 0)
+                                    <span style="position:absolute; top:-4px; right:-4px; background:#fff; color:#f39c12; border-radius:50%; width:14px; height:14px; font-size:9px; line-height:14px; text-align:center; font-weight:700;">{{ $totalDocs }}</span>
+                                    @endif
                                 </a>
                                 @else
-                                <span class="btn btn-default btn-xs disabled" style="padding:4px 8px; margin-left:3px; opacity:0.5; cursor:not-allowed;" title="Sin documentos cargados">
-                                    <i class="fa fa-folder"></i>
-                                </span>
+                                <span style="width:28px; height:28px; display:inline-flex;"></span>
                                 @endif
-                                @endif
+                                <button type="button" class="btn btn-danger btn-xs" style="width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center;" title="Eliminar" onclick="confirmarEliminarIndividual('{{ $item->idSolicitud }}')">
+                                    <i class="fa fa-trash" style="font-size:12px;"></i>
+                                </button>
+                                </div>
+                                </div>
+                                <form id="formDelete-{{ $item->idSolicitud }}" action="{{ route('cotizacion-expres.destroy', $item->idSolicitud) }}" method="POST" style="display:none;">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="11" class="text-center text-muted" style="padding: 30px;">
+                            <td colspan="12" class="text-center text-muted" style="padding: 30px;">
                                 <i class="fas fa-inbox fa-2x"></i><br>
                                 No hay solicitudes registradas.
                             </td>
@@ -264,6 +252,13 @@
         outline: none !important;
         box-shadow: none !important;
     }
+
+    .check-solicitud {
+        width: 16px;
+        height: 16px;
+        accent-color: #dc3545;
+        cursor: pointer;
+    }
 </style>
 <script>
 $(document).ready(function () {
@@ -276,7 +271,7 @@ $(document).ready(function () {
     }
 
 
-    // Ocultar botones extra que aparezcan dinámicamente
+    // Ocultar botones extra que aparezcan dinamicamente
     setTimeout(function() {
         $('button:contains("Columnas"), button:contains("Excel")').hide();
     }, 500);
@@ -304,7 +299,6 @@ $(document).ready(function () {
     $(document).on('click', '.btn-eliminar-numero', function() {
         $(this).closest('.input-group').remove();
     });
-
     $('#btn-confirmar-envio').on('click', function() {
         var numeros = [];
         $('.numero-input').each(function() {
@@ -313,27 +307,108 @@ $(document).ready(function () {
         });
 
         if (numeros.length === 0) {
-            alert('Ingresa al menos un número.');
+            mostrarModalMensaje('Ingresa al menos un numero.', 'warning');
             return;
         }
 
-        var mensaje = encodeURIComponent($('#mensaje-whatsapp').val().trim() || mensajeDefault());
-
-        // Descargar el Excel primero
-        window.location.href = '{{ route("cotizacion-expres.excel") }}';
-
-        // Abrir WhatsApp Web para cada número con un pequeño delay
-        setTimeout(function() {
-            numeros.forEach(function(numero, i) {
-                setTimeout(function() {
-                    window.open('https://wa.me/' + numero + '?text=' + mensaje, '_blank');
-                }, i * 800);
-            });
-        }, 1000);
-
+        var $btn = $(this);
+        var textoOriginal = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Enviando...');
         $('#modal-enviar-reporte').modal('hide');
+
+        // Descargar el Excel
+        var link = document.createElement('a');
+        link.href = '{{ route("cotizacion-expres.excel") }}?telefono=' + numeros.join(',');
+        link.target = '_blank';
+        link.click();
+
+        // Enviar via Wati (servidor)
+        $.ajax({
+            url: '{{ route("cotizacion-expres.enviar-reporte") }}',
+            method: 'POST',
+            data: {
+                numeros: numeros,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(resp) {
+                if (resp.ok) {
+                    mostrarModalMensaje('Reporte enviado a ' + numeros.length + ' numero(s)', 'success');
+                }
+            },
+            error: function() {
+                var mensaje = encodeURIComponent($('#mensaje-whatsapp').val().trim() || mensajeDefault());
+                setTimeout(function() {
+                    numeros.forEach(function(numero, i) {
+                        setTimeout(function() {
+                            window.open('https://wa.me/' + numero + '?text=' + mensaje, '_blank');
+                        }, i * 800);
+                    });
+                }, 1500);
+            },
+            complete: function() {
+                $btn.prop('disabled', false).html(textoOriginal);
+            }
+        });
+    });
+
+    // --- Seleccion multiple y eliminacion masiva ---
+    function actualizarBotonEliminar() {
+        var count = $('.check-solicitud:checked').length;
+        var $btn = $('#btnEliminarSeleccion');
+        if (count > 0) {
+            $btn.show().find('#countSeleccion').text(count);
+        } else {
+            $btn.hide();
+        }
+    }
+
+    $(document).on('change', '.check-solicitud', function() {
+        actualizarBotonEliminar();
     });
 });
+
+function eliminarSeleccionados() {
+    var ids = $('.check-solicitud:checked').map(function() { return this.value; }).get();
+    if (ids.length === 0) return;
+    mostrarModalConfirmacion('Eliminar ' + ids.length + ' solicitud(es)?', function() {
+        var $btn = $('#btnEliminarSeleccion');
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Eliminando...');
+
+        $.ajax({
+            url: '{{ route("cotizacion-expres.eliminar-lote") }}',
+            method: 'POST',
+            data: { ids: ids, _token: '{{ csrf_token() }}' },
+            success: function() { location.reload(); },
+            error: function() {
+                mostrarModalMensaje('Error al eliminar', 'danger');
+                $btn.prop('disabled', false).html('<i class="fa fa-trash"></i> Eliminar seleccionados');
+            }
+        });
+    });
+}
+
+function confirmarEliminarIndividual(id) {
+    mostrarModalConfirmacion('Eliminar solicitud #' + id + '?', function() {
+        document.getElementById('formDelete-' + id).submit();
+    });
+}
+
+function mostrarModalMensaje(mensaje, tipo) {
+    var icono = tipo === 'success' ? 'fa-check-circle' : (tipo === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle');
+    var color = tipo === 'success' ? '#00a65a' : (tipo === 'warning' ? '#f39c12' : '#dd4b39');
+    $('#modalMensaje .modal-icono').attr('class', 'modal-icono fas ' + icono).css('color', color);
+    $('#modalMensaje .modal-texto').text(mensaje);
+    $('#modalMensaje').modal('show');
+}
+
+function mostrarModalConfirmacion(mensaje, callback) {
+    $('#modalConfirmar .modal-texto').text(mensaje);
+    $('#modalConfirmar .btn-confirmar').off('click').on('click', function() {
+        $('#modalConfirmar').modal('hide');
+        callback();
+    });
+    $('#modalConfirmar').modal('show');
+}
 </script>
 
 {{-- Modal enviar reporte --}}
@@ -341,7 +416,7 @@ $(document).ready(function () {
     <div class="modal-dialog" role="document" style="max-width:460px;">
         <div class="modal-content" style="border-radius:8px; overflow:hidden;">
             <div class="modal-header" style="background:#25D366; padding:14px 18px;">
-                <button type="button" class="close" data-dismiss="modal" style="color:#fff; opacity:1; font-size:20px;">
+                <button type="button" class="close" onclick="$('#modal-enviar-reporte').modal('hide')" style="color:#fff; opacity:1; font-size:20px;">
                     <span>&times;</span>
                 </button>
                 <h4 class="modal-title" style="color:#fff; font-weight:600; font-size:15px;">
@@ -375,14 +450,41 @@ $(document).ready(function () {
 
                 <p style="font-size:11px; color:#999; margin-top:10px; margin-bottom:0;">
                     <i class="fa fa-info-circle"></i>
-                    Se descargará el Excel y se abrirá WhatsApp Web por cada número. Solo debes dar clic en <strong>Enviar</strong> en cada chat.
+                    Se descargara el Excel y se enviara automaticamente via Wati a cada numero.
                 </p>
             </div>
             <div class="modal-footer" style="background:#f9f9f9;">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-default" onclick="$('#modal-enviar-reporte').modal('hide')">Cancelar</button>
                 <button type="button" class="btn btn-success" id="btn-confirmar-envio" style="background:#25D366; border-color:#25D366;">
                     <i class="fa fa-whatsapp"></i> Descargar y Abrir WhatsApp
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal mensaje --}}
+<div class="modal fade" id="modalMensaje" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content" style="border-radius:6px; border:none;">
+            <div class="modal-body text-center" style="padding:25px;">
+                <i class="modal-icono fas fa-check-circle" style="font-size:40px; margin-bottom:12px; display:block;"></i>
+                <p class="modal-texto" style="font-size:14px; color:#333; margin:0;"></p>
+                <button type="button" class="btn btn-default btn-sm" onclick="$('#modalMensaje').modal('hide')" style="margin-top:15px;">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal confirmacion --}}
+<div class="modal fade" id="modalConfirmar" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content" style="border-radius:6px; border:none;">
+            <div class="modal-body text-center" style="padding:25px;">
+                <i class="fas fa-exclamation-triangle" style="font-size:40px; color:#f39c12; margin-bottom:12px; display:block;"></i>
+                <p class="modal-texto" style="font-size:14px; color:#333; margin:0 0 18px 0;"></p>
+                <button type="button" class="btn btn-default btn-sm" onclick="$('#modalConfirmar').modal('hide')">Cancelar</button>
+                <button type="button" class="btn btn-danger btn-sm btn-confirmar">Eliminar</button>
             </div>
         </div>
     </div>

@@ -63,7 +63,7 @@
         @foreach($meses as $mes)
         <div style="flex:1; min-width:250px;">
             <div style="background:#27ae60; border-radius:6px; padding:15px; display:flex; align-items:flex-start; gap:12px; color:#fff; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
-                 data-toggle="modal" data-target="#modalDocumentosMes" onclick="abrirMes('{{ $mes['mes_es'] }}', {{ $mes['mes_numero'] }}, {{ $mes['año'] }})">
+                 onclick="abrirMes('{{ $mes['mes_es'] }}', {{ $mes['mes_numero'] }}, {{ $mes['año'] }})">
                 <div style="font-size:32px; min-width:45px; padding-top:2px;">
                     <i class="fas fa-folder-open"></i>
                 </div>
@@ -78,8 +78,8 @@
 
         {{-- RECUADRO CARGAR DOCUMENTO --}}
         <div style="flex:1; min-width:250px;">
-            <div style="background:#0066cc; border-radius:6px; padding:15px; display:flex; align-items:flex-start; gap:12px; color:#fff; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.1); hover: background:#005aa8;"
-                 data-toggle="modal" data-target="#modalCargarDocumento">
+            <div style="background:#0066cc; border-radius:6px; padding:15px; display:flex; align-items:flex-start; gap:12px; color:#fff; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                 onclick="$('#modalCargarDocumento').modal('show')">
                 <div style="font-size:32px; min-width:45px; padding-top:2px;">
                     <i class="fas fa-cloud-upload-alt"></i>
                 </div>
@@ -122,7 +122,6 @@
                             <td style="padding:12px; vertical-align:middle;">{{ $doc->fechaCarga->format('d/m/Y H:i') }}</td>
                             <td style="padding:12px; text-align:center; vertical-align:middle;">
                                 <button class="btn btn-info btn-xs" style="padding:4px 8px; border:none; cursor:pointer;"
-                                    data-toggle="modal" data-target="#modalDocumentoDetalle"
                                     onclick="abrirDocumento('{{ $doc->nombre }}', '{{ $razonSocial }}', '{{ $doc->url }}')">
                                     <i class="fa fa-search"></i>
                                 </button>
@@ -161,7 +160,7 @@
             <div style="background-image:linear-gradient(40deg,rgb(255,160,100),rgb(252,98,98)); padding:12px 16px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between;">
                 <div style="background-color:#ecf0f5; position:absolute; height:200%; width:35vw; transform:rotate(30deg); right:-10vw; top:-50%;"></div>
                 <span style="color:#fff; font-weight:600; font-size:14px; position:relative; z-index:1;" id="tituloMes">Documentos - Mes</span>
-                <button type="button" data-dismiss="modal"
+                <button type="button" onclick="$('#modalDocumentosMes').modal('hide')"
                         style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer; position:relative; z-index:1; line-height:1;">&times;</button>
             </div>
 
@@ -184,7 +183,7 @@
             <div style="background-image:linear-gradient(40deg,rgb(255,160,100),rgb(252,98,98)); padding:12px 16px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between;">
                 <div style="background-color:#ecf0f5; position:absolute; height:200%; width:35vw; transform:rotate(30deg); right:-10vw; top:-50%;"></div>
                 <span style="color:#fff; font-weight:600; font-size:14px; position:relative; z-index:1;" id="nombreDocumento">Documento</span>
-                <button type="button" data-dismiss="modal"
+                <button type="button" onclick="$('#modalDocumentoDetalle').modal('hide')"
                         style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer; position:relative; z-index:1; line-height:1;">&times;</button>
             </div>
 
@@ -220,7 +219,7 @@
                 <span style="color:#fff; font-weight:600; font-size:14px; position:relative; z-index:1;">
                     <i class="fa fa-upload" style="margin-right:8px;"></i> Cargar Documento
                 </span>
-                <button type="button" data-dismiss="modal"
+                <button type="button" onclick="$('#modalCargarDocumento').modal('hide')"
                         style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer; position:relative; z-index:1; line-height:1;">&times;</button>
             </div>
 
@@ -233,8 +232,10 @@
 
                 <div style="margin-bottom:15px;">
                     <label style="display:block; margin-bottom:5px; font-weight:600; color:#333;">Tipo de Documento</label>
-                    <select id="tipoDoc" name="tipoDoc" class="form-control"
-                            style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                    <select id="tipoDoc" name="tipoDoc" class="form-control select-native"
+                            style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:13px; color:#333; background:#fff; height:38px;">
+
+
                         <option value="">Selecciona un tipo</option>
                         <option value="Factura">Factura</option>
                         <option value="Recibo">Recibo</option>
@@ -262,7 +263,7 @@
                 </div>
 
                 <div style="display:flex; gap:10px; justify-content:flex-end;">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" style="padding:8px 20px;">
+                    <button type="button" class="btn btn-default" onclick="$('#modalCargarDocumento').modal('hide')" style="padding:8px 20px;">
                         Cancelar
                     </button>
                     <button type="submit" class="btn btn-success" style="padding:8px 20px;">
@@ -353,6 +354,7 @@ function abrirMes(mes, numero, año) {
     }
 
     document.getElementById('modalDocsMesBody').innerHTML = html;
+    $('#modalDocumentosMes').modal('show');
 }
 
 function abrirDocumento(nombre, empresa, rutaDocumento) {
@@ -377,6 +379,7 @@ function abrirDocumento(nombre, empresa, rutaDocumento) {
         iframe.style.display = 'block';
         iframe.src = rutaDocumento;
     }
+    $('#modalDocumentoDetalle').modal('show');
 }
 
 // Drag and Drop para cargar documentos
@@ -446,26 +449,30 @@ $(document).ready(function() {
             var archivoDoc = archivoSeleccionado;
 
             if (!nombreDoc) {
-                alert('Por favor ingresa el nombre del documento');
+                mostrarModalMensaje('Por favor ingresa el nombre del documento', 'warning');
                 return;
             }
 
             if (!archivoDoc) {
-                alert('Por favor selecciona un archivo PDF');
+                mostrarModalMensaje('Por favor selecciona un archivo PDF', 'warning');
                 return;
             }
 
             if (!archivoDoc.name.endsWith('.pdf')) {
-                alert('Solo se permiten archivos PDF');
+                mostrarModalMensaje('Solo se permiten archivos PDF', 'warning');
                 return;
             }
 
             if (archivoDoc.size > 10 * 1024 * 1024) {
-                alert('El archivo es muy grande (máximo 10MB)');
+                mostrarModalMensaje('El archivo es muy grande (maximo 10MB)', 'warning');
                 return;
             }
 
             // Enviar al servidor
+            var $btnSubmit = $(formCargar.querySelector('button[type="submit"]'));
+            var btnText = $btnSubmit.html();
+            $btnSubmit.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Subiendo...');
+
             var formData = new FormData();
             formData.append('nombreDoc', nombreDoc);
             formData.append('tipoDoc', tipoDoc);
@@ -483,11 +490,24 @@ $(document).ready(function() {
             fetch(url, {
                 method: 'POST',
                 body: formData,
-                headers: headers
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Error: ' + response.status);
+                    return response.json().then(errData => {
+                        var msg = '';
+                        if (errData.errors) {
+                            Object.values(errData.errors).forEach(function(arr) { msg += arr.join(', ') + '\n'; });
+                        } else if (errData.message) {
+                            msg = errData.message;
+                        } else {
+                            msg = 'Error ' + response.status;
+                        }
+                        throw new Error(msg);
+                    });
                 }
                 return response.json();
             })
@@ -507,7 +527,8 @@ $(document).ready(function() {
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error al cargar el documento: ' + error.message);
+                mostrarModalMensaje('Error: ' + error.message, 'danger');
+                $btnSubmit.prop('disabled', false).html(btnText);
             });
         });
     }
@@ -522,6 +543,28 @@ $(document).ready(function() {
             notif.remove();
         }, 3000);
     }
+
+    function mostrarModalMensaje(mensaje, tipo) {
+        var icono = tipo === 'success' ? 'fa-check-circle' : (tipo === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle');
+        var color = tipo === 'success' ? '#00a65a' : (tipo === 'warning' ? '#f39c12' : '#dd4b39');
+        document.querySelector('#modalMensaje .modal-icono').className = 'modal-icono fas ' + icono;
+        document.querySelector('#modalMensaje .modal-icono').style.color = color;
+        document.querySelector('#modalMensaje .modal-texto').textContent = mensaje;
+        $('#modalMensaje').modal('show');
+    }
 });
 </script>
+
+{{-- Modal mensaje --}}
+<div class="modal fade" id="modalMensaje" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content" style="border-radius:6px; border:none;">
+            <div class="modal-body text-center" style="padding:25px;">
+                <i class="modal-icono fas fa-check-circle" style="font-size:40px; margin-bottom:12px; display:block;"></i>
+                <p class="modal-texto" style="font-size:14px; color:#333; margin:0;"></p>
+                <button type="button" class="btn btn-default btn-sm" onclick="$('#modalMensaje').modal('hide')" style="margin-top:15px;">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

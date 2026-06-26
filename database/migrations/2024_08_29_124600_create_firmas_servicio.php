@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('FirmaPDA')->unique();
             $table->string('SlugFirmas')->unique();
             $table->string('NombreFuncionario')->unique();
-            $table->int('Cedula')->unique();
+            $table->integer('Cedula')->unique();
             $table->string('Observaciones')->unique();
             $table->timestamps();
             $table->engine = 'InnoDB';
