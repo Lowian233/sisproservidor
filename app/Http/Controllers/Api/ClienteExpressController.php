@@ -48,6 +48,8 @@ class ClienteExpressController extends Controller
             return response()->json([
                 'existe'      => true,
                 'cliente'     => $this->formatearCliente($cliente),
+                'datosRepre'              => $this->datosRepreVacios($cliente),
+                'datosRepreIncompletos'   => $this->datosRepreIncompletos($cliente),
                 'tieneSedes'  => $sedes->isNotEmpty(),
                 'totalSedes'  => $sedes->count(),
                 'sedes_texto' => $sedes->map(function ($s) {
@@ -65,6 +67,40 @@ class ClienteExpressController extends Controller
             'mensaje' => 'Cliente no encontrado',
         ]);
     }
+
+    /**
+    * Indica si los datos del representante legal estan vacios (No definido).
+    * true = sin datos reales, false = tiene datos reales.
+    */
+   private function datosRepreVacios($cliente): bool
+   {
+       $campos = [$cliente->nombreRepLegal, $cliente->identificacionRepLegal, $cliente->lugarExpedicion];
+       foreach ($campos as $campo) {
+           if ($campo !== null && $campo !== '' && $campo !== 'No definido') {
+               return false;
+           }
+       }
+       return true;
+   }
+
+   /**
+    * Indica si ALGUN dato del representante legal esta incompleto (vacio/No definido).
+    * true = al menos un campo vacio, false = todos los campos tienen datos reales.
+    */
+   private function datosRepreIncompletos($cliente): bool
+   {
+       $campos = [
+           $cliente->nombreRepLegal,
+           $cliente->identificacionRepLegal,
+           $cliente->lugarExpedicion,
+       ];
+       foreach ($campos as $campo) {
+           if ($campo === null || $campo === '' || $campo === 'No definido') {
+               return true;
+           }
+       }
+       return false;
+   }
 
     /**
      * Sedes del cliente enumeradas (opcion 1..N) para que Wati las muestre
@@ -211,7 +247,7 @@ class ClienteExpressController extends Controller
 
         // ===== UPDATE: el NIT ya existe =====
         if ($cliente) {
-            $request->validate($this->reglasCliente());
+            $request->validate($this->reglasCliente($cliente->id));
 
             // Solo actualiza los campos que realmente vinieron en la petición
             $datos = $this->datosEnviados($request, $campos);

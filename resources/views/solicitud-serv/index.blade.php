@@ -15,9 +15,6 @@
 			<div class="box">
 				<div class="box-header">
 					<h3 class="box-title">{{ __('adminlte::message.solsertitleindex') }}</h3>
-					@if(in_array(Auth::user()->UsRol, Permisos::PROGRAMADOR) || in_array(Auth::user()->UsRol, Permisos::PROGRAMADOR))
-							<a href="/solicitud-servicio/createit" class="btn btn-primary pull-right">{{ __('adminlte::message.create') }}</a>
-					@endif		
 					@if($Cliente->CliStatus == "Bloqueado")
 								@section('contentheader_description')
 									@component('layouts.partials.modalecartera')

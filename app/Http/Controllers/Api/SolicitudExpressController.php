@@ -40,8 +40,9 @@ class SolicitudExpressController extends Controller
                 if ($request->has('estado'))           $datos['estado']           = $request->input('estado');
                 if ($request->has('RequiereContrato')) $datos['RequiereContrato'] = $request->input('RequiereContrato');
                 if ($request->has('peso')) {
-                    $datos['peso']   = $request->input('peso');
-                    $datos['precio'] = $this->calcularPrecio($request->input('peso'));
+                    $parsed = $this->parsearPesoYPrecio($request->input('peso'));
+                    $datos['peso']   = $parsed['peso'];
+                    $datos['precio'] = $parsed['precio'];
                 }
 
                 $solicitud = SolicitudExpress::create($datos);
@@ -71,8 +72,9 @@ class SolicitudExpressController extends Controller
             if ($request->has('estado'))           $datos['estado']           = $request->input('estado');
             if ($request->has('RequiereContrato')) $datos['RequiereContrato'] = $request->input('RequiereContrato');
             if ($request->has('peso')) {
-                $datos['peso']   = $request->input('peso');
-                $datos['precio'] = $this->calcularPrecio($request->input('peso'));
+                $$parsed = $this->parsearPesoYPrecio($request->input('peso'));
+                $datos['peso']   = $parsed['peso'];
+                $datos['precio'] = $parsed['precio'];
             }
 
             if (empty($datos)) {
@@ -128,7 +130,18 @@ class SolicitudExpressController extends Controller
     }
 
     private function calcularPrecio(string $peso): int|string
-    {
+    {   
+         // Opcion numerica (Wati envia "1", "2", etc.)
+         if (is_numeric(trim($peso))) {
+            return $this->parsearPesoYPrecio($peso)['precio'];
+        }
+
+        // Nuevo formato: "1. Microgenerador < 12 Kg - $60.000"
+        if (preg_match('/\$([\d.]+)/', $peso, $m)) {
+            return (int) str_replace('.', '', $m[1]);
+        }
+
+        // Formato antiguo: "Menos de 20 kg"
         $mapa = [
             'menos de 12 kg'  => 60000,
             'menos de 20 kg'  => 80000,
@@ -139,5 +152,43 @@ class SolicitudExpressController extends Controller
         ];
 
         return $mapa[strtolower(trim($peso))] ?? 'Precio no definido';
+    }
+    
+    /**
+     * Parsea el peso recibido y devuelve [peso, precio].
+     * Soporta 3 formatos: opcion numerica, texto nuevo Wati, texto antiguo.
+     */
+    private function parsearPesoYPrecio(string $peso): array
+    {
+        $peso = trim($peso);
+
+        // Formato: opcion numerica "2"
+        if (is_numeric($peso)) {
+            $opciones = [
+                1 => ['peso' => 'Menos de 12 kg',  'precio' => 60000],
+                2 => ['peso' => 'Menos de 20 kg',  'precio' => 80000],
+                3 => ['peso' => 'Menos de 40 kg',  'precio' => 115000],
+                4 => ['peso' => 'Menos de 60 kg',  'precio' => 150000],
+                5 => ['peso' => 'Menos de 100 kg', 'precio' => 240000],
+                6 => ['peso' => 'Menos de 150 kg', 'precio' => 342000],
+                7 => ['peso' => 'Mas de 200 kg',   'precio' => 'Precio no definido'],
+            ];
+            $opcion = (int) $peso;
+            if (isset($opciones[$opcion])) {
+                return $opciones[$opcion];
+            }
+            return ['peso' => $peso, 'precio' => 'Precio no definido'];
+        }
+
+        // Formato nuevo: "2. Pequeño generador < 20 Kg - $80.000"
+        if (preg_match('/\$([\d.]+)/', $peso, $m)) {
+            $precioNum = (int) str_replace('.', '', $m[1]);
+            $pesoLimpio = preg_replace('/^\d+\.\s*/', '', $peso);   // quitar "2. "
+            $pesoLimpio = preg_replace('/\s*-\s*\$[\d.]+$/', '', $pesoLimpio); // quitar " - $80.000"
+            return ['peso' => trim($pesoLimpio), 'precio' => $precioNum];
+        }
+
+        // Formato antiguo: "Menos de 20 kg"
+        return ['peso' => $peso, 'precio' => $this->calcularPrecio($peso)];
     }
 }

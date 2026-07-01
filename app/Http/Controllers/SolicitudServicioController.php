@@ -85,6 +85,90 @@ class SolicitudServicioController extends Controller
 	/** Buzón de Programaciones: aviso cuando el cliente añade residuos faltantes (SolSerLeftRespel). Alineado con VehicProgController::MAIL_PROGRAMACIONES_INTERNO. */
 	private const MAIL_PROGRAMACIONES_INTERNO = 'programaciones@prosarc.com.co';
 
+	private function puedeRectificarCliente(): bool
+	{
+		$user = Auth::user();
+
+		return in_array($user->UsRol, Permisos::COMERCIALES, true)
+			|| in_array($user->UsRol2, Permisos::COMERCIALES, true)
+			|| in_array($user->UsRol, Permisos::COMERCIALEINGRURNO, true)
+			|| in_array($user->UsRol2, Permisos::COMERCIALEINGRURNO, true);
+	}
+
+	private function esJefeComercialPrincipal(): bool
+	{
+		return Auth::user()->UsRol === 'JefeComercial';
+	}
+
+	private function esComercialIndividual(): bool
+	{
+		$user = Auth::user();
+		$rolesComercialIndividual = ['Comercial', 'Comercialap', 'Ejecutivo Comercial'];
+
+		if ($user->UsRol === 'JefeComercial') {
+			return false;
+		}
+		if (in_array($user->UsRol, $rolesComercialIndividual, true)) {
+			return true;
+		}
+		if (in_array($user->UsRol, Permisos::JefeComercial, true)
+			|| in_array($user->UsRol, Permisos::PROGRAMADOR, true)) {
+			return false;
+		}
+
+		return in_array($user->UsRol2, $rolesComercialIndividual, true);
+	}
+
+	private function idsComercialesEquipo(): array
+	{
+		$comercialesIds = DB::table('users')
+			->join('personals', 'users.FK_UserPers', '=', 'personals.ID_Pers')
+			->where(function ($q) {
+				$q->whereIn('users.UsRol', ['Comercial', 'Comercialap', 'Ejecutivo Comercial'])
+					->orWhereIn('users.UsRol2', ['Comercial', 'Comercialap', 'Ejecutivo Comercial']);
+			})
+			->where('personals.PersDelete', 0)
+			->pluck('personals.ID_Pers')
+			->unique()
+			->toArray();
+
+		$comercialesConClientes = Cliente::where('CliDelete', 0)
+			->whereNotNull('CliComercial')
+			->distinct()
+			->pluck('CliComercial')
+			->toArray();
+
+		return array_values(array_unique(array_merge($comercialesIds, $comercialesConClientes)));
+	}
+
+	private function aplicarFiltroComercialEnQuery($query, string $columnaComercial = 'Comercial.ID_Pers'): void
+	{
+		if ($this->esJefeComercialPrincipal()) {
+			$ids = $this->idsComercialesEquipo();
+			if (!empty($ids)) {
+				$query->whereIn($columnaComercial, $ids);
+			}
+			return;
+		}
+		if ($this->esComercialIndividual()) {
+			$query->where($columnaComercial, Auth::user()->FK_UserPers);
+		}
+	}
+
+	private function aplicarFiltroComercialEnClientes($query, string $columna = 'clientes.CliComercial'): void
+	{
+		if ($this->esJefeComercialPrincipal()) {
+			$ids = $this->idsComercialesEquipo();
+			if (!empty($ids)) {
+				$query->whereIn($columna, $ids);
+			}
+			return;
+		}
+		if ($this->esComercialIndividual()) {
+			$query->where($columna, Auth::user()->FK_UserPers);
+		}
+	}
+
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -147,11 +231,7 @@ public function index(Request $request)
 						$query->orWhere('solicitud_servicios.SolServCertStatus', 1);
 					}
 				}
-				if(in_array(Auth::user()->UsRol, Permisos::COMERCIALES) || in_array(Auth::user()->UsRol2, Permisos::COMERCIALES)){
-					if(in_array(Auth::user()->UsRol, Permisos::COMERCIAL)){
-						$query->where('Comercial.ID_Pers', Auth::user()->FK_UserPers);
-					}
-				}
+				$this->aplicarFiltroComercialEnQuery($query);
 			})
 			->where('CliCategoria', 'Cliente')
 			//->whereBetween('solicitud_servicios.created_at',['2022-01-01 00:00:00','2022-12-31 23:59:00'])
@@ -242,11 +322,7 @@ public function index(Request $request)
 						$q->orWhere('solicitud_servicios.SolServCertStatus', 1);
 					}
 				}
-				if(in_array(Auth::user()->UsRol, Permisos::COMERCIALES) || in_array(Auth::user()->UsRol2, Permisos::COMERCIALES)){
-					if(in_array(Auth::user()->UsRol, Permisos::COMERCIAL)){
-						$q->where('Comercial.ID_Pers', Auth::user()->FK_UserPers);
-					}
-				}
+				$this->aplicarFiltroComercialEnQuery($q);
 			})
 			->where('CliCategoria', 'Cliente')
 			->whereYear('solicitud_servicios.created_at', $anio)
@@ -294,10 +370,7 @@ public function index(Request $request)
 			->distinct()
 			->orderBy('clientes.CliName');
 
-		if (in_array(Auth::user()->UsRol, Permisos::COMERCIAL) || in_array(Auth::user()->UsRol2, Permisos::COMERCIAL)) {
-			$qClientes->join('personals as Comercial', 'Comercial.ID_Pers', '=', 'clientes.CliComercial')
-				->where('Comercial.ID_Pers', Auth::user()->FK_UserPers);
-		}
+		$this->aplicarFiltroComercialEnClientes($qClientes);
 		$clientesFiltro = $qClientes->get();
 
 		// Meses del año seleccionado (Enero a Diciembre)
@@ -357,7 +430,7 @@ public function index(Request $request)
 
 	public function createit(Request $request)
     {
-        if ( in_array(Auth::user()->UsRol, Permisos::COMERCIALEINGRURNO)|| in_array(Auth::user()->UsRol, Permisos::COMERCIALEINGRURNO)) {
+        if ($this->puedeRectificarCliente()) {
             $ID_Cli = Cliente::where('CliDelete', 0)->get();
             $Departamentos = Departamento::all();
 
@@ -382,9 +455,7 @@ public function index(Request $request)
     {
         // 🟢 Flujo para usuarios internos de planta → cliente Prosarc (ID 1)
         // Pueden acceder directamente sin pasar por createit
-        if (in_array(Auth::user()->UsRol, Permisos::PUEDE_SOLICITAR_PLANTA) &&
-            !in_array(Auth::user()->UsRol, Permisos::PROGRAMADOR) &&
-            !in_array(Auth::user()->UsRol, Permisos::COMERCIALEINGRURNO)) {
+        if (in_array(Auth::user()->UsRol, Permisos::PUEDE_SOLICITAR_PLANTA) && !$this->puedeRectificarCliente()) {
 
             $Departamentos = Departamento::all();
             $Cliente = Cliente::select('ID_Cli', 'CliName', 'CliStatus', 'TipoFacturacion')
@@ -671,7 +742,7 @@ public function index(Request $request)
 	$SolicitudServicio->FK_SolSerPersona = $personal ? $personal->ID_Pers : null;
 
 	// Usuarios que crean solicitudes para clientes externos (comerciales)
-	if (in_array(Auth::user()->UsRol, Permisos::PROGRAMADOR) || in_array(Auth::user()->UsRol, Permisos::COMERCIALEINGRURNO)) {
+	if ($this->puedeRectificarCliente()) {
 		$SolicitudServicio->FK_SolSerCliente = $request->input('FK_SolSerCliente');
 	}
 	// Usuarios de planta crean solicitudes para Prosarc (ID_Cli = 1) - disposición interna

@@ -15,14 +15,7 @@
         <div class="col-md-16 col-md-offset-0">
                 <div class="box-header">
                     <h3 class="box-title">{{ __('adminlte::message.solsertitleindex') }}</h3>
-                    @if(in_array(Auth::user()->UsRol, Permisos::COMERCIALEINGRURNO) || in_array(Auth::user()->UsRol, Permisos::COMERCIALEINGRURNO))
-                    <a href="solicitud-servicio/createit" class="btn btn-primary pull-right">{{ __('adminlte::message.create') }}</a>
-                    @endif
-                </div>
-                <div class="box-header">
-                    @if(in_array(Auth::user()->UsRol, Permisos::PUEDE_SOLICITAR_PLANTA))
-                    <a href="solicitud-servicio/create" class="btn btn-primary pull-right">{{ __('adminlte::message.create') }}</a>
-                    @endif
+                    @include('solicitud-serv.partials.botones-crear-solicitud')
                 </div>
                 <div class="box box-info">
                     <div class="box-body">

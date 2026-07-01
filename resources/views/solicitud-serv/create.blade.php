@@ -32,12 +32,14 @@
                             <div class="col-md-12">
                                 <div class="row">
                                     @php
-                                    $rol = Auth::user()->UsRol;
-                                    $esProgramadorOComercial = in_array($rol, Permisos::PROGRAMADOR, true) || in_array($rol, Permisos::COMERCIALEINGRURNO, true);
-                                    $esPlanta = in_array($rol, Permisos::PUEDE_SOLICITAR_PLANTA, true);
+                                    $usuario = Auth::user();
+                                    $puedeRectificarCliente = in_array($usuario->UsRol, Permisos::COMERCIALES, true)
+                                        || in_array($usuario->UsRol2, Permisos::COMERCIALES, true)
+                                        || in_array($usuario->UsRol, Permisos::COMERCIALEINGRURNO, true)
+                                        || in_array($usuario->UsRol2, Permisos::COMERCIALEINGRURNO, true);
                                     @endphp
 
-                                    @if($esProgramadorOComercial && !$esPlanta)
+                                    @if($puedeRectificarCliente && $Clientes->isNotEmpty())
                                     <div class="form-group col-md-12">
                                         <label data-placement="auto" data-trigger="hover" data-html="true" data-toggle="popover" title="<b>{{ __('adminlte::message.solserpersonal') }}</b>" data-content="{{ __('adminlte::message.solserpersonaldescript') }}">
                                             <i style="font-size: 1.8rem; color: Dodgerblue;" class="fas fa-info-circle fa-2x fa-spin"></i>

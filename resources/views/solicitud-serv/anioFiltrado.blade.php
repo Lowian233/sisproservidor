@@ -17,12 +17,7 @@
                 <div class="box-header">
                     <h3 class="box-title">{{ __('adminlte::message.solsertitleindex') }} - {{ $anio }}</h3>
                     <a href="{{ url('solicitud-servicio') }}" class="btn btn-default btn-sm pull-right" style="margin-left: 5px;" title="Volver al selector de años"><i class="fas fa-arrow-left"></i> Volver</a>
-                    @if(in_array(Auth::user()->UsRol, Permisos::COMERCIALEINGRURNO) || in_array(Auth::user()->UsRol2, Permisos::COMERCIALEINGRURNO))
-                        <a href="solicitud-servicio/createit" class="btn btn-primary pull-right">{{ __('adminlte::message.create') }}</a>
-                    @endif
-                    @if(in_array(Auth::user()->UsRol, Permisos::PUEDE_SOLICITAR_PLANTA))
-                        <a href="solicitud-servicio/create" class="btn btn-primary pull-right" style="margin-right: 5px;">{{ __('adminlte::message.create') }}</a>
-                    @endif
+                    @include('solicitud-serv.partials.botones-crear-solicitud', ['margenPlanta' => true])
                 </div>
                 <div class="box box-info">
                     <div class="box-body">

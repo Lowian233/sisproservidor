@@ -38,10 +38,13 @@ class CotizacionExpresController extends Controller
             ->leftJoin('clientes_express as c', 's.idCliente', '=', 'c.id')
             ->leftJoin('sedes_express as se', 's.idSede', '=', 'se.id')
             ->groupBy('s.idSolicitud')
-            ->orderByRaw('CAST(s.idSolicitud AS UNSIGNED) ASC');
+            ->orderByRaw('CAST(s.idSolicitud AS UNSIGNED) DESC');
 
         if ($request->filled('nombre')) {
             $query->where('c.nombreEmpresa', 'like', '%' . $request->input('nombre') . '%');
+        }
+        if ($request->filled('servicio')) {
+            $query->where('s.tipoResiduo', 'like', '%' . $request->input('servicio') . '%');
         }
 
         if ($request->filled('estado')) {
@@ -251,7 +254,26 @@ class CotizacionExpresController extends Controller
 
     public function destroy($id)
     {
-        return redirect()->route('cotizacion-expres.index');
+        $idSolicitud = is_numeric($id) ? (int) $id : null;
+
+        if ($idSolicitud) {
+            DB::table('solicitudes_express')->where('idSolicitud', $idSolicitud)->delete();
+        }
+
+        return redirect()->route('cotizacion-expres.index')
+            ->with('success', 'Solicitud #' . $idSolicitud . ' eliminada.');
+    }
+
+    public function eliminarLote(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return response()->json(['error' => 'No se recibieron IDs'], 422);
+        }
+
+        DB::table('solicitudes_express')->whereIn('idSolicitud', $ids)->delete();
+
+        return response()->json(['ok' => true, 'eliminados' => count($ids)]);
     }
 
     public function exportExcel()
@@ -271,7 +293,7 @@ class CotizacionExpresController extends Controller
             ])
             ->leftJoin('clientes_express as c', 's.idCliente', '=', 'c.id')
             ->groupBy('s.idSolicitud')
-            ->orderByRaw('CAST(s.idSolicitud AS UNSIGNED) ASC')
+            ->orderByRaw('CAST(s.idSolicitud AS UNSIGNED) DESC')
             ->get();
 
         $spreadsheet = new Spreadsheet();
@@ -439,7 +461,7 @@ class CotizacionExpresController extends Controller
             ])
             ->leftJoin('clientes_express as c', 's.idCliente', '=', 'c.id')
             ->groupBy('s.idSolicitud')
-            ->orderByRaw('CAST(s.idSolicitud AS UNSIGNED) ASC')
+            ->orderByRaw('CAST(s.idSolicitud AS UNSIGNED) DESC')
             ->get();
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -472,21 +494,15 @@ class CotizacionExpresController extends Controller
         $tmpPath = $tmpDir . '/reporte_envio_' . time() . '.xlsx';
         (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($tmpPath);
 
-        $resultados = [];
         $this->enviarReportePorWhatsapp($tmpPath, $numeros);
-
-        foreach ($numeros as $numero) {
-            $resultados[] = ['numero' => $numero, 'enviado' => true];
-        }
 
         @unlink($tmpPath);
 
-        Log::info('Reporte enviado por WhatsApp', ['numeros' => $numeros]);
+       Log::info('Reporte enviado por WhatsApp', ['numeros' => $numeros]);
 
         return response()->json([
             'ok'         => true,
-            'message'    => 'Reporte enviado a ' . count($numeros) . ' número(s)',
-            'resultados' => $resultados,
+            'message'    => 'Reporte enviado a ' . count($numeros) . ' numero(s)',
         ]);
     }
 
@@ -495,7 +511,7 @@ class CotizacionExpresController extends Controller
         if (is_numeric($slug)) {
             $cliente = ClienteExpress::find($slug);
             if ($cliente) {
-                return redirect()->route('cotizacion-expres.documentos', $this->slugCliente($cliente));
+                return redirect()->route('cotizacion-expres.historial-documentos', $this->slugCliente($cliente));
             }
             abort(404, 'Cliente no encontrado');
         }
