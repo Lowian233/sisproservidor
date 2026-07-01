@@ -72,7 +72,7 @@ class SolicitudExpressController extends Controller
             if ($request->has('estado'))           $datos['estado']           = $request->input('estado');
             if ($request->has('RequiereContrato')) $datos['RequiereContrato'] = $request->input('RequiereContrato');
             if ($request->has('peso')) {
-                $$parsed = $this->parsearPesoYPrecio($request->input('peso'));
+                $parsed = $this->parsearPesoYPrecio($request->input('peso'));
                 $datos['peso']   = $parsed['peso'];
                 $datos['precio'] = $parsed['precio'];
             }
@@ -130,9 +130,9 @@ class SolicitudExpressController extends Controller
     }
 
     private function calcularPrecio(string $peso): int|string
-    {   
-         // Opcion numerica (Wati envia "1", "2", etc.)
-         if (is_numeric(trim($peso))) {
+    {
+        // Opcion numerica (Wati envia "1", "2", etc.)
+        if (is_numeric(trim($peso))) {
             return $this->parsearPesoYPrecio($peso)['precio'];
         }
 
@@ -153,7 +153,7 @@ class SolicitudExpressController extends Controller
 
         return $mapa[strtolower(trim($peso))] ?? 'Precio no definido';
     }
-    
+
     /**
      * Parsea el peso recibido y devuelve [peso, precio].
      * Soporta 3 formatos: opcion numerica, texto nuevo Wati, texto antiguo.

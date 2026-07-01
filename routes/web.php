@@ -267,10 +267,8 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 	Route::get('/cotizacion-expres/create', 'CotizacionExpresController@create')->name('cotizacion-expres.create');
 	Route::post('/cotizacion-expres', 'CotizacionExpresController@store')->name('cotizacion-expres.store');
     Route::get('/cotizacion-expres/excel', 'CotizacionExpresController@exportExcel')->name('cotizacion-expres.excel');
-	Route::post('/cotizacion-express/reporte/enviar','CotizacionExpresController@enviarReporte')->name('cotizacion-expres.enviar-reporte');
-	Route::get('/cotizacion-express/{slug}/documentos','CotizacionExpresController@documentos')->name('cotizacion-expres.documentos');
-	Route::get('/cotizacion-express/{slug}/historial-documentos','CotizacionExpresController@historialDocumentos')->name('cotizacion-expres.historial-documentos');
-	Route::post('/cotizacion-express/{slug}/cargar-documento','CotizacionExpresController@cargarDocumento')->name('cotizacion-expres.cargar-documento');
+	Route::post('/cotizacion-expres/reporte/enviar','CotizacionExpresController@enviarReporte')->name('cotizacion-expres.enviar-reporte');
+	Route::post('/cotizacion-expres/eliminar-lote','CotizacionExpresController@eliminarLote')->name('cotizacion-expres.eliminar-lote');
 
 	// Rutas específicas con {slug} en sub-rutas (ANTES que la ruta genérica {slug})
 	Route::get('/cotizacion-expres/{slug}/documentos', 'CotizacionExpresController@documentos')->name('cotizacion-expres.documentos');

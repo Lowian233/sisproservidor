@@ -99,7 +99,7 @@
                                 <i class="fa fa-edit"></i>
                             </button>
                             <button type="button" class="btn btn-danger btn-sm" style="padding: 8px 12px; border-radius: 4px;"
-                                    onclick="if(confirm('¿Eliminar esta solicitud?')) document.getElementById('formEliminar').submit()">
+                                    onclick="mostrarModalConfirmacion('Eliminar esta solicitud?', function(){ document.getElementById('formEliminar').submit(); })">
                                 <i class="fa fa-trash"></i>
                             </button>
                         </div>
@@ -179,7 +179,7 @@
                                    style="background-color: #00a65a; border-color: #008d4c; padding: 6px 15px;">
                                     <i class="fa fa-folder-open"></i> Ver documentos
                                 </a>
-                                <a href="{{ route('cotizacion-expres.documentos', $cotizacionExpres->slug) }}"
+                                <a href="{{ route('cotizacion-expres.historial-documentos', $cotizacionExpres->slug) }}"
                                    class="btn btn-sm" style="background-color:#34495e; color:#fff; padding: 6px 15px;">
                                     <i class="fa fa-upload"></i> Cargar documento
                                 </a>
@@ -381,10 +381,9 @@
          data-base-url="{{ url('cotizacion-expres/' . $cotizacionExpres->slug . '/sedes') }}">
         <div class="col-md-12">
             <div class="box box-info" style="border-top:3px solid #00c0ef; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-                <div style="padding:20px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center;">
+                <div style="padding:15px 20px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="margin:0; font-size:16px; font-weight:600; color:#333;">
-                        Sedes de la empresa
-                        <small style="color:#999; font-weight:400;">(opcional, para empresas con varias ubicaciones)</small>
+                        <i class="fa fa-building" style="color:#00c0ef; margin-right:6px;"></i> Sedes de la empresa
                     </h3>
                     <button type="button" class="btn btn-success btn-sm"
                             style="background-color:#00a65a; border-color:#008d4c; padding:6px 15px;"
@@ -393,46 +392,40 @@
                     </button>
                 </div>
                 <div class="box-body" style="padding:0;">
-                    <table class="table" style="width:100%; margin:0; border-collapse:collapse;">
-                        <thead>
-                            <tr style="background:#f9f9f9; border-bottom:2px solid #f0f0f0;">
-                                <th style="padding:12px 20px; font-size:13px; color:#333;">Nombre de la sede</th>
-                                <th style="padding:12px 20px; font-size:13px; color:#333;">Dirección</th>
-                                <th style="padding:12px 20px; font-size:13px; color:#333;">Localidad</th>
-                                <th style="padding:12px 20px; font-size:13px; color:#333; width:110px; text-align:right;">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sedesTbody">
-                            @forelse($sedes as $sede)
-                                <tr data-id="{{ $sede->id }}"
-                                    data-nombre="{{ $sede->nombreSede }}"
-                                    data-direccion="{{ $sede->direccion }}"
-                                    data-localidad="{{ $sede->localidad }}"
-                                    style="border-bottom:1px solid #f0f0f0;">
-                                    <td style="padding:12px 20px; font-size:13px; color:#333;">{{ $sede->nombreSede }}</td>
-                                    <td style="padding:12px 20px; font-size:13px; color:#333;">{{ $sede->direccion ?: '—' }}</td>
-                                    <td style="padding:12px 20px; font-size:13px; color:#333;">{{ $sede->localidad ?: '—' }}</td>
-                                    <td style="padding:12px 20px; text-align:right; white-space:nowrap;">
-                                        <button type="button" class="btn btn-warning btn-xs"
-                                                style="background-color:#f39c12; border-color:#e08e0b;"
-                                                onclick="editarSede(this)">
-                                            <i class="fa fa-edit"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-danger btn-xs"
-                                                onclick="eliminarSede(this)">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr id="sedesVacio">
-                                    <td colspan="4" style="padding:20px; text-align:center; color:#999; font-size:13px;">
-                                        Esta empresa no tiene sedes registradas. La recolección usa la dirección del cliente.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                    @forelse($sedes as $sede)
+                        <div data-id="{{ $sede->id }}"
+                             data-nombre="{{ $sede->nombreSede }}"
+                             data-direccion="{{ $sede->direccion }}"
+                             data-localidad="{{ $sede->localidad }}"
+                             style="display:flex; align-items:center; padding:14px 20px; border-bottom:1px solid #f0f0f0;">
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-weight:600; font-size:14px; color:#333; margin-bottom:2px;">{{ $sede->nombreSede }}</div>
+                                <div style="font-size:12px; color:#777;">
+                                    @if($sede->direccion){{ $sede->direccion }}@endif
+                                    @if($sede->direccion && $sede->localidad)<span style="color:#ccc;"> &middot; </span>@endif
+                                    @if($sede->localidad){{ $sede->localidad }}@endif
+                                    @if(!$sede->direccion && !$sede->localidad)<span style="color:#ccc;">Sin direccion</span>@endif
+                                </div>
+                            </div>
+                            <div style="flex-shrink:0; margin-left:15px;">
+                                <button type="button" class="btn btn-warning btn-xs"
+                                        style="background-color:#f39c12; border-color:#e08e0b;"
+                                        onclick="editarSede(this)" title="Editar">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-xs"
+                                        style="margin-left:4px;"
+                                        onclick="eliminarSede(this)" title="Eliminar">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    @empty
+                        <div id="sedesVacio" style="padding:30px 20px; text-align:center; color:#999; font-size:13px;">
+                            <i class="fa fa-building" style="font-size:28px; color:#ddd; display:block; margin-bottom:8px;"></i>
+                            No hay sedes registradas
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -447,7 +440,7 @@
             <div style="background-image:linear-gradient(40deg,rgb(255,160,100),rgb(252,98,98)); padding:12px 16px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between;">
                 <div style="background-color:#ecf0f5; position:absolute; height:200%; width:35vw; transform:rotate(30deg); right:-10vw; top:-50%;"></div>
                 <span id="modalSedeTitulo" style="color:#fff; font-weight:600; font-size:14px; position:relative; z-index:1;">Agregar sede</span>
-                <button type="button" data-dismiss="modal"
+                <button type="button" onclick="$('#modalSede').modal('hide')"
                         style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer; position:relative; z-index:1; line-height:1;">&times;</button>
             </div>
             <div class="modal-body" style="padding:20px;">
@@ -467,7 +460,7 @@
                 <div id="sedeError" style="display:none; color:#dd4b39; font-size:12px; margin-top:5px;"></div>
             </div>
             <div class="modal-footer" style="border-top:1px solid #f0f0f0;">
-                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-default btn-sm" onclick="$('#modalConfirmar').modal('hide')">Cancelar</button>
                 <button type="button" class="btn btn-success btn-sm" id="btnGuardarSede"
                         style="background-color:#00a65a; border-color:#008d4c;" onclick="guardarSede()">
                     Guardar
@@ -485,7 +478,7 @@
             <div style="background-image:linear-gradient(40deg,rgb(255,160,100),rgb(252,98,98)); padding:12px 16px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between;">
                 <div style="background-color:#ecf0f5; position:absolute; height:200%; width:35vw; transform:rotate(30deg); right:-10vw; top:-50%;"></div>
                 <span style="color:#fff; font-weight:600; font-size:14px; position:relative; z-index:1;">Documentos</span>
-                <button type="button" data-dismiss="modal"
+                <button type="button" onclick="$('#modalVerDocumentos').modal('hide')"
                         style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer; position:relative; z-index:1; line-height:1;">&times;</button>
             </div>
 
@@ -589,12 +582,12 @@ function abrirModalSede() {
 }
 
 function editarSede(btn) {
-    const tr = btn.closest('tr');
+    const row = btn.closest('[data-id]');
     document.getElementById('modalSedeTitulo').textContent = 'Editar sede';
-    document.getElementById('sedeId').value = tr.dataset.id;
-    document.getElementById('sedeNombre').value = tr.dataset.nombre || '';
-    document.getElementById('sedeDireccion').value = tr.dataset.direccion || '';
-    document.getElementById('sedeLocalidad').value = tr.dataset.localidad || '';
+    document.getElementById('sedeId').value = row.dataset.id;
+    document.getElementById('sedeNombre').value = row.dataset.nombre || '';
+    document.getElementById('sedeDireccion').value = row.dataset.direccion || '';
+    document.getElementById('sedeLocalidad').value = row.dataset.localidad || '';
     document.getElementById('sedeError').style.display = 'none';
     $('#modalSede').modal('show');
 }
@@ -644,22 +637,66 @@ function guardarSede() {
 }
 
 function eliminarSede(btn) {
-    const tr = btn.closest('tr');
-    if (!confirm('¿Eliminar esta sede?')) return;
+    const row = btn.closest('[data-id]');
+    mostrarModalConfirmacion('Eliminar esta sede?', function() {
+        fetch(`${SEDES_BASE}/${row.dataset.id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': CSRF,
+                'X-HTTP-Method-Override': 'DELETE',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ _method: 'DELETE' }),
+        })
+        .then(r => r.json())
+        .then(() => location.reload())
+        .catch(() => mostrarModalMensaje('No se pudo eliminar la sede.', 'danger'));
+    });
+}
 
-    fetch(`${SEDES_BASE}/${tr.dataset.id}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': CSRF,
-            'X-HTTP-Method-Override': 'DELETE',
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify({ _method: 'DELETE' }),
-    })
-    .then(r => r.json())
-    .then(() => location.reload())
-    .catch(() => alert('No se pudo eliminar la sede.'));
+function mostrarModalMensaje(mensaje, tipo) {
+    var icono = tipo === 'success' ? 'fa-check-circle' : (tipo === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle');
+    var color = tipo === 'success' ? '#00a65a' : (tipo === 'warning' ? '#f39c12' : '#dd4b39');
+    $('#modalMensaje .modal-icono').attr('class', 'modal-icono fas ' + icono).css('color', color);
+    $('#modalMensaje .modal-texto').text(mensaje);
+    $('#modalMensaje').modal('show');
+}
+
+function mostrarModalConfirmacion(mensaje, callback) {
+    $('#modalConfirmar .modal-texto').text(mensaje);
+    $('#modalConfirmar .btn-confirmar').off('click').on('click', function() {
+        $('#modalConfirmar').modal('hide');
+        callback();
+    });
+    $('#modalConfirmar').modal('show');
 }
 </script>
+
+{{-- Modal mensaje --}}
+<div class="modal fade" id="modalMensaje" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content" style="border-radius:6px; border:none;">
+            <div class="modal-body text-center" style="padding:25px;">
+                <i class="modal-icono fas fa-check-circle" style="font-size:40px; margin-bottom:12px; display:block;"></i>
+                <p class="modal-texto" style="font-size:14px; color:#333; margin:0;"></p>
+                <button type="button" class="btn btn-default btn-sm" onclick="$('#modalMensaje').modal('hide')" style="margin-top:15px;">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal confirmacion --}}
+<div class="modal fade" id="modalConfirmar" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content" style="border-radius:6px; border:none;">
+            <div class="modal-body text-center" style="padding:25px;">
+                <i class="fas fa-exclamation-triangle" style="font-size:40px; color:#f39c12; margin-bottom:12px; display:block;"></i>
+                <p class="modal-texto" style="font-size:14px; color:#333; margin:0 0 18px 0;"></p>
+                <button type="button" class="btn btn-default btn-sm" onclick="$('#modalConfirmar').modal('hide')">Cancelar</button>
+                <button type="button" class="btn btn-danger btn-sm btn-confirmar">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

@@ -69,38 +69,38 @@ class ClienteExpressController extends Controller
     }
 
     /**
-    * Indica si los datos del representante legal estan vacios (No definido).
-    * true = sin datos reales, false = tiene datos reales.
-    */
-   private function datosRepreVacios($cliente): bool
-   {
-       $campos = [$cliente->nombreRepLegal, $cliente->identificacionRepLegal, $cliente->lugarExpedicion];
-       foreach ($campos as $campo) {
-           if ($campo !== null && $campo !== '' && $campo !== 'No definido') {
-               return false;
-           }
-       }
-       return true;
-   }
+     * Indica si los datos del representante legal estan vacios (No definido).
+     * true = sin datos reales, false = tiene datos reales.
+     */
+    private function datosRepreVacios($cliente): bool
+    {
+        $campos = [$cliente->nombreRepLegal, $cliente->identificacionRepLegal, $cliente->lugarExpedicion];
+        foreach ($campos as $campo) {
+            if ($campo !== null && $campo !== '' && $campo !== 'No definido') {
+                return false;
+            }
+        }
+        return true;
+    }
 
-   /**
-    * Indica si ALGUN dato del representante legal esta incompleto (vacio/No definido).
-    * true = al menos un campo vacio, false = todos los campos tienen datos reales.
-    */
-   private function datosRepreIncompletos($cliente): bool
-   {
-       $campos = [
-           $cliente->nombreRepLegal,
-           $cliente->identificacionRepLegal,
-           $cliente->lugarExpedicion,
-       ];
-       foreach ($campos as $campo) {
-           if ($campo === null || $campo === '' || $campo === 'No definido') {
-               return true;
-           }
-       }
-       return false;
-   }
+    /**
+     * Indica si ALGUN dato del representante legal esta incompleto (vacio/No definido).
+     * true = al menos un campo vacio, false = todos los campos tienen datos reales.
+     */
+    private function datosRepreIncompletos($cliente): bool
+    {
+        $campos = [
+            $cliente->nombreRepLegal,
+            $cliente->identificacionRepLegal,
+            $cliente->lugarExpedicion,
+        ];
+        foreach ($campos as $campo) {
+            if ($campo === null || $campo === '' || $campo === 'No definido') {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Sedes del cliente enumeradas (opcion 1..N) para que Wati las muestre

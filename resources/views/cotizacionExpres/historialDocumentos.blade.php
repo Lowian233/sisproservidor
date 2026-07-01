@@ -62,7 +62,8 @@
 
         @foreach($meses as $mes)
         <div style="flex:1; min-width:250px;">
-            <div style="background:#27ae60; border-radius:6px; padding:15px; display:flex; align-items:flex-start; gap:12px; color:#fff; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.1);" onclick="abrirMes('{{ $mes['mes_es'] }}', {{ $mes['mes_numero'] }}, {{ $mes['año'] }})">
+            <div style="background:#27ae60; border-radius:6px; padding:15px; display:flex; align-items:flex-start; gap:12px; color:#fff; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                 onclick="abrirMes('{{ $mes['mes_es'] }}', {{ $mes['mes_numero'] }}, {{ $mes['año'] }})">
                 <div style="font-size:32px; min-width:45px; padding-top:2px;">
                     <i class="fas fa-folder-open"></i>
                 </div>
@@ -77,8 +78,8 @@
 
         {{-- RECUADRO CARGAR DOCUMENTO --}}
         <div style="flex:1; min-width:250px;">
-        <div style="background:#0066cc; border-radius:6px; padding:15px; display:flex; align-items:flex-start; gap:12px; color:#fff; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
-        onclick="$('#modalCargarDocumento').modal('show')">
+            <div style="background:#0066cc; border-radius:6px; padding:15px; display:flex; align-items:flex-start; gap:12px; color:#fff; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                 onclick="$('#modalCargarDocumento').modal('show')">
                 <div style="font-size:32px; min-width:45px; padding-top:2px;">
                     <i class="fas fa-cloud-upload-alt"></i>
                 </div>
@@ -121,7 +122,6 @@
                             <td style="padding:12px; vertical-align:middle;">{{ $doc->fechaCarga->format('d/m/Y H:i') }}</td>
                             <td style="padding:12px; text-align:center; vertical-align:middle;">
                                 <button class="btn btn-info btn-xs" style="padding:4px 8px; border:none; cursor:pointer;"
-                                    data-toggle="modal" data-target="#modalDocumentoDetalle"
                                     onclick="abrirDocumento('{{ $doc->nombre }}', '{{ $razonSocial }}', '{{ $doc->url }}')">
                                     <i class="fa fa-search"></i>
                                 </button>
@@ -183,7 +183,7 @@
             <div style="background-image:linear-gradient(40deg,rgb(255,160,100),rgb(252,98,98)); padding:12px 16px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between;">
                 <div style="background-color:#ecf0f5; position:absolute; height:200%; width:35vw; transform:rotate(30deg); right:-10vw; top:-50%;"></div>
                 <span style="color:#fff; font-weight:600; font-size:14px; position:relative; z-index:1;" id="nombreDocumento">Documento</span>
-                 <button type="button" onclick="$('#modalDocumentoDetalle').modal('hide')"
+                <button type="button" onclick="$('#modalDocumentoDetalle').modal('hide')"
                         style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer; position:relative; z-index:1; line-height:1;">&times;</button>
             </div>
 
@@ -233,7 +233,8 @@
                 <div style="margin-bottom:15px;">
                     <label style="display:block; margin-bottom:5px; font-weight:600; color:#333;">Tipo de Documento</label>
                     <select id="tipoDoc" name="tipoDoc" class="form-control select-native"
-                    style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:13px; color:#333; background:#fff; height:38px;">
+                            style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:13px; color:#333; background:#fff; height:38px;">
+
                         <option value="">Selecciona un tipo</option>
                         <option value="Factura">Factura</option>
                         <option value="Recibo">Recibo</option>
@@ -470,6 +471,7 @@ $(document).ready(function() {
             var $btnSubmit = $(formCargar.querySelector('button[type="submit"]'));
             var btnText = $btnSubmit.html();
             $btnSubmit.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Subiendo...');
+
             var formData = new FormData();
             formData.append('nombreDoc', nombreDoc);
             formData.append('tipoDoc', tipoDoc);
@@ -541,7 +543,7 @@ $(document).ready(function() {
         }, 3000);
     }
 
-function mostrarModalMensaje(mensaje, tipo) {
+    function mostrarModalMensaje(mensaje, tipo) {
         var icono = tipo === 'success' ? 'fa-check-circle' : (tipo === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle');
         var color = tipo === 'success' ? '#00a65a' : (tipo === 'warning' ? '#f39c12' : '#dd4b39');
         document.querySelector('#modalMensaje .modal-icono').className = 'modal-icono fas ' + icono;

@@ -47,6 +47,10 @@ class CotizacionExpresController extends Controller
             $query->where('s.tipoResiduo', 'like', '%' . $request->input('servicio') . '%');
         }
 
+        if ($request->filled('servicio')) {
+            $query->where('s.tipoResiduo', 'like', '%' . $request->input('servicio') . '%');
+        }
+
         if ($request->filled('estado')) {
             $query->where('s.estado', $request->input('estado'));
         }
@@ -495,10 +499,9 @@ class CotizacionExpresController extends Controller
         (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($tmpPath);
 
         $this->enviarReportePorWhatsapp($tmpPath, $numeros);
-
         @unlink($tmpPath);
 
-       Log::info('Reporte enviado por WhatsApp', ['numeros' => $numeros]);
+        Log::info('Reporte enviado por WhatsApp', ['numeros' => $numeros]);
 
         return response()->json([
             'ok'         => true,
