@@ -40,20 +40,7 @@ class CotizacionExpresController extends Controller
             ->groupBy('s.idSolicitud')
             ->orderByRaw('CAST(s.idSolicitud AS UNSIGNED) DESC');
 
-        if ($request->filled('nombre')) {
-            $query->where('c.nombreEmpresa', 'like', '%' . $request->input('nombre') . '%');
-        }
-        if ($request->filled('servicio')) {
-            $query->where('s.tipoResiduo', 'like', '%' . $request->input('servicio') . '%');
-        }
-
-        if ($request->filled('servicio')) {
-            $query->where('s.tipoResiduo', 'like', '%' . $request->input('servicio') . '%');
-        }
-
-        if ($request->filled('estado')) {
-            $query->where('s.estado', $request->input('estado'));
-        }
+        $query = $this->aplicarFiltrosSolicitudes($query, $request);
 
         $solicitudes = $query->paginate(20)->withQueryString();
 
@@ -69,6 +56,31 @@ class CotizacionExpresController extends Controller
         }
 
         return view('cotizacionExpres.index', compact('solicitudes', 'documentosPorCliente'));
+    }
+
+    private function aplicarFiltrosSolicitudes($query, Request $request)
+    {
+        if ($request->filled('nombre')) {
+            $query->where('c.nombreEmpresa', 'like', '%' . $request->input('nombre') . '%');
+        }
+
+        if ($request->filled('servicio')) {
+            $query->where('s.tipoResiduo', 'like', '%' . $request->input('servicio') . '%');
+        }
+
+        if ($request->filled('estado')) {
+            $query->where('s.estado', $request->input('estado'));
+        }
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('s.created_at', '>=', $request->input('fecha_desde'));
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('s.created_at', '<=', $request->input('fecha_hasta'));
+        }
+
+        return $query;
     }
 
     public function create()
@@ -280,7 +292,7 @@ class CotizacionExpresController extends Controller
         return response()->json(['ok' => true, 'eliminados' => count($ids)]);
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
         $data = DB::table('solicitudes_express as s')
             ->select([
@@ -297,8 +309,9 @@ class CotizacionExpresController extends Controller
             ])
             ->leftJoin('clientes_express as c', 's.idCliente', '=', 'c.id')
             ->groupBy('s.idSolicitud')
-            ->orderByRaw('CAST(s.idSolicitud AS UNSIGNED) DESC')
-            ->get();
+            ->orderByRaw('CAST(s.idSolicitud AS UNSIGNED) DESC');
+
+        $data = $this->aplicarFiltrosSolicitudes($data, $request)->get();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
