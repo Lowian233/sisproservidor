@@ -178,7 +178,7 @@ class VerificarPagoWati implements ShouldQueue
     /** Convierte la 1.ª página del PDF a JPEG (requiere extensión Imagick). */
     private function pdfPrimeraPaginaComoJpeg(string $contenido): ?string
     {
-        if (!extension_loaded('imagick')) {
+        if (!extension_loaded('imagick') || !class_exists('\\Imagick')) {
             return null;
         }
 
@@ -318,8 +318,21 @@ class VerificarPagoWati implements ShouldQueue
 
             if (!$msgResponse->successful()) break;
 
-            $items = $msgResponse->json()['messages']['items'] ?? [];
-            if (empty($items)) break;
+            // $items = $msgResponse->json()['messages']['items'] ?? [];
+            $responseData = $msgResponse->json();
+            $messages        = $responseData['messages'] ?? [];
+
+            $items = isset($messages['items']) ? $messages['items'] : $messages;
+
+            if(empty($items)) {
+                Log::warning('VerificarPagoWati: No se encontraron mensajes en la respuesta de Wati', [
+                    'phone' => $this->numberPhone,
+                    'pageNumber'  => $pageNumber,
+                    'responseKeys' => array_keys($responseData),
+                ]);
+                break;
+            }
+
 
             foreach ($items as $message) {
                 // Solo mensajes recibidos del contacto, no enviados por el bot
@@ -331,7 +344,9 @@ class VerificarPagoWati implements ShouldQueue
                 $dataPath    = $message['data'] ?? '';
                 $textoNombre = $message['text'] ?? '';
 
-                if (!in_array($type, ['image', 'document'], true) || !$dataPath) continue;
+
+                $tiposValidos = ['image', 'document', '1', '2', 1, 2];
+                if (!in_array($type, $tiposValidos, true) || !$dataPath) continue;
                 if (str_contains(strtolower($textoNombre ?: $dataPath), '.crdownload')) continue;
 
                 $descarga = WatiMediaService::download($dataPath, $textoNombre, $type);

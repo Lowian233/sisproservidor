@@ -106,7 +106,7 @@ class WatiMediaService
             return true;
         }
 
-        return $type === 'document' && strlen($content) > 500;
+        return in_array($type, ['document', '2', 2], true) && strlen($content) > 500;
     }
 
     private static function esPdf(string $content): bool
@@ -146,6 +146,6 @@ class WatiMediaService
             return $ext === 'jpeg' ? 'jpg' : $ext;
         }
 
-        return $type === 'image' ? 'jpg' : 'pdf';
+        return in_array($type, ['image', '1', 1], true) ? 'jpg' : 'pdf';
     }
 }

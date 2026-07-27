@@ -136,8 +136,8 @@ class SolicitudExpressController extends Controller
             return $this->parsearPesoYPrecio($peso)['precio'];
         }
 
-        // Nuevo formato: "1. Microgenerador < 12 Kg - $60.000"
-        if (preg_match('/\$([\d.]+)/', $peso, $m)) {
+        // Nuevo formato (con o sin prefijo): "Microgenerador < 12 Kg - $60.000"
+        if (preg_match('/\$\s*([\d.]+)/', $peso, $m)) {
             return (int) str_replace('.', '', $m[1]);
         }
 
@@ -153,8 +153,7 @@ class SolicitudExpressController extends Controller
 
         return $mapa[strtolower(trim($peso))] ?? 'Precio no definido';
     }
-
-    /**
+    /*
      * Parsea el peso recibido y devuelve [peso, precio].
      * Soporta 3 formatos: opcion numerica, texto nuevo Wati, texto antiguo.
      */
@@ -180,15 +179,13 @@ class SolicitudExpressController extends Controller
             return ['peso' => $peso, 'precio' => 'Precio no definido'];
         }
 
-        // Formato nuevo: "2. Pequeño generador < 20 Kg - $80.000"
-        if (preg_match('/\$([\d.]+)/', $peso, $m)) {
-            $precioNum = (int) str_replace('.', '', $m[1]);
-            $pesoLimpio = preg_replace('/^\d+\.\s*/', '', $peso);   // quitar "2. "
-            $pesoLimpio = preg_replace('/\s*-\s*\$[\d.]+$/', '', $pesoLimpio); // quitar " - $80.000"
-            return ['peso' => trim($pesoLimpio), 'precio' => $precioNum];
+        // Formato nuevo (con o sin prefijo): "2. ... - $80.000" o "... - $80.000"
+        if (preg_match('/^(?:\d+\.\s*)?(.+?)\s*-\s*\$\s*([\d.]+)\s*$/u', $peso, $m)) {
+            $precioNum = (int) str_replace('.', '', $m[2]);
+            return ['peso' => trim($m[1]), 'precio' => $precioNum];
         }
 
         // Formato antiguo: "Menos de 20 kg"
         return ['peso' => $peso, 'precio' => $this->calcularPrecio($peso)];
-    }
+    }   
 }
