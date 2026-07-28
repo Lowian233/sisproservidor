@@ -18,6 +18,7 @@ class VerificarPagoWati implements ShouldQueue
 
     public $timeout = 120;
     public $tries   = 1;
+    private ?string $ultimoErrorDescarga = null;
 
     private array $meses = [
         'enero' => 1, 'febrero' => 2, 'marzo' => 3, 'abril' => 4,
@@ -45,7 +46,7 @@ class VerificarPagoWati implements ShouldQueue
         if ($archivoContenido === null) {
             $this->guardarResultado(self::enriquecerResultado([
                 'ok'    => false,
-                'error' => 'No se encontró ningún archivo reciente',
+                'error' => $this->ultimoErrorDescarga ?: 'No se encontró ningún archivo reciente',
             ]));
             return;
         }
@@ -305,50 +306,139 @@ class VerificarPagoWati implements ShouldQueue
 
     private function descargarUltimoArchivo(string $endpoint, string $token): array
     {
+        $this->ultimoErrorDescarga = null;
+        if (trim($endpoint) === '' || trim($token) === '') {
+            $this->ultimoErrorDescarga = 'Configuración WATI incompleta: revisa endpoint y token.';
+            Log::warning('VerificarPagoWati: configuración WATI incompleta', [
+                'endpoint_definido' => trim($endpoint) !== '',
+                'token_definido'    => trim($token) !== '',
+            ]);
+            return [null, null];
+        }
+
         $pageNumber = 1;
 
+        $telefonos = $this->telefonosConsulta();
+
         for ($i = 0; $i < 5; $i++) {
-            $msgResponse = Http::withoutVerifying()
-                ->withToken($token)
-                ->timeout(30)
-                ->get("{$endpoint}/api/v1/getMessages/{$this->numberPhone}", [
-                    'pageSize'   => 20,
-                    'pageNumber' => $pageNumber,
-                ]);
+            foreach ($telefonos as $telefono) {
+                $msgResponse = Http::withoutVerifying()
+                    ->withToken($token)
+                    ->timeout(30)
+                    ->get("{$endpoint}/api/v1/getMessages/{$telefono}", [
+                        'pageSize'   => 20,
+                        'pageNumber' => $pageNumber,
+                    ]);
 
-            if (!$msgResponse->successful()) break;
+                if (!$msgResponse->successful()) {
+                    Log::warning('Wati getMessages falló en verificación de pago', [
+                        'phone_original' => $this->numberPhone,
+                        'phone_consulta' => $telefono,
+                        'pageNumber'     => $pageNumber,
+                        'status'         => $msgResponse->status(),
+                        'body'           => mb_substr($msgResponse->body(), 0, 300),
+                    ]);
 
-            $items = $msgResponse->json()['messages']['items'] ?? [];
-            if (empty($items)) break;
+                    if (in_array($msgResponse->status(), [401, 403], true)) {
+                        $this->ultimoErrorDescarga = 'No fue posible consultar WATI: token o endpoint no autorizado.';
+                    } elseif ($msgResponse->status() >= 500) {
+                        $this->ultimoErrorDescarga = 'WATI no respondió correctamente al consultar los mensajes.';
+                    }
+                    continue;
+                }
 
-            foreach ($items as $message) {
-                // Solo mensajes recibidos del contacto, no enviados por el bot
-                $owner     = strtolower($message['owner'] ?? '');
-                $eventType = strtolower($message['eventType'] ?? '');
-                if ($owner === 'us' || $eventType === 'sent') continue;
+                $items = $msgResponse->json()['messages']['items'] ?? [];
+                if (empty($items)) {
+                    continue;
+                }
 
-                $type        = $message['type'] ?? '';
-                $dataPath    = $message['data'] ?? '';
-                $textoNombre = $message['text'] ?? '';
+                foreach ($items as $message) {
+                    // Solo mensajes recibidos del contacto, no enviados por el bot
+                    $owner     = strtolower((string) ($message['owner'] ?? ''));
+                    $eventType = strtolower((string) ($message['eventType'] ?? ''));
+                    if ($owner === 'us' || $eventType === 'sent') continue;
 
-                if (!in_array($type, ['image', 'document'], true) || !$dataPath) continue;
-                if (str_contains(strtolower($textoNombre ?: $dataPath), '.crdownload')) continue;
+                    $type        = strtolower((string) ($message['type'] ?? ''));
+                    $dataPath    = (string) ($message['data'] ?? $message['mediaUrl'] ?? $message['fileName'] ?? '');
+                    $textoNombre = (string) ($message['text'] ?? $message['fileName'] ?? '');
 
-                $descarga = WatiMediaService::download($dataPath, $textoNombre, $type);
-                if (!$descarga) continue;
+                    $tipoNormalizado = $this->normalizarTipoAdjunto($type, $dataPath, $textoNombre);
 
-                $ext = $descarga['extension'];
-                $nombreArchivo = ($textoNombre && preg_match('/\.\w{2,4}$/i', $textoNombre))
-                    ? preg_replace('/[^a-zA-Z0-9_\-]/', '_', pathinfo($textoNombre, PATHINFO_FILENAME)) . '.' . $ext
-                    : 'comprobante_' . time() . '.' . $ext;
+                    if (!in_array($tipoNormalizado, ['image', 'document'], true) || !$dataPath) {
+                        continue;
+                    }
+                    if (str_contains(strtolower($textoNombre ?: $dataPath), '.crdownload')) continue;
 
-                return [$descarga['content'], $nombreArchivo];
+                    $descarga = WatiMediaService::download($dataPath, $textoNombre, $tipoNormalizado);
+                    if (!$descarga) {
+                        Log::warning('Wati adjunto no se pudo descargar en verificación de pago', [
+                            'phone_original' => $this->numberPhone,
+                            'phone_consulta' => $telefono,
+                            'type'           => $type,
+                            'tipo_usado'     => $tipoNormalizado,
+                            'dataPath'       => $dataPath,
+                            'text'           => $textoNombre,
+                        ]);
+                        continue;
+                    }
+
+                    $ext = $descarga['extension'];
+                    $nombreArchivo = ($textoNombre && preg_match('/\.\w{2,4}$/i', $textoNombre))
+                        ? preg_replace('/[^a-zA-Z0-9_\-]/', '_', pathinfo($textoNombre, PATHINFO_FILENAME)) . '.' . $ext
+                        : 'comprobante_' . time() . '.' . $ext;
+
+                    return [$descarga['content'], $nombreArchivo];
+                }
             }
 
             $pageNumber++;
         }
 
+        if ($this->ultimoErrorDescarga === null) {
+            $this->ultimoErrorDescarga = 'No se encontró ningún archivo reciente. Verifica que el comprobante se haya enviado como imagen o documento.';
+        }
+
         return [null, null];
+    }
+
+    private function telefonosConsulta(): array
+    {
+        $original = trim($this->numberPhone);
+        $digitos  = preg_replace('/\D/', '', $original);
+
+        $telefonos = array_filter([
+            $original,
+            $digitos,
+            $digitos !== '' && str_starts_with($digitos, '57') ? substr($digitos, 2) : null,
+            $digitos !== '' && !str_starts_with($digitos, '57') ? '57' . $digitos : null,
+        ]);
+
+        return array_values(array_unique($telefonos));
+    }
+
+    private function normalizarTipoAdjunto(string $type, string $dataPath, string $textoNombre): ?string
+    {
+        if (in_array($type, ['image', 'document'], true)) {
+            return $type;
+        }
+
+        if ($type === 'file') {
+            $ref = strtolower($textoNombre ?: $dataPath);
+            if (preg_match('/\.(jpg|jpeg|png|gif|bmp|webp)$/i', $ref)) {
+                return 'image';
+            }
+            return 'document';
+        }
+
+        $ref = strtolower($textoNombre ?: $dataPath);
+        if (preg_match('/\.(jpg|jpeg|png|gif|bmp|webp)$/i', $ref)) {
+            return 'image';
+        }
+        if (preg_match('/\.(pdf|doc|docx|xls|xlsx)$/i', $ref)) {
+            return 'document';
+        }
+
+        return null;
     }
 
     private function extraerValor(string $texto): ?string
