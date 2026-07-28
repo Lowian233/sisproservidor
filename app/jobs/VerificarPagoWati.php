@@ -179,7 +179,7 @@ class VerificarPagoWati implements ShouldQueue
     /** Convierte la 1.ª página del PDF a JPEG (requiere extensión Imagick). */
     private function pdfPrimeraPaginaComoJpeg(string $contenido): ?string
     {
-        if (!extension_loaded('imagick')) {
+        if (!extension_loaded('imagick') || !class_exists('\\Imagick')) {
             return null;
         }
 
