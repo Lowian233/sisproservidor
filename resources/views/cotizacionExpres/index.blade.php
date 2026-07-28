@@ -29,6 +29,20 @@
         <div class="box-body">
             <form method="GET" action="{{ route('cotizacion-expres.index') }}">
                 <div class="row">
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label>Desde</label>
+                            <input type="date" name="fecha_desde" class="form-control"
+                                   value="{{ request('fecha_desde') }}">
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group">
+                            <label>Hasta</label>
+                            <input type="date" name="fecha_hasta" class="form-control"
+                                   value="{{ request('fecha_hasta') }}">
+                        </div>
+                    </div>
                     <div class="col-sm-3">
                         <div class="form-group">
                             <label>Nombre</label>
@@ -56,14 +70,15 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-sm-4 text-right" style="padding-top: 19px;">
+                    
+                    <div class="col-sm-12 text-right" style="padding-top: 4px;">
                         <button type="submit" class="btn btn-info btn-sm">
                             <i class="fa fa-search"></i> Filtrar
                         </button>
                         <a href="{{ route('cotizacion-expres.index') }}" class="btn btn-default btn-sm">
                             Limpiar
                         </a>
-                        <a href="{{ route('cotizacion-expres.excel') }}" class="btn btn-success btn-sm" id="btn-descargar-reporte">
+                        <a href="{{ route('cotizacion-expres.excel', request()->except('page')) }}" class="btn btn-success btn-sm" id="btn-descargar-reporte">
                             <i class="fa fa-download"></i> Descargar Reporte
                         </a>
                         <button type="button" class="btn btn-warning btn-sm" id="btn-enviar-reporte" style="margin-left:5px;">
@@ -101,7 +116,7 @@
                             <th style="padding:12px; vertical-align:middle; text-align:right;">Precio</th>
                             <th style="padding:12px; vertical-align:middle; text-align:center;">Req. Contrato Comercial</th>
                             <th style="padding:12px; vertical-align:middle; text-align:center;">Estado</th>
-                            <th style="width:120px; padding:12px; vertical-align:middle; text-align:center;">Acciones</th>
+                            <th style="width:160px; padding:12px; vertical-align:middle; text-align:center;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -190,6 +205,15 @@
                                 @else
                                 <span style="width:28px; height:28px; display:inline-flex;"></span>
                                 @endif
+                                <button type="button"
+                                        class="btn btn-success btn-xs btn-whatsapp-individual"
+                                        style="width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center;"
+                                        title="Abrir WhatsApp"
+                                        data-telefono="{{ $item->telefono ?? '' }}"
+                                        data-empresa="{{ $item->nombreEmpresa ?? '' }}"
+                                        data-solicitud="{{ $item->idSolicitud }}">
+                                    <i class="fa fa-whatsapp" style="font-size:12px;"></i>
+                                </button>
                                 <button type="button" class="btn btn-danger btn-xs" style="width:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center;" title="Eliminar" onclick="confirmarEliminarIndividual('{{ $item->idSolicitud }}')">
                                     <i class="fa fa-trash" style="font-size:12px;"></i>
                                 </button>
@@ -276,32 +300,56 @@ $(document).ready(function () {
         $('button:contains("Columnas"), button:contains("Excel")').hide();
     }, 500);
 
-    var mensajeDefault = function() {
+    var mensajeDefaultReporte = function() {
         var fecha = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
         return '¡Hola! 👋 Te enviamos el reporte de cotizaciones Express de *PROSARC S.A. ESP* correspondiente al ' + fecha + '.\n\nPor favor encuéntras adjunto el archivo Excel con el detalle de las solicitudes.\n\n_Prosarc – Protección, Servicios Ambientales, Respel de Colombia S.A. ESP_';
     };
 
-    // Modal enviar reporte — restaurar mensaje al abrir
+    function normalizarNumero(numero) {
+        var limpio = (numero || '').toString().replace(/\D/g, '');
+        if (!limpio) return '57';
+        if (limpio.indexOf('57') === 0) return limpio;
+        if (limpio.length === 10) return '57' + limpio;
+        return '57' + limpio;
+    }
+
+    function reiniciarListaNumerosMensaje() {
+        var $lista = $('#lista-numeros-mensaje');
+        $lista.find('.input-group').slice(1).remove();
+        $lista.find('.numero-input-mensaje').first().val('57');
+    }
+
+    function abrirModalMensajeWhatsapp(numeroInicial) {
+        reiniciarListaNumerosMensaje();
+        $('#mensaje-whatsapp-manual').val('');
+        if (numeroInicial) {
+            $('#lista-numeros-mensaje .numero-input-mensaje').first().val(normalizarNumero(numeroInicial));
+        }
+        $('#modal-enviar-mensaje').modal('show');
+    }
+
+    // Modal reporte por WhatsApp (original)
     $('#btn-enviar-reporte').on('click', function() {
-        $('#mensaje-whatsapp').val(mensajeDefault());
+        $('#mensaje-whatsapp-reporte').val(mensajeDefaultReporte());
         $('#modal-enviar-reporte').modal('show');
     });
 
-    $('#btn-agregar-numero').on('click', function() {
+    $('#btn-agregar-numero-reporte').on('click', function() {
         var html = '<div class="input-group" style="margin-bottom:8px;">' +
-            '<input type="text" class="form-control numero-input" placeholder="573001234567">' +
+            '<input type="text" class="form-control numero-input-reporte" placeholder="573001234567">' +
             '<span class="input-group-btn">' +
-            '<button class="btn btn-danger btn-sm btn-eliminar-numero" type="button"><i class="fa fa-times"></i></button>' +
+            '<button class="btn btn-danger btn-sm btn-eliminar-numero-reporte" type="button"><i class="fa fa-times"></i></button>' +
             '</span></div>';
-        $('#lista-numeros').append(html);
+        $('#lista-numeros-reporte').append(html);
     });
 
-    $(document).on('click', '.btn-eliminar-numero', function() {
+    $(document).on('click', '.btn-eliminar-numero-reporte', function() {
         $(this).closest('.input-group').remove();
     });
-    $('#btn-confirmar-envio').on('click', function() {
+
+    $('#btn-confirmar-envio-reporte').on('click', function() {
         var numeros = [];
-        $('.numero-input').each(function() {
+        $('.numero-input-reporte').each(function() {
             var v = $(this).val().trim().replace(/\D/g, '');
             if (v) numeros.push(v);
         });
@@ -336,7 +384,7 @@ $(document).ready(function () {
                 }
             },
             error: function() {
-                var mensaje = encodeURIComponent($('#mensaje-whatsapp').val().trim() || mensajeDefault());
+                var mensaje = encodeURIComponent($('#mensaje-whatsapp-reporte').val().trim() || mensajeDefaultReporte());
                 setTimeout(function() {
                     numeros.forEach(function(numero, i) {
                         setTimeout(function() {
@@ -349,6 +397,56 @@ $(document).ready(function () {
                 $btn.prop('disabled', false).html(textoOriginal);
             }
         });
+    });
+
+    // Modal nuevo: mensaje manual por WhatsApp (desde acciones)
+    $('#btn-agregar-numero-mensaje').on('click', function() {
+        var html = '<div class="input-group" style="margin-bottom:8px;">' +
+            '<input type="text" class="form-control numero-input-mensaje" placeholder="573001234567" value="57">' +
+            '<span class="input-group-btn">' +
+            '<button class="btn btn-danger btn-sm btn-eliminar-numero-mensaje" type="button"><i class="fa fa-times"></i></button>' +
+            '</span></div>';
+        $('#lista-numeros-mensaje').append(html);
+    });
+
+    $(document).on('click', '.btn-eliminar-numero-mensaje', function() {
+        $(this).closest('.input-group').remove();
+    });
+
+    $('#btn-confirmar-envio-mensaje').on('click', function() {
+        var mensajeTexto = $('#mensaje-whatsapp-manual').val().trim();
+        if (!mensajeTexto) {
+            mostrarModalMensaje('Escribe el mensaje que deseas enviar.', 'warning');
+            return;
+        }
+
+        var numeros = [];
+        $('.numero-input-mensaje').each(function() {
+            var v = normalizarNumero($(this).val());
+            if (v && v.length > 2) numeros.push(v);
+        });
+
+        if (numeros.length === 0) {
+            mostrarModalMensaje('Ingresa al menos un numero.', 'warning');
+            return;
+        }
+
+        var $btn = $(this);
+        var textoOriginal = $btn.html();
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Enviando...');
+        $('#modal-enviar-mensaje').modal('hide');
+
+        var mensaje = encodeURIComponent(mensajeTexto);
+        numeros.forEach(function(numero, i) {
+            setTimeout(function() {
+                window.open('https://wa.me/' + numero + '?text=' + mensaje, '_blank');
+            }, i * 500);
+        });
+
+        setTimeout(function() {
+            mostrarModalMensaje('Se abrio WhatsApp para ' + numeros.length + ' numero(s).', 'success');
+            $btn.prop('disabled', false).html(textoOriginal);
+        }, Math.max(700, numeros.length * 550));
     });
 
     // --- Seleccion multiple y eliminacion masiva ---
@@ -364,6 +462,11 @@ $(document).ready(function () {
 
     $(document).on('change', '.check-solicitud', function() {
         actualizarBotonEliminar();
+    });
+
+    $(document).on('click', '.btn-whatsapp-individual', function() {
+        var telefono = ($(this).data('telefono') || '').toString();
+        abrirModalMensajeWhatsapp(telefono || '57');
     });
 });
 
@@ -430,18 +533,18 @@ function mostrarModalConfirmacion(mensaje, callback) {
                     <label style="font-size:12px; font-weight:600; color:#166534; margin-bottom:4px; display:block;">
                         <i class="fa fa-pencil"></i> Mensaje (editable):
                     </label>
-                    <textarea id="mensaje-whatsapp" rows="5" class="form-control" style="font-size:12px; line-height:1.5; resize:vertical; border-color:#bbf7d0; background:#f0fdf4; color:#166534;"></textarea>
+                    <textarea id="mensaje-whatsapp-reporte" rows="5" class="form-control" style="font-size:12px; line-height:1.5; resize:vertical; border-color:#bbf7d0; background:#f0fdf4; color:#166534;"></textarea>
                 </div>
 
                 <p style="font-size:13px; color:#555; margin-bottom:10px;">
                     Números destino (con código de país, sin +):
                 </p>
 
-                <div id="lista-numeros">
+                <div id="lista-numeros-reporte">
                     <div class="input-group" style="margin-bottom:8px;">
-                        <input type="text" class="form-control numero-input" placeholder="573001234567">
+                        <input type="text" class="form-control numero-input-reporte" placeholder="573001234567">
                         <span class="input-group-btn">
-                            <button class="btn btn-success btn-sm" type="button" id="btn-agregar-numero" title="Agregar número">
+                            <button class="btn btn-success btn-sm" type="button" id="btn-agregar-numero-reporte" title="Agregar número">
                                 <i class="fa fa-plus"></i>
                             </button>
                         </span>
@@ -455,8 +558,54 @@ function mostrarModalConfirmacion(mensaje, callback) {
             </div>
             <div class="modal-footer" style="background:#f9f9f9;">
                 <button type="button" class="btn btn-default" onclick="$('#modal-enviar-reporte').modal('hide')">Cancelar</button>
-                <button type="button" class="btn btn-success" id="btn-confirmar-envio" style="background:#25D366; border-color:#25D366;">
+                <button type="button" class="btn btn-success" id="btn-confirmar-envio-reporte" style="background:#25D366; border-color:#25D366;">
                     <i class="fa fa-whatsapp"></i> Descargar y Abrir WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal mensaje manual --}}
+<div class="modal fade" id="modal-enviar-mensaje" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document" style="max-width:460px;">
+        <div class="modal-content" style="border-radius:8px; overflow:hidden;">
+            <div class="modal-header" style="background:#25D366; padding:14px 18px;">
+                <button type="button" class="close" onclick="$('#modal-enviar-mensaje').modal('hide')" style="color:#fff; opacity:1; font-size:20px;">
+                    <span>&times;</span>
+                </button>
+                <h4 class="modal-title" style="color:#fff; font-weight:600; font-size:15px;">
+                    <i class="fa fa-whatsapp"></i> Enviar Mensaje por WhatsApp
+                </h4>
+            </div>
+            <div class="modal-body" style="padding:18px;">
+                <div style="margin-bottom:14px;">
+                    <label style="font-size:12px; font-weight:600; color:#166534; margin-bottom:4px; display:block;">
+                        <i class="fa fa-pencil"></i> Mensaje:
+                    </label>
+                    <p style="font-size:11px; color:#666; margin:0 0 6px 0;">Escribe el mensaje que deseas enviar.</p>
+                    <textarea id="mensaje-whatsapp-manual" rows="5" class="form-control" style="font-size:12px; line-height:1.5; resize:vertical; border-color:#bbf7d0; background:#f0fdf4; color:#166534;"></textarea>
+                </div>
+
+                <p style="font-size:13px; color:#555; margin-bottom:10px;">
+                    Números destino (con código de país, sin +):
+                </p>
+
+                <div id="lista-numeros-mensaje">
+                    <div class="input-group" style="margin-bottom:8px;">
+                        <input type="text" class="form-control numero-input-mensaje" placeholder="573001234567" value="57">
+                        <span class="input-group-btn">
+                            <button class="btn btn-success btn-sm" type="button" id="btn-agregar-numero-mensaje" title="Agregar número">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="background:#f9f9f9;">
+                <button type="button" class="btn btn-default" onclick="$('#modal-enviar-mensaje').modal('hide')">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btn-confirmar-envio-mensaje" style="background:#25D366; border-color:#25D366;">
+                    <i class="fa fa-whatsapp"></i> Enviar y Abrir WhatsApp
                 </button>
             </div>
         </div>
