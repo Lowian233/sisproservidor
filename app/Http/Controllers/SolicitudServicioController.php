@@ -1477,24 +1477,47 @@ public function index(Request $request)
 			->distinct()
 			->get();
 
+        // Buscar fotos del servicios
+         // Obtener la solicitud
+        $solicitud = DB::table('solicitud_servicios as ss')
+            ->join('solicitud_residuos as sr', 'sr.FK_SolResSolSer', '=', 'ss.ID_SolSer')
+            ->where('ss.SolSerSlug', $SolicitudServicio->SolSerSlug)
+            ->select('ss.ID_SolSer', 'sr.ID_SolRes', 'ss.SolSerStatus')
+            ->first();
+
+        if (!$solicitud) {
+            abort(404, 'Solicitud no encontrada');
+        }
+
+        // Obtener fotos de la solicitud
+        $foto = DB::table('recursos as r')
+            ->where('r.FK_RecSolRes', $solicitud->ID_SolRes)
+            ->where('r.RecCarte', 'Foto')
+            ->where('r.RecTipo', 'Pesaje-Descargue')
+            ->orderBy('r.created_at', 'desc')
+            ->exists();
+
+
+        //return $fotos;
+
         // adjuntar variables segun status del servicio
         switch ($SolicitudServicio->SolSerStatus) {
             case 'Residuo Faltante':
             case 'Notificado':
             case 'Programado':
 				//return $Residuos;
-		       return view('solicitud-serv.show', compact('SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente', 'SolSerCollectAddress', 'SolSerConductor', 'TextProgramacion', 'Municipio', 'Programaciones', 'ProgramacionesActivas', 'total', 'cantidadesXtratamiento', 'tratamientos', 'Observaciones', 'PublicRespels'));
+		       return view('solicitud-serv.show', compact('SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente', 'SolSerCollectAddress', 'SolSerConductor', 'TextProgramacion', 'Municipio', 'Programaciones', 'ProgramacionesActivas', 'total', 'cantidadesXtratamiento', 'tratamientos', 'Observaciones', 'PublicRespels', 'foto'));
                 break;
 
             case 'Corregido':
             case 'Completado':
 			//	return $tratamientos;
-		       return view('solicitud-serv.show', compact('SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente', 'SolSerCollectAddress', 'SolSerConductor', 'TextProgramacion', 'Municipio', 'Programaciones', 'total', 'cantidadesXtratamiento', 'tratamientos', 'Observaciones', 'ultimoRecordatorio', 'PublicRespels'));
+		       return view('solicitud-serv.show', compact('SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente', 'SolSerCollectAddress', 'SolSerConductor', 'TextProgramacion', 'Municipio', 'Programaciones', 'total', 'cantidadesXtratamiento', 'tratamientos', 'Observaciones', 'ultimoRecordatorio', 'PublicRespels', 'foto'));
                 break;
 
             default:
 			//return $tratamientos;
-       		return view('solicitud-serv.show', compact('SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente', 'SolSerCollectAddress', 'SolSerConductor', 'TextProgramacion', 'Municipio', 'Programaciones', 'total', 'cantidadesXtratamiento', 'tratamientos', 'Observaciones', 'PublicRespels'));
+       		return view('solicitud-serv.show', compact('SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente', 'SolSerCollectAddress', 'SolSerConductor', 'TextProgramacion', 'Municipio', 'Programaciones', 'total', 'cantidadesXtratamiento', 'tratamientos', 'Observaciones', 'PublicRespels', 'foto'));
                 break;
         }
 	}

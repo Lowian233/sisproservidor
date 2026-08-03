@@ -45,6 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::post('fotos-cliente/{solserslug}', 'FotosClienteController@store')->name('fotos-cliente.store');
+Route::get('/fotos-cliente/{solserslug}/show', 'FotosClienteController@show')->name('fotos-cliente.show');
 
 Route::get('qr-code', function ()
 {
@@ -129,7 +130,7 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 	// Route::get('/cliente/{cliente}/tarifascliente_create', 'ClienteTarifasController@create');
 	// Route::post('/cliente/{cliente}/tarifascliente_store', 'ClienteTarifasController@store')->name('cliente-tarifas-store');
 	Route::resource('/cliente/{slug}/clientetarifas', 'ClienteTarifasController');
-	
+
 	//Proveedor tarifas routes
 	Route::get('/proveedor/{slug}/proveedor-tarifas', 'ProveedorTarifasController@create')->name('proveedor-tarifas.index');
 	Route::get('/proveedor/{slug}/proveedor-tarifas/create', 'ProveedorTarifasController@create')->name('proveedor-tarifas.create');
@@ -232,12 +233,12 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 	Route::put('/solicitud-residuo/{id}/corregirSolResExpress', 'SolicitudResiduoController@corregirSolResExpress');
 	Route::put('/solicitud-residuo/{id}/UpdatePrice', 'SolicitudResiduoController@updateSolResPrice');
 	// Rutas para Express
-	Route::put('/serviciosexpress-residuo/{id}/Update', 'SolicitudResiduoController@updateSolRes');	
+	Route::put('/serviciosexpress-residuo/{id}/Update', 'SolicitudResiduoController@updateSolRes');
 	Route::get('/solicitud-serv/{id}/AñadirRespel', 'SolicitudResiduoController@Respelcliente') ->name('solicitud-serv.AñadirRespel');
 	//Rutas para reportes
 	//Route::get('/reportes.indextemp', 'SolicitudResiduoController@reportes');
 	Route::get('/reportes/regular', ['as'=> 'reportes.regular', 'uses' => 'SolicitudResiduoController@reportesreg']);
-	Route::get('/reportes.indextemp',  ['as'=> 'reportes.indextemp', 'uses' =>'SolicitudResiduoController@reportes']);	
+	Route::get('/reportes.indextemp',  ['as'=> 'reportes.indextemp', 'uses' =>'SolicitudResiduoController@reportes']);
 	Route::get('/reportes.ReporteRegular', ['as'=> 'reportes.ReporteRegular', 'uses' => 'SolicitudResiduoController@reportesreg']);
 	Route::get('/reportes.ReporteExpress', ['as'=> 'reportes.ReporteExpress', 'uses' => 'SolicitudResiduoController@reportesexpress']);
 	Route::post('/reportes/regular', 'SolicitudResiduoController@reportesreg');
@@ -251,7 +252,7 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 	Route::get('/reportes/cliente', ['as'=> 'reportes.cliente', 'uses' => 'SolicitudResiduoController@reportesCliente']);
 	Route::post('/reportes/cliente/generar', ['as'=> 'reportes.cliente.generar', 'uses' => 'SolicitudResiduoController@reportesClienteGenerar']);
 	Route::post('/reportes/cliente/excel', ['as'=> 'reportes.cliente.excel', 'uses' => 'SolicitudResiduoController@exportToExcel']);
-	
+
 	//Rutas para Cotizaciones
 	// Rutas específicas de cotización antes del resource para evitar conflictos
 	Route::get('/cotizacion/tarifa-proveedor', 'CotizacionController@obtenerTarifaProveedor')->name('cotizacion.tarifa-proveedor');
@@ -281,7 +282,7 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 	Route::post('/cotizacion-expres/{slug}/sedes', 'CotizacionExpresController@storeSede')->name('cotizacion-expres.sedes.store');
 	Route::post('/cotizacion-expres/{slug}/sedes/{idSede}', 'CotizacionExpresController@updateSede')->name('cotizacion-expres.sedes.update');
 	Route::delete('/cotizacion-expres/{slug}/sedes/{idSede}', 'CotizacionExpresController@destroySede')->name('cotizacion-expres.sedes.destroy');
-    
+
 	// Alias con guión "express" (compatibilidad con enlaces antiguos / Wati)
 	Route::get('/cotizacion-express/{slug}', function ($slug) {
 		return redirect()->route('cotizacion-expres.show', $slug);
@@ -313,8 +314,8 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 
 	//Route::post('/solicitud-servicio/{id}/NumFactura', [SolicitudServicioController::class, 'NumFactura'])->name('NumFactura.dato');
 	Route::put('/solicitud-servicio/{id}/NumFactura', 'SolicitudServicioController@NumFactura');
-	Route::get('/reportes.ReporteDatos', ['as'=> 'reportes.ReporteDatos', 'uses' => 'SolicitudResiduoController@reportesRegularesDatos']);	
-	Route::resource('/solicitud-servicio', 'SolicitudServicioController');	
+	Route::get('/reportes.ReporteDatos', ['as'=> 'reportes.ReporteDatos', 'uses' => 'SolicitudResiduoController@reportesRegularesDatos']);
+	Route::resource('/solicitud-servicio', 'SolicitudServicioController');
 	Route::post('/solicitud-servicio/changestatus', 'SolicitudServicioController@changestatus');
 	Route::post('/solicitud-servicio/reversarStatus', 'SolicitudServicioController@reversarStatus');
 	Route::post('/solicitud-servicio/cancelarServicio', 'SolicitudServicioController@cancelarServicio');
@@ -345,7 +346,7 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 	Route::get('solicitud-serv.2024', ['as' => 'solicitud-serv.2024', 'uses' => 'SolicitudServicioController@soli2024']);
 	Route::get('solicitud-serv.2025', ['as' => 'solicitud-serv.2025', 'uses' => 'SolicitudServicioController@soli2025']);
 	Route::get('solicitud-serv.2026', ['as' => 'solicitud-serv.2026', 'uses' => 'SolicitudServicioController@soli2026']);
-	
+
 	/*Rutas para ver los servicios Express por año*/
 	Route::get('serviciosexpress.2020', ['as' => 'serviciosexpress.2020', 'uses' => 'ServiceExpressController@soli2020']);
 	Route::get('serviciosexpress.2021', ['as' => 'serviciosexpress.2021', 'uses' => 'ServiceExpressController@soli2021']);
@@ -459,7 +460,7 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 	Route::put('/firmarCertificado/{slug}', 'AjaxController@firmarCertificado')->name('certificados.ajaxfirmar');
 	Route::get('/ClienteExpress-Residuos/{id}', 'AjaxController@clienteExpressResiduos');
 	Route::resource('/prefacturas', 'PrefacturaController');
-	
+
 	/*Rutas paa ver los certificados por año*/
 	//Route::get('/certificados/cert2020', 'CertificadoController@cert2020')->name('certificados.2020');
 	Route::get('certificados.2020', ['as' => 'certificados.2020', 'uses' => 'CertificadoController@cert2020']);
@@ -470,15 +471,15 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 	Route::get('certificados.2025', ['as' => 'certificados.2025', 'uses' => 'CertificadoController@cert2025']);
 	Route::get('certificados.2026', ['as' => 'certificados.2026', 'uses' => 'CertificadoController@cert2026']);
 
-	Route::get('certificadosExpress.ano', ['as' => 'certificadosExpress.ano', 'uses' => 'CertificadoExpressController@index']); 
+	Route::get('certificadosExpress.ano', ['as' => 'certificadosExpress.ano', 'uses' => 'CertificadoExpressController@index']);
 	Route::get('certificadosExpress.2023', ['as' => 'certificadosExpress.2023', 'uses' => 'CertificadoExpressController@certex2023']);
 	Route::get('certificadosExpress.2024', ['as' => 'certificadosExpress.2024', 'uses' => 'CertificadoExpressController@certex2024']);
 	Route::get('certificadosExpress.2025', ['as' => 'certificadosExpress.2025', 'uses' => 'CertificadoExpressController@certex2025']);
 	Route::get('certificadosExpress.2026', ['as' => 'certificadosExpress.2026', 'uses' => 'CertificadoExpressController@certex2026']);
 
 	Route::get('/solicitud-serv.Createrespel', 'RespelController@createrespelcliente') ->name('solicitud-serv.Createrespel');
-	Route::post('/respel', 'RespelController@storenewrespel')->name('respel'); 
-	
+	Route::post('/respel', 'RespelController@storenewrespel')->name('respel');
+
 	/*Rutas de generacion de PDF*/
 	Route::get('/PdfManiCarg/{id}','PdfController@PdfManiCarg');
 	/*Rutas de envio de e-mail */
@@ -516,15 +517,15 @@ Route::group(['prefix' => 'crm', 'as' => 'crm.', 'middleware' => ['auth']], func
     // Vista de Gerencia Comercial
     Route::get('/gerencia', 'CrmDashboardController@gerencia')->name('gerencia');
     Route::get('/gerencia/clientes-nuevos-mes', 'CrmDashboardController@clientesNuevosMes')->name('gerencia.clientes-nuevos-mes');
-    
+
     // Clientes nuevos del comercial
     Route::get('/mis-clientes-nuevos', 'CrmDashboardController@misClientesNuevos')->name('mis-clientes-nuevos');
-    
+
     // Clientes
      Route::post('/clientes/{slug}/toggle-activo', 'CrmClienteController@toggleActivo')->name('clientes.toggle-activo');
     Route::get('/clientes', 'CrmClienteController@index')->name('clientes.index');
     Route::get('/clientes/{slug}', 'CrmClienteController@show')->name('clientes.show');
-    
+
     // Actividades
     Route::get('/actividades', 'CrmActividadController@index')->name('actividades.index');
     Route::get('/actividades/create', 'CrmActividadController@create')->name('actividades.create');
@@ -532,7 +533,7 @@ Route::group(['prefix' => 'crm', 'as' => 'crm.', 'middleware' => ['auth']], func
     Route::get('/actividades/{id}/edit', 'CrmActividadController@edit')->name('actividades.edit');
     Route::put('/actividades/{id}', 'CrmActividadController@update')->name('actividades.update');
     Route::post('/actividades/{id}/estado', 'CrmActividadController@updateEstado')->name('actividades.updateEstado');
-    
+
     // Oportunidades
     Route::get('/oportunidades', 'CrmOportunidadController@index')->name('oportunidades.index');
     Route::get('/oportunidades/create', 'CrmOportunidadController@create')->name('oportunidades.create');

@@ -16,9 +16,9 @@ class FotosClienteController extends Controller
     public function index(Request $request)
     {
         // Verificar permisos
-        if (!in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) && 
-            !in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC) && 
-            !in_array(Auth::user()->UsRol, Permisos::CLIENTE) && 
+        if (!in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) &&
+            !in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC) &&
+            !in_array(Auth::user()->UsRol, Permisos::CLIENTE) &&
             !in_array(Auth::user()->UsRol2, Permisos::CLIENTE)) {
             abort(403, 'Acceso denegado');
         }
@@ -55,7 +55,7 @@ class FotosClienteController extends Controller
                 ->join('clientes', 'clientes.ID_Cli', 'sedes.FK_SedeCli')
                 ->where('personals.ID_Pers', Auth::user()->FK_UserPers)
                 ->value('clientes.ID_Cli');
-            
+
             if ($clienteID) {
                 $fotosQuery->where('c.ID_Cli', $clienteID);
             } else {
@@ -112,9 +112,9 @@ class FotosClienteController extends Controller
     public function download($id)
     {
         // Verificar permisos
-        if (!in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) && 
-            !in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC) && 
-            !in_array(Auth::user()->UsRol, Permisos::CLIENTE) && 
+        if (!in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) &&
+            !in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC) &&
+            !in_array(Auth::user()->UsRol, Permisos::CLIENTE) &&
             !in_array(Auth::user()->UsRol2, Permisos::CLIENTE)) {
             abort(403, 'Acceso denegado');
         }
@@ -146,7 +146,7 @@ class FotosClienteController extends Controller
                 ->join('clientes', 'clientes.ID_Cli', 'sedes.FK_SedeCli')
                 ->where('personals.ID_Pers', Auth::user()->FK_UserPers)
                 ->value('clientes.ID_Cli');
-            
+
             if ($clienteID) {
                 $fotoQuery->where('c.ID_Cli', $clienteID);
             } else {
@@ -179,9 +179,9 @@ class FotosClienteController extends Controller
     public function downloadAll(Request $request)
     {
         // Verificar permisos
-        if (!in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) && 
-            !in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC) && 
-            !in_array(Auth::user()->UsRol, Permisos::CLIENTE) && 
+        if (!in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) &&
+            !in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC) &&
+            !in_array(Auth::user()->UsRol, Permisos::CLIENTE) &&
             !in_array(Auth::user()->UsRol2, Permisos::CLIENTE)) {
             abort(403, 'Acceso denegado');
         }
@@ -214,7 +214,7 @@ class FotosClienteController extends Controller
                 ->join('clientes', 'clientes.ID_Cli', 'sedes.FK_SedeCli')
                 ->where('personals.ID_Pers', Auth::user()->FK_UserPers)
                 ->value('clientes.ID_Cli');
-            
+
             if ($clienteID) {
                 $fotosQuery->where('c.ID_Cli', $clienteID);
             } else {
@@ -244,7 +244,7 @@ class FotosClienteController extends Controller
         if ($zip->open($zipPath, \ZipArchive::CREATE) === TRUE) {
             foreach ($fotos as $foto) {
                 $rutaArchivo = public_path('img/Recursos/' . $foto->RecSrc . '/' . $foto->RecRmSrc);
-                
+
                 if (file_exists($rutaArchivo)) {
                     $nombreArchivo = 'ID' . $foto->ID_SolSer . '_' . $foto->SolSerSlug . '_' . $foto->RecTipo . '_' . date('Y-m-d', strtotime($foto->created_at)) . '.' . pathinfo($foto->RecRmSrc, PATHINFO_EXTENSION);
                     $zip->addFile($rutaArchivo, $nombreArchivo);
@@ -257,14 +257,14 @@ class FotosClienteController extends Controller
 
         return back()->with('error', 'Error al crear el archivo ZIP');
     }
-    
+
     /**
      * Subir nuevas fotos a una solicitud
      */
     public function store(Request $request, $solserslug)
     {
         // Verificar permisos
-        if (!in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) && 
+        if (!in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) &&
             !in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC)) {
             abort(403, 'Solo personal de PROSARC puede subir fotos');
         }
@@ -291,21 +291,21 @@ class FotosClienteController extends Controller
         ]);
 
         $fotos = [];
-        
+
         // Procesar cada foto
         foreach ($request->file('fotos') as $foto) {
             // Generar nombre único para la foto
             $fotoName = uniqid() . '_' . time() . '.' . $foto->getClientOriginalExtension();
-            
+
             // Crear directorio si no existe
             $directory = 'img/Recursos/Fotos-Descargue/' . $solicitud->ID_SolSer;
             if (!file_exists(public_path($directory))) {
                 mkdir(public_path($directory), 0777, true);
             }
-            
+
             // Mover la foto al directorio
             $foto->move(public_path($directory), $fotoName);
-            
+
             // Registrar en la tabla recursos
             DB::table('recursos')->insert([
                 'RecSrc' => 'Fotos-Descargue/' . $solicitud->ID_SolSer,
@@ -316,10 +316,46 @@ class FotosClienteController extends Controller
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
-            
+
             $fotos[] = $fotoName;
         }
 
         return redirect()->back()->with('success', 'Fotos subidas correctamente: ' . count($fotos) . ' foto(s)');
     }
-} 
+
+    /**
+     * Mostrar las fotos de una solicitud
+     */
+
+    public function show($solserslug)
+    {
+        // Verificar permisos
+        if (!in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) &&
+            !in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC) &&
+            !in_array(Auth::user()->UsRol, Permisos::CLIENTE) &&
+            !in_array(Auth::user()->UsRol2, Permisos::CLIENTE)) {
+            abort(403, 'Acceso denegado');
+        }
+
+        // Obtener la solicitud
+        $solicitud = DB::table('solicitud_servicios as ss')
+            ->join('solicitud_residuos as sr', 'sr.FK_SolResSolSer', '=', 'ss.ID_SolSer')
+            ->where('ss.SolSerSlug', $solserslug)
+            ->select('ss.ID_SolSer', 'sr.ID_SolRes', 'ss.SolSerStatus')
+            ->first();
+
+        if (!$solicitud) {
+            abort(404, 'Solicitud no encontrada');
+        }
+
+        // Obtener fotos de la solicitud
+        $fotos = DB::table('recursos as r')
+            ->where('r.FK_RecSolRes', $solicitud->ID_SolRes)
+            ->where('r.RecCarte', 'Foto')
+            ->where('r.RecTipo', 'Pesaje-Descargue')
+            ->orderBy('r.created_at', 'desc')
+            ->get();
+
+        return view('fotos-cliente.show', compact('fotos', 'solicitud'));
+    }
+}

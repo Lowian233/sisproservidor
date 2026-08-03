@@ -125,11 +125,11 @@
 										@case(2)
 											@if($certificado->CertSrcExt!=="CertificadoDefault.pdf")
 												@php
-													$_docExtImg = public_path('img/CertificadosEXT/'.$certificado->CertSrcExt);
+													$_docExtImg = public_path('app/public/certificadoExt/'.$certificado->CertSrcExt);
 												@endphp
-												<td class="text-center"><a method='get' href='/img/CertificadosEXT/{{$certificado->CertSrcExt}}?v={{ file_exists($_docExtImg) ? filemtime($_docExtImg) : time() }}' target='_blank' class='btn btn-warning'><i class='far fa-file-alt fa-lg'></a></td>
+												<td class="text-center"><a method='get' href='{{ asset('storage/certificadoExt/'.$certificado->CertSrcExt) }}?v={{ file_exists($_docExtImg) ? filemtime($_docExtImg) : time() }}' target='_blank' class='btn btn-warning'><i class='far fa-file-alt fa-lg'></a></td>
 											@else
-												<td class="text-center"><a disabled method='get' href='/img/CertificadoDefault.pdf' target='_blank' class='btn btn-default'><i class='far fa-file-alt fa-lg'></a></td>
+												<td class="text-center"><a disabled method='get' href='/storage/CertificadoDefault.pdf' target='_blank' class='btn btn-default'><i class='far fa-file-alt fa-lg'></a></td>
 											@endif
 											@break
 										@default
