@@ -597,9 +597,14 @@ public function index(Request $request)
 		$log->Auditlog=json_encode($request->all());
 		$log->save();
 
+        $status = 'Aprobado';
+        if($request->input('SolResAuditoriaTipo') != 0){
+            $status = 'Pendiente';
+        }
+
 		// return $request;
 		$SolicitudServicio = new SolicitudServicio();
-		$SolicitudServicio->SolSerStatus = 'Aprobado';
+		$SolicitudServicio->SolSerStatus = $status;
 		$SolicitudServicio->SolServMailCopia = json_encode($request->input('SolServMailCopia'));
 		switch ($request->input('SolResAuditoriaTipo')) {
 			case 99:

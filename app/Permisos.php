@@ -61,12 +61,12 @@ class Permisos{
 		solicitud-serv/show
 		recursos/show
 	*/
-	
+
 	const RESPEL = ['Programador','JefeOperaciones','DireccionTecnica','IngDeTurno','JefeLogistica','AsistenteLogistica','AdministradorPlanta'];
 	/*Using ->
 		respels/create (segundo rol para validación de acceso)
 	*/
-	
+
 	const SolSer2 = ['Programador','JefeOperaciones','Supervisor','JefeLogistica','AsistenteLogistica', 'AdministradorPlanta'];
 	/*Using ->
 		solicitud-serv/show
@@ -164,15 +164,15 @@ class Permisos{
 	/* Using ->
 		scliencontroller:create
 	*/
-	const AREALOGISTICA = ['AsistenteLogistica','JefeLogistica', 'Programador', 'Supervisor' ];
+	const AREALOGISTICA = ['AsistenteLogistica','JefeLogistica', 'Programador', 'Supervisor', 'AdministradorPlanta' ];
 	/* Using ->
 		ProgramacionVehicle/edit
 	*/
-	const LOGISTICA = ['AsistenteLogistica','JefeLogistica', 'Programador' ];
+	const LOGISTICA = ['AsistenteLogistica','JefeLogistica', 'Programador', 'AdministradorPlanta' ];
 	/* Using ->
 		ProgramacionVehicle/edit
 	*/
-	const ASISTENTELOGISTICA = ['Programador', 'AsistenteLogistica'];
+	const ASISTENTELOGISTICA = ['Programador', 'AsistenteLogistica', 'AdministradorPlanta'];
 	/* Using ->
 		ProgramacionVehicle/edit
 	*/
@@ -246,10 +246,10 @@ class Permisos{
 	/* Permiso unificado para crear Solicitudes de Servicio de planta.
 	   Ajuste este arreglo para conceder/quitar acceso sin tocar controladores/vistas. */
 	const PUEDE_SOLICITAR_PLANTA = [
-		
+
 		// Comerciales y roles que ya estaban autorizados
 		'DireccionTecnica','AdministradorPlanta','AdministradorBogota','Supervisor','AsistenteGerencia',
-		
+
 		// Usuarios internos de Prosarc que pueden crear solicitudes para Prosarc (disposición de residuos internos)
 		// Excluye conductores
 		'Programador','JefeLogistica','JefeOperaciones','Logistica',
@@ -369,7 +369,7 @@ class Permisos{
 
 	/*Recibo de Materia */
 	const RECIBOMATERIAL = ['Programador','AdministradorPlanta','Supervisor', 'Conductor', 'JefeOperaciones', 'Tesorería', 'JefeLogistica', 'AsistenteLogistica'];
-	const RECEPCIONPDA = ['Programador', 'Supervisor', 'JefeOperaciones'];
+	const RECEPCIONPDA = ['Programador', 'Supervisor', 'JefeOperaciones', 'AdministradorPlanta'];
 
 
 	const USAQUEN = ['usaquen'];
