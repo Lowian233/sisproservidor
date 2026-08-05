@@ -20,6 +20,7 @@ use App\Mail\ServicioReversado;
 use App\Mail\CertUpdated;
 use App\Mail\SolSerRM;
 use App\Mail\SolserAuditar;
+use App\Mail\AprobarAuditoria;
 use App\Mail\SustanciaControladaProgramada;
 use App\Mail\AceiteUsadoProgramado;
 use App\Mail\SustanciaControladaCreada;
@@ -236,7 +237,8 @@ public function index(Request $request)
 			->where('CliCategoria', 'Cliente')
 			//->whereBetween('solicitud_servicios.created_at',['2022-01-01 00:00:00','2022-12-31 23:59:00'])
 			->orderBy('created_at', 'desc')
-			->distinct()
+            ->groupBy('solicitud_servicios.ID_SolSer')
+			//->distinct()
 			->get();
 		$Cliente = Cliente::select('CliName','ID_Cli', 'CliStatus')->where('ID_Cli',userController::IDClienteSegunUsuario())->first();
 		foreach ($Servicios as $servicio) {
@@ -597,9 +599,10 @@ public function index(Request $request)
 		$log->Auditlog=json_encode($request->all());
 		$log->save();
 
-        $status = 'Aprobado';
-        if($request->input('SolResAuditoriaTipo') != 0){
+        if($request->input('SolResAuditoriaTipo') != 97){
             $status = 'Pendiente';
+        } else {
+            $status = 'Aprobado';
         }
 
 		// return $request;
@@ -1558,7 +1561,7 @@ public function changestatus(Request $request)
 						}
 						break;
 					case 'Aceptada':
-						if(in_array(Auth::user()->UsRol, Permisos::SOLSERACEPTADO) || in_array(Auth::user()->UsRol2, Permisos::SOLSERACEPTADO)){
+						if(in_array(Auth::user()->UsRol, Permisos::APROBARAUDITORIA) || in_array(Auth::user()->UsRol2, Permisos::APROBARAUDITORIA)){
 							$Solicitud->SolSerStatus = 'Aceptado';
 						}
 						break;
@@ -1657,6 +1660,15 @@ public function changestatus(Request $request)
 		}
 		$Solicitud->SolSerDescript = $request->input('solserdescript');
 		$Solicitud->save();
+
+        if($Solicitud->SolSerStatus == 'Aprobado'){
+            $destinatarios = [self::MAIL_AUDITORIAS_INTERNO];
+            $observacion = Observacion::where('FK_ObsSolSer', $Solicitud->ID_SolSer)
+                ->where('ObsStatus', 'Aprobado')
+                ->orderBy('ObsDate', 'desc')
+                ->first();
+            Mail::to($destinatarios)->send(new AprobarAuditoria($Solicitud, $observacion));
+        }
 
 		if ($Solicitud->SolSerStatus == 'Conciliado') {
 			$this->solservdocstore($Solicitud->ID_SolSer);

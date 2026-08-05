@@ -388,6 +388,8 @@ class Permisos{
 	const TURNOEXACTO = ['Ingeniero de turno', 'Supervisor de Turno', 'IngDeTurno', 'Supervisor'];
 	const EJECUTIVOCOMERCIAL = ['Ejecutivo Comercial', 'Comercial', 'Comercialap', 'usaquen'];
 
+    const APROBARAUDITORIA = ['Programador','JefeOperaciones', 'Ingeniero de turno', 'Supervisor de Turno', 'IngDeTurno', 'Supervisor', 'AdministradorPlanta'];
+
 }
 
 /*

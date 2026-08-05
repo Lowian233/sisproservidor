@@ -1836,7 +1836,7 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 						</div>
 						`);
 					@endif
-						@if(in_array(Auth::user()->UsRol, Permisos::ProgVehic2) || in_array(Auth::user()->UsRol2, Permisos::ProgVehic2))
+						@if(in_array(Auth::user()->UsRol, Permisos::APROBARAUDITORIA) || in_array(Auth::user()->UsRol2, Permisos::APROBARAUDITORIA))
                             $('#titulo').append(`
 								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Aprobada')" class="btn btn-success pull-right"><i class="fas fa-clipboard-check"></i> {{__('adminlte::message.solserstatusaprobado')}}</a>
 							`);
@@ -1868,7 +1868,7 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 						`);
 					@endif
 					@if(Auth::user()->UsRol <> __('adminlte::message.Cliente'))
-						@if(in_array(Auth::user()->UsRol, Permisos::ProgVehic2) || in_array(Auth::user()->UsRol2, Permisos::ProgVehic2))
+						@if(in_array(Auth::user()->UsRol, Permisos::APROBARAUDITORIA) || in_array(Auth::user()->UsRol2, Permisos::APROBARAUDITORIA))
 							$('#titulo').append(`
 								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Aprobada')" class="btn btn-success pull-right"><i class="fas fa-clipboard-check"></i> {{__('adminlte::message.solserstatusaprobado')}}</a>
 							`);
@@ -2378,7 +2378,7 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 						`);
 					@endif
 					@if(Auth::user()->UsRol <> __('adminlte::message.Cliente'))
-						@if(in_array(Auth::user()->UsRol, Permisos::ProgVehic2) || in_array(Auth::user()->UsRol2, Permisos::ProgVehic2))
+						@if(in_array(Auth::user()->UsRol, Permisos::APROBARAUDITORIA) || in_array(Auth::user()->UsRol2, Permisos::APROBARAUDITORIA))
 							$('#titulo').append(`
 								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Aprobada')" class="btn btn-success pull-right"><i class="fas fa-clipboard-check"></i> {{__('adminlte::message.solserstatusaprobado')}}</a>
 							`);
@@ -2411,7 +2411,7 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 						`);
 					@endif
 					@if(Auth::user()->UsRol <> __('adminlte::message.Cliente'))
-						@if(in_array(Auth::user()->UsRol, Permisos::ProgVehic2) || in_array(Auth::user()->UsRol2, Permisos::ProgVehic2))
+						@if(in_array(Auth::user()->UsRol, Permisos::APROBARAUDITORIA) || in_array(Auth::user()->UsRol2, Permisos::APROBARAUDITORIA))
 							$('#titulo').append(`
 								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Aprobada')" class="btn btn-success pull-right"><i class="fas fa-clipboard-check"></i> {{__('adminlte::message.solserstatusaprobado')}}</a>
 							`);
