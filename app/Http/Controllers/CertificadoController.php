@@ -312,7 +312,7 @@ class CertificadoController extends Controller
             $query->where('CertAuthJo', '!=', 0);
             $query->where('CertAuthJl', '!=', 0);
             $query->where('CertAuthDp', '!=', 0);
-            
+
             // Validar que el certificado pertenezca al cliente
             $query->where('FK_CertCliente', $UserSedeID);
         }
@@ -1270,6 +1270,9 @@ class CertificadoController extends Controller
 			abort(404);
 		}
 
+
+        //return $certificado;
+
 		$request->validate([
 			'CertSrc' => 'required|file|mimes:pdf|max:10240',
 			'CertType' => 'required|integer|in:0,1,2'
@@ -1279,17 +1282,17 @@ class CertificadoController extends Controller
 			case 0: // Certificado regular
 				$hoja = $certificado->CertSlug . '.pdf';
 				$path = storage_path('app/public/certificadoRegular/');
-				
+
 				// Crear directorio si no existe
 				if (!file_exists($path)) {
 					mkdir($path, 0755, true);
 				}
-				
+
 				// Eliminar archivo anterior si existe
 				if ($certificado->CertSrc != 'CertificadoDefault.pdf' && file_exists($path . $hoja)) {
 					unlink($path . $hoja);
 				}
-				
+
 				// Guardar nuevo archivo
 				$request->file('CertSrc')->move($path, $hoja);
 				$certificado->CertSrc = $hoja;
@@ -1301,12 +1304,12 @@ class CertificadoController extends Controller
 				if (!file_exists($path)) {
 					mkdir($path, 0755, true);
 				}
-				
+
 				// Eliminar archivo anterior si existe
 				if ($certificado->CertSrcManif != 'CertificadoDefault.pdf' && file_exists($path . $certificado->CertSrcManif)) {
 					unlink($path . $certificado->CertSrcManif);
 				}
-				
+
 				// Guardar nuevo archivo
 				$request->file('CertSrc')->move($path, $hoja);
 				$certificado->CertSrcManif = $hoja;
@@ -1324,39 +1327,46 @@ class CertificadoController extends Controller
 					return redirect()->back()->with('error', 'No se pudo guardar el archivo. Verifique permisos en storage.');
 				}
 
-				$certificadoNuevo = new Certificado;
-				$certificadoNuevo->CertType = 2;
-				$certificadoNuevo->CertObservacion = 'Certificado de terceros';
-				$certificadoNuevo->CertNumero = 0;
-				$certificadoNuevo->CertManifNumero = 0;
-				$certificadoNuevo->CertManifPrepend = '';
-				$certificadoNuevo->CertiEspName = $certificado->CertiEspName;
-				$certificadoNuevo->CertiEspValue = $certificado->CertiEspValue;
-				$certificadoNuevo->CertSlug = $nuevoSlug;
-				$certificadoNuevo->CertSrc = $hoja;
-				$certificadoNuevo->CertSrcManif = 'CertificadoDefault.pdf';
-				$certificadoNuevo->CertSrcExt = $hoja;
-				$certificadoNuevo->CertAuthHseq = $certificado->CertAuthHseq;
-				$certificadoNuevo->CertAuthJo = $certificado->CertAuthJo;
-				$certificadoNuevo->CertAuthJl = $certificado->CertAuthJl;
-				$certificadoNuevo->CertAuthDp = $certificado->CertAuthDp;
-				$certificadoNuevo->CertAnexo = $certificado->CertAnexo;
-				$certificadoNuevo->FK_CertSolser = $certificado->FK_CertSolser;
-				$certificadoNuevo->FK_CertCliente = $certificado->FK_CertCliente;
-				$certificadoNuevo->FK_CertGenerSede = $certificado->FK_CertGenerSede;
-				$certificadoNuevo->FK_CertGestor = $certificado->FK_CertGestor;
-				$certificadoNuevo->FK_CertTrat = $certificado->FK_CertTrat;
-				$certificadoNuevo->FK_CertTransp = $certificado->FK_CertTransp;
-				$certificadoNuevo->save();
+                if($certificado->CertType == 2){
+                    $certificado->CertSrc = $hoja;
+                    $certificado->save();
+                } else {
+                    $certificadoNuevo = new Certificado;
+				    $certificadoNuevo->CertType = 2;
+				    $certificadoNuevo->CertObservacion = 'Certificado de terceros';
+				    $certificadoNuevo->CertNumero = 0;
+				    $certificadoNuevo->CertManifNumero = 0;
+				    $certificadoNuevo->CertManifPrepend = '';
+				    $certificadoNuevo->CertiEspName = $certificado->CertiEspName;
+				    $certificadoNuevo->CertiEspValue = $certificado->CertiEspValue;
+				    $certificadoNuevo->CertSlug = $nuevoSlug;
+				    $certificadoNuevo->CertSrc = $hoja;
+				    $certificadoNuevo->CertSrcManif = 'CertificadoDefault.pdf';
+				    $certificadoNuevo->CertSrcExt = $hoja;
+				    $certificadoNuevo->CertAuthHseq = $certificado->CertAuthHseq;
+				    $certificadoNuevo->CertAuthJo = $certificado->CertAuthJo;
+				    $certificadoNuevo->CertAuthJl = $certificado->CertAuthJl;
+				    $certificadoNuevo->CertAuthDp = $certificado->CertAuthDp;
+				    $certificadoNuevo->CertAnexo = $certificado->CertAnexo;
+				    $certificadoNuevo->FK_CertSolser = $certificado->FK_CertSolser;
+				    $certificadoNuevo->FK_CertCliente = $certificado->FK_CertCliente;
+				    $certificadoNuevo->FK_CertGenerSede = $certificado->FK_CertGenerSede;
+				    $certificadoNuevo->FK_CertGestor = $certificado->FK_CertGestor;
+				    $certificadoNuevo->FK_CertTrat = $certificado->FK_CertTrat;
+				    $certificadoNuevo->FK_CertTransp = $certificado->FK_CertTransp;
+				    $certificadoNuevo->save();
 
-				foreach ($certificado->certdato as $dato) {
-					$nuevoDato = new Certdato;
-					$nuevoDato->FK_DatoCert = $certificadoNuevo->ID_Cert;
-					$nuevoDato->FK_DatoCertSolRes = $dato->FK_DatoCertSolRes;
-					$nuevoDato->save();
-				}
+				    foreach ($certificado->certdato as $dato) {
+					    $nuevoDato = new Certdato;
+					    $nuevoDato->FK_DatoCert = $certificadoNuevo->ID_Cert;
+					    $nuevoDato->FK_DatoCertSolRes = $dato->FK_DatoCertSolRes;
+					    $nuevoDato->save();
+				    }
 
-				$certificado = $certificadoNuevo;
+				    $certificado = $certificadoNuevo;
+
+                }
+
 				break;
 		}
 
