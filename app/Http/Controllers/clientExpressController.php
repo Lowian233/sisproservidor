@@ -15,6 +15,7 @@ use App\Http\Requests\ClienteExpressUpdateRequest;
 use App\AuditRequest;
 use App\Permisos;
 use App\Cliente;
+use App\ClienteExpress;
 use App\Departamento;
 use App\Municipio;
 use App\Sede;
@@ -26,6 +27,7 @@ use App\Cargo;
 use App\Personal;
 use App\User;
 use App\RequerimientosCliente;
+use App\Http\Controllers\CotizacionExpresController;
 
 class clientExpressController extends Controller
 {
@@ -37,72 +39,297 @@ class clientExpressController extends Controller
    public function index()
     {
         switch (true) {
-        case in_array(Auth::user()->UsRol, Permisos::USAQUEN):
-            $clientes = Cliente::with(['comercialAsignado'])
-                ->join('sedes', 'sedes.FK_SedeCli', '=', 'clientes.ID_Cli')
-                ->select('*')
-                ->where('CliCategoria', 'ClientePrepago')
-                //->where('sedes.SedeMapLocalidad', 'Usaquen')
-                ->whereIn('sedes.SedeMapLocalidad', ['Usaquen', 'Chapinero'])
-                ->where('CliDelete', 0)
-                ->get();
-                
-            $personals = DB::table('personals')
-                ->rightJoin('users', 'personals.ID_Pers', '=', 'users.FK_UserPers')
-                ->select('personals.*')
-                ->where('personals.PersDelete', 0)
-                ->where(function ($query) {
-                    $query->where('users.UsRol', 'Comercial')
-                        ->orWhere('users.UsRol2', 'Comercial');
-                })
-                ->get();
-              
-            return view('clientExpress.indexExpress', compact('clientes', 'personals'));
-        break;   
-        
-        case in_array(Auth::user()->UsRol, Permisos::PROGRAMADOR):
-            $clientes = Cliente::with(['comercialAsignado'])
-                ->join('sedes', 'sedes.FK_SedeCli', '=', 'clientes.ID_Cli')
-                ->select('*')
-                ->where('CliCategoria', 'ClientePrepago')
-                ->where('CliDelete', 0)
-                ->get();
-                
-            $personals = DB::table('personals')
-                ->rightJoin('users', 'personals.ID_Pers', '=', 'users.FK_UserPers')
-                ->select('personals.*')
-                ->where('personals.PersDelete', 0)
-                ->where(function ($query) {
-                    $query->where('users.UsRol', 'Comercial')
-                        ->orWhere('users.UsRol2', 'Comercial');
-                })
-                ->get();
-              
-            return view('clientExpress.indexExpress', compact('clientes', 'personals'));
-        break;    
-        
-        case in_array(Auth::user()->UsRol, Permisos::TODOPROSARCSINUSAQUEN):
-                $clientes = Cliente::with(['comercialAsignado'])
-                    ->where('CliCategoria', 'ClientePrepago')
-                    ->where('CliDelete', 0)
-                    ->get();
-        
+            case in_array(Auth::user()->UsRol, Permisos::USAQUEN):
+
+                $clientes = $this->obtenerClientesConsolidados([
+                    'Usaquen',
+                    'Chapinero'
+                ]);
+
                 $personals = DB::table('personals')
-                    ->rightJoin('users', 'personals.ID_Pers', '=', 'users.FK_UserPers')
+                    ->rightJoin(
+                        'users',
+                        'personals.ID_Pers',
+                        '=',
+                        'users.FK_UserPers'
+                    )
                     ->select('personals.*')
                     ->where('personals.PersDelete', 0)
                     ->where(function ($query) {
                         $query->where('users.UsRol', 'Comercial')
-                              ->orWhere('users.UsRol2', 'Comercial');
+                            ->orWhere('users.UsRol2', 'Comercial');
                     })
                     ->get();
-        
-                return view('clientExpress.indexExpress', compact('clientes', 'personals'));
-        
+
+                return view(
+                    'clientExpress.indexExpress',
+                    compact('clientes', 'personals')
+                );
+
+            break;
+
+            case in_array(Auth::user()->UsRol, Permisos::PROGRAMADOR):
+
+                $clientes = $this->obtenerClientesConsolidados();
+
+                $personals = DB::table('personals')
+                    ->rightJoin(
+                        'users',
+                        'personals.ID_Pers',
+                        '=',
+                        'users.FK_UserPers'
+                    )
+                    ->select('personals.*')
+                    ->where('personals.PersDelete', 0)
+                    ->where(function ($query) {
+                        $query->where('users.UsRol', 'Comercial')
+                            ->orWhere('users.UsRol2', 'Comercial');
+                    })
+                    ->get();
+
+                return view(
+                    'clientExpress.indexExpress',
+                    compact('clientes', 'personals')
+                );
+
+            break;
+
+            case in_array(
+                Auth::user()->UsRol,
+                Permisos::TODOPROSARCSINUSAQUEN
+            ):
+
+                $clientes = $this->obtenerClientesConsolidados();
+
+                $personals = DB::table('personals')
+                    ->rightJoin(
+                        'users',
+                        'personals.ID_Pers',
+                        '=',
+                        'users.FK_UserPers'
+                    )
+                    ->select('personals.*')
+                    ->where('personals.PersDelete', 0)
+                    ->where(function ($query) {
+                        $query->where('users.UsRol', 'Comercial')
+                            ->orWhere('users.UsRol2', 'Comercial');
+                    })
+                    ->get();
+
+                return view(
+                    'clientExpress.indexExpress',
+                    compact('clientes', 'personals')
+                );
+
+            break;
+
             default:
                 abort(403);
         }
-        
+    }
+
+
+    private function obtenerClientesConsolidados($localidades = null)
+    {
+        $clientesSISPRO = DB::table('clientes')
+            ->leftJoinSub(
+                DB::table('sedes')
+                    ->select(
+                        'FK_SedeCli',
+                        DB::raw('MIN(ID_Sede) as ID_Sede')
+                    )
+                    ->where(function ($query) {
+                        $query->where('SedeDelete', 0)
+                            ->orWhereNull('SedeDelete');
+                    })
+                    ->groupBy('FK_SedeCli'),
+                'sede_principal',
+                'sede_principal.FK_SedeCli',
+                '=',
+                'clientes.ID_Cli'
+            )
+            ->leftJoin(
+                'sedes',
+                'sedes.ID_Sede',
+                '=',
+                'sede_principal.ID_Sede'
+            )
+            ->leftJoin(
+                'clientes_express',
+                function ($join) {
+                    $join->on(
+                        DB::raw("
+                            UPPER(
+                                REPLACE(
+                                    REPLACE(
+                                        REPLACE(TRIM(clientes.CliNit), '.', ''),
+                                    '-', ''),
+                                ' ', '')
+                            )
+                        "),
+                        '=',
+                        DB::raw("
+                            UPPER(
+                                REPLACE(
+                                    REPLACE(
+                                        REPLACE(TRIM(clientes_express.nit), '.', ''),
+                                    '-', ''),
+                                ' ', '')
+                            )
+                        ")
+                    );
+                }
+            )
+            ->leftJoin(
+                'personals',
+                'personals.ID_Pers',
+                '=',
+                'clientes.CliComercial'
+            )
+            ->select([
+                'clientes.created_at',
+                'clientes.CliNit',
+                'clientes.CliName',
+                'clientes.CliShortname',
+                'clientes.CliComercial',
+                'clientes.CliSlug',
+
+                DB::raw("
+                    COALESCE(
+                        NULLIF(sedes.SedeAddress, ''),
+                        NULLIF(clientes_express.direccion, '')
+                    ) AS SedeAddress
+                "),
+
+                DB::raw("
+                    COALESCE(
+                        NULLIF(sedes.SedeMapLocalidad, ''),
+                        NULLIF(clientes_express.localidad, '')
+                    ) AS SedeMapLocalidad
+                "),
+
+                DB::raw("
+                    COALESCE(
+                        NULLIF(sedes.SedeCelular, ''),
+                        NULLIF(clientes_express.numero_contacto, ''),
+                        NULLIF(clientes_express.numeroEmpresa, '')
+                    ) AS SedeCelular
+                "),
+
+                DB::raw("
+                    CONCAT(
+                        COALESCE(personals.PersFirstName, ''),
+                        ' ',
+                        COALESCE(personals.PersLastName, '')
+                    ) AS comercial_nombre
+                "),
+
+                DB::raw("'SISPRO' AS origen"),
+            ])
+            ->where('clientes.CliCategoria', 'ClientePrepago')
+            ->where('clientes.CliDelete', 0);
+
+
+        if (!empty($localidades)) {
+            $clientesSISPRO->whereIn('sedes.SedeMapLocalidad', $localidades);
+        }
+
+        $clientesExpress = DB::table('clientes_express')
+            ->leftJoinSub(
+                DB::table('sedes_express')
+                    ->select(
+                        'idClienteExpress',
+                        DB::raw('MIN(id) as id')
+                    )
+                    ->groupBy('idClienteExpress'),
+                'sede_express_principal',
+                'sede_express_principal.idClienteExpress',
+                '=',
+                'clientes_express.id'
+            )
+            ->leftJoin(
+                'sedes_express',
+                'sedes_express.id',
+                '=',
+                'sede_express_principal.id'
+            )
+            ->leftJoin(
+                'clientes',
+                function ($join) {
+                    $join->on(
+                        DB::raw("
+                            UPPER(
+                                REPLACE(
+                                    REPLACE(
+                                        REPLACE(TRIM(clientes.CliNit), '.', ''),
+                                    '-', ''),
+                                ' ', '')
+                            )
+                        "),
+                        '=',
+                        DB::raw("
+                            UPPER(
+                                REPLACE(
+                                    REPLACE(
+                                        REPLACE(TRIM(clientes_express.nit), '.', ''),
+                                    '-', ''),
+                                ' ', '')
+                            )
+                        ")
+                    );
+                }
+            )
+            ->select([
+                'clientes_express.created_at',
+
+                DB::raw('clientes_express.nit AS CliNit'),
+                DB::raw('clientes_express.nombreEmpresa AS CliName'),
+                DB::raw('clientes_express.nombreEmpresa AS CliShortname'),
+
+                DB::raw('NULL AS CliComercial'),
+                DB::raw('clientes_express.id AS CliSlug'),
+
+                DB::raw("
+                    COALESCE(
+                        NULLIF(sedes_express.direccion, ''),
+                        NULLIF(clientes_express.direccion, '')
+                    ) AS SedeAddress
+                "),
+
+                DB::raw("
+                    COALESCE(
+                        NULLIF(sedes_express.localidad, ''),
+                        NULLIF(clientes_express.localidad, ''),
+                        NULLIF(clientes_express.ciudadEmpresa, '')
+                    ) AS SedeMapLocalidad
+                "),
+
+                DB::raw("
+                    COALESCE(
+                        NULLIF(clientes_express.numero_contacto, ''),
+                        NULLIF(clientes_express.numeroEmpresa, '')
+                    ) AS SedeCelular
+                "),
+
+                DB::raw("NULL AS comercial_nombre"),
+
+                DB::raw("'EXPRESS' AS origen"),
+            ])
+            ->whereNull('clientes.ID_Cli');
+
+
+        if (!empty($localidades)) {
+            $clientesExpress->whereIn(
+                'sedes_express.localidad',
+                $localidades
+            );
+        }
+
+        /* UNIFICAR CLIENTES*/
+        return $clientesSISPRO
+            ->unionAll($clientesExpress)
+            ->orderByDesc('created_at')
+            ->get();
     }
 
     /**
@@ -132,10 +359,18 @@ class clientExpressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Cliente $clientexpress)
+    public function show($clientexpress)
     {
         $cliente = $clientexpress;
-        switch (true) {
+        $CotizacionExpresController = new CotizacionExpresController();
+
+        if(is_numeric($cliente)){
+            return redirect()->route('cotizacion-expres.show', ['slug' => $cliente]);
+            //$resultado = $CotizacionExpresController->show($cliente);
+        } else {
+            $cliente = Cliente::where('CliSlug', $clientexpress)->first();
+
+            switch (true) {
             case(Auth::user()->email == 'asesorse2@prosarc.com.co'):
             case(Auth::user()->email == 'asesorse1@prosarc.com.co'):
             case(Auth::user()->email == 'coordinadorse@prosarc.com.co'):
@@ -163,6 +398,9 @@ class clientExpressController extends Controller
                 abort(403);
                 break;
         }
+
+        }
+
     }
 
     /**

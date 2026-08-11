@@ -31,32 +31,41 @@ Clientes Express
                                     @if(in_array(Auth::user()->UsRol, Permisos::TODOPROSARCMenosComercial))
                                     <th>Comercial Asignado</th>
                                     @endif
+                                    <th>Tipo</th>
                                     <th>{{ __('adminlte::message.seemore') }}</th>
                                 </tr>
                             </thead>
                             <tbody onload="renderTable()" id="readyTable">
                                 @foreach($clientes as $cliente)
-                                <tr style="{{$cliente->CliDelete === 1 ? 'color: red;' : ''}}">
+                                {{-- <tr style="{{$cliente->CliDelete === 1 ? 'color: red;' : ''}}"> --}}
+                                <tr>
                                     <td>{{$cliente->created_at}}</td>
                                     <td>{{$cliente->CliNit}}</td>
                                     <td>{{$cliente->CliName}}</td>
-                                    @if ($cliente->sedes()->count() > 0)
-                                    <td>{{$cliente->sedes()->first()->SedeAddress}}</td>
-                                    @else
-                                    <td>sin sede definida</td>
-                                    @endif
-                                    <td>{{$cliente->sedes()->first()->SedeMapLocalidad }}</td>                                   
-                                    <td>{{$cliente->SedeCelular}}</td>  
+                                    <td>{{ $cliente->SedeAddress ?? 'sin sede definida' }}</td>
+                                    <td>{{ $cliente->SedeMapLocalidad ?? 'N/A' }}</td>
+                                    <td>{{$cliente->SedeCelular}}</td>
                                     @if(in_array(Auth::user()->UsRol, Permisos::TODOPROSARCMenosComercial))
                                     <td>
                                         @if(in_array(Auth::user()->UsRol, Permisos::AsigComercial) || in_array(Auth::user()->UsRol2, Permisos::AsigComercial))
                                         <a href="#" class="kg" onclick="changeComercial(`{{$cliente->CliSlug}}`, {{intval($cliente->CliComercial)}}, `{{$cliente->CliShortname}}`)"><i class="fas fa-marker"></i></a>
                                         @endif
-                                        {{$cliente->comercialAsignado->PersFirstName <> null ? $cliente->comercialAsignado->PersFirstName.' '.$cliente->comercialAsignado->PersLastName : 'Sin Asignar'}}
+                                        {{ $cliente->comercial_nombre }}
                                     </td>
                                     @endif
                                     <td>
-                                        <a method='get' href='/clientexpress/{{$cliente->CliSlug}}' class='btn btn-info btn-block' title="{{ __('adminlte::message.seemoredetails')}}"><i class="fas fa-search"></i></a>
+                                        @if($cliente->origen === 'SISPRO')
+                                            <span class="label label-primary">SISPRO</span>
+                                        @else
+                                            <span class="label label-success">CHATBOT</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($cliente->origen === 'SISPRO')
+                                            <a method='get' href='/clientexpress/{{$cliente->CliSlug}}' class='btn btn-info btn-block' title="{{ __('adminlte::message.seemoredetails')}}"><i class="fas fa-search"></i></a>
+                                        @else
+                                            <a method='get' href='clientexpress/{{$cliente->CliSlug}}' class='btn btn-info btn-block' title="{{ __('adminlte::message.seemoredetails')}}"><i class="fas fa-search"></i></a>
+                                        @endif
                                     </td>
                                 </tr>
                                 @endforeach

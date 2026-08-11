@@ -389,7 +389,7 @@ class Permisos{
 	const EJECUTIVOCOMERCIAL = ['Ejecutivo Comercial', 'Comercial', 'Comercialap', 'usaquen'];
 
     const APROBARAUDITORIA = ['Programador','JefeOperaciones', 'Ingeniero de turno', 'Supervisor de Turno', 'IngDeTurno', 'Supervisor', 'AdministradorPlanta'];
-
+    const TODOPROSARCSINUSAQUEN = ['Programador','AdministradorPlanta','Hseq','JefeLogistica','AsistenteLogistica','Conductor','JefeOperaciones','Supervisor','AdministradorBogota','JefeComercial','Tesorería','Comercial','Comercialap','AsistenteComercial', 'DireccionTecnica'];
 }
 
 /*
