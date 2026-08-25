@@ -100,76 +100,103 @@ class ServiceExpressController extends Controller
 			->groupBy('FK_ProgServi');
 
 		$query = DB::table('solicitud_servicios')
-			->join('clientes', 'clientes.ID_Cli', '=', 'solicitud_servicios.FK_SolSerCliente')
-			->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
-			->join('personals as Comercial', 'Comercial.ID_Pers', '=', 'clientes.CliComercial')
-			->join(DB::raw('(' . $subquery->toSql() . ') as primera_prog'), function($join) {
-				$join->on('solicitud_servicios.ID_SolSer', '=', 'primera_prog.FK_ProgServi');
-			})
-			->mergeBindings($subquery)
-			->join('progvehiculos', function($join) {
-				$join->on('progvehiculos.FK_ProgServi', '=', 'solicitud_servicios.ID_SolSer')
-					 ->on('progvehiculos.ProgVehSalida', '=', 'primera_prog.primera_recepcion')
-					 ->where('progvehiculos.ProgVehDelete', '=', 0);
-			})
-			->select(
-				'solicitud_servicios.ID_SolSer',
-				'solicitud_servicios.SolSerStatus',
-				'solicitud_servicios.SolSerTipo',
-				'solicitud_servicios.SolSerAuditable',
-				'solicitud_servicios.SolSerConductor',
-				'solicitud_servicios.SolSerVehiculo',
-				'solicitud_servicios.SolSerSlug',
-				'solicitud_servicios.created_at',
-				'solicitud_servicios.updated_at',
-				'solicitud_servicios.SolSerDelete',
-				'solicitud_servicios.SolResAuditoriaTipo',
-				'solicitud_servicios.SolSerNameTrans',
-				'solicitud_servicios.SolSerNitTrans',
-				'solicitud_servicios.SolSerAdressTrans',
-				'solicitud_servicios.SolSerTypeCollect',
-				'solicitud_servicios.SolSerCollectAddress',
-				'solicitud_servicios.SolServCertStatus',
-				'solicitud_servicios.SolNumeroFactura',
-				'clientes.ID_Cli',
-				'clientes.CliName',
-				'clientes.CliSlug',
-				'clientes.CliStatus',
-				'clientes.TipoFacturacion',
-				'clientes.CliCategoria',
-				'personals.PersFirstName',
-				'personals.PersLastName',
-				'personals.PersSlug',
-				'personals.PersEmail',
-				'personals.PersCellphone',
-				'Comercial.ID_Pers as ComercialID_Pers',
-				'Comercial.PersFirstName as ComercialPersFirstName',
-				'Comercial.PersLastName as ComercialPersLastName',
-				'Comercial.PersSlug as ComercialPersSlug',
-				'Comercial.PersEmail as ComercialPersEmail',
-				'Comercial.PersCellphone as ComercialPersCellphone',
-				'progvehiculos.ProgVehSalida as recepcion'
-			)
-			->where(function($q){
-				if(in_array(Auth::user()->UsRol, Permisos::CLIENTE)){
-					$q->where('clientes.ID_Cli', userController::IDClienteSegunUsuario());
-				}
-				if(in_array(Auth::user()->UsRol, Permisos::SOLSERACEPTADO) || in_array(Auth::user()->UsRol2, Permisos::SOLSERACEPTADO)){
-					if(!in_array(Auth::user()->UsRol, Permisos::PROGRAMADOR)){
-						$q->where('solicitud_servicios.SolSerStatus', 'Pendiente');
-						$q->orWhere('solicitud_servicios.SolServCertStatus', 1);
-					}
-				}
-				if(in_array(Auth::user()->UsRol, Permisos::COMERCIALES) || in_array(Auth::user()->UsRol2, Permisos::COMERCIALES)){
-					if(in_array(Auth::user()->UsRol, Permisos::COMERCIAL)){
-						$q->where('Comercial.ID_Pers', Auth::user()->FK_UserPers);
-					}
-				}
-			})
-			->where('CliCategoria', 'ClientePrepago')
-			->whereYear('progvehiculos.ProgVehSalida', $anio)
-			->orderBy('progvehiculos.ProgVehSalida', 'desc');
+            // LEFT JOINs para evitar que la ausencia de datos en una tabla elimine la fila
+            ->leftJoin('clientes', 'clientes.ID_Cli', '=', 'solicitud_servicios.FK_SolSerCliente')
+            ->leftJoin('clientes_express', 'clientes_express.id', '=', 'solicitud_servicios.FK_Cliente_Express')
+            ->leftJoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+            ->leftJoin('personals as Comercial', 'Comercial.ID_Pers', '=', 'clientes.CliComercial')
 
+            // Subconsulta de programaciones
+            ->leftJoinSub($subquery, 'primera_prog', function($join) {
+                $join->on('solicitud_servicios.ID_SolSer', '=', 'primera_prog.FK_ProgServi');
+            })
+            ->leftJoin('progvehiculos', function($join) {
+                $join->on('progvehiculos.FK_ProgServi', '=', 'solicitud_servicios.ID_SolSer')
+                    ->on('progvehiculos.ProgVehSalida', '=', 'primera_prog.primera_recepcion')
+                    ->where('progvehiculos.ProgVehDelete', '=', 0);
+            })
+
+            ->select(
+                'solicitud_servicios.ID_SolSer',
+                'solicitud_servicios.SolSerStatus',
+                'solicitud_servicios.SolSerTipo',
+                'solicitud_servicios.SolSerAuditable',
+                'solicitud_servicios.SolSerConductor',
+                'solicitud_servicios.SolSerVehiculo',
+                'solicitud_servicios.SolSerSlug',
+                'solicitud_servicios.created_at',
+                'solicitud_servicios.updated_at',
+                'solicitud_servicios.SolSerDelete',
+                'solicitud_servicios.SolResAuditoriaTipo',
+                'solicitud_servicios.SolSerNameTrans',
+                'solicitud_servicios.SolSerNitTrans',
+                'solicitud_servicios.SolSerAdressTrans',
+                'solicitud_servicios.SolSerTypeCollect',
+                'solicitud_servicios.SolSerCollectAddress',
+                'solicitud_servicios.SolServCertStatus',
+                'solicitud_servicios.SolNumeroFactura',
+                'solicitud_servicios.FK_SolSerCliente',
+                'solicitud_servicios.FK_Cliente_Express',
+
+                // --- Nombre Unificado del Cliente (Tradicional o Express) ---
+                DB::raw("COALESCE(clientes.CliName, clientes_express.nombreEmpresa) as CliName"),
+
+                // Datos específicos de Cliente Tradicional
+                'clientes.ID_Cli',
+                'clientes.CliSlug',
+                'clientes.CliStatus',
+                'clientes.TipoFacturacion',
+                'clientes.CliCategoria',
+
+                // Datos específicos de Cliente Express (si necesitas algún otro campo)
+                'clientes_express.id as ID_ClienteExpress',
+                'clientes_express.localidad as ExpressLocalidad',
+
+                // Datos del personal/contacto
+                'personals.PersFirstName',
+                'personals.PersLastName',
+                'personals.PersSlug',
+                'personals.PersEmail',
+                'personals.PersCellphone',
+
+                // Comercial asignado (si aplica)
+                'Comercial.ID_Pers as ComercialID_Pers',
+                'Comercial.PersFirstName as ComercialPersFirstName',
+                'Comercial.PersLastName as ComercialPersLastName',
+                'Comercial.PersSlug as ComercialPersSlug',
+                'Comercial.PersEmail as ComercialPersEmail',
+                'Comercial.PersCellphone as ComercialPersCellphone',
+
+                'progvehiculos.ProgVehSalida as recepcion'
+            )
+            ->where(function($q) {
+                // Validación de permisos por Rol
+                if (in_array(Auth::user()->UsRol, Permisos::CLIENTE)) {
+                    $idCliente = userController::IDClienteSegunUsuario();
+                    $q->where('solicitud_servicios.FK_SolSerCliente', $idCliente)
+                    ->orWhere('solicitud_servicios.FK_Cliente_Express', $idCliente);
+                }
+
+                if (in_array(Auth::user()->UsRol, Permisos::SOLSERACEPTADO) || in_array(Auth::user()->UsRol2, Permisos::SOLSERACEPTADO)) {
+                    if (!in_array(Auth::user()->UsRol, Permisos::PROGRAMADOR)) {
+                        $q->where('solicitud_servicios.SolSerStatus', 'Pendiente')
+                        ->orWhere('solicitud_servicios.SolServCertStatus', 1);
+                    }
+                }
+
+                if (in_array(Auth::user()->UsRol, Permisos::COMERCIALES) || in_array(Auth::user()->UsRol2, Permisos::COMERCIALES)) {
+                    if (in_array(Auth::user()->UsRol, Permisos::COMERCIAL)) {
+                        $q->where('Comercial.ID_Pers', Auth::user()->FK_UserPers);
+                    }
+                }
+            })
+            // Condición para permitir Clientes Prepago O Clientes Express (sin importar la categoría)
+            ->where(function($q) {
+                $q->where('clientes.CliCategoria', 'ClientePrepago')
+                ->orWhereNotNull('solicitud_servicios.FK_Cliente_Express');
+            })
+            ->whereYear('progvehiculos.ProgVehSalida', $anio)
+            ->orderBy('progvehiculos.ProgVehSalida', 'desc');
 		// Filtro por mes (1-12)
 		if ($request->filled('mes')) {
 			$mes = (int) $request->mes;
@@ -470,11 +497,13 @@ class ServiceExpressController extends Controller
      */
     public function show($id)
     {
+        log::info("Mostrando servicio Express con ID: $id");
 		$SolicitudServicio = DB::table('solicitud_servicios')
-			->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+			->leftJoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
 			->select('solicitud_servicios.*','personals.PersFirstName','personals.PersLastName', 'personals.PersEmail', 'personals.PersCellphone')
 			->where('solicitud_servicios.SolSerSlug', $id)
 			->first();
+        log::info("SolicitudServicio encontrada: " . json_encode($SolicitudServicio));
 		if (!$SolicitudServicio) {
 			abort(404);
 		}
@@ -629,12 +658,39 @@ class ServiceExpressController extends Controller
 				->get());
 				break;
 		}
-		$Cliente = DB::table('clientes')
+		/* $Cliente = DB::table('clientes')
 			->join('sedes', 'clientes.ID_Cli', '=', 'sedes.FK_SedeCli')
 			->join('municipios', 'sedes.FK_SedeMun', '=', 'municipios.ID_Mun')
 			->select('clientes.CliNit', 'clientes.CliName', 'sedes.SedeAddress', 'municipios.MunName')
 			->where('clientes.ID_Cli', $SolicitudServicio->FK_SolSerCliente)
-			->first();
+			->first(); */
+
+        // 1. Definir la consulta de clientes tradicionales
+        $clienteTradicional = DB::table('clientes')
+            ->join('sedes', 'clientes.ID_Cli', '=', 'sedes.FK_SedeCli')
+            ->leftJoin('municipios', 'sedes.FK_SedeMun', '=', 'municipios.ID_Mun')
+            ->select(
+                'clientes.ID_Cli as id',
+                'clientes.CliNit as CliNit',
+                'clientes.CliName as CliName',
+                'sedes.SedeAddress as SedeAddress',
+                'municipios.MunName as MunName'
+            )
+            ->where('clientes.ID_Cli', $SolicitudServicio->FK_SolSerCliente);
+
+        // 2. Definir la consulta de clientes express (ajusta los nombres de tabla/columnas según tu BD)
+        $Cliente = DB::table('clientes_express')
+            //->leftJoin('municipios', 'clientes_express.FK_CliExpressMun', '=', 'municipios.ID_Mun')
+            ->select(
+                'clientes_express.id as id',
+                'clientes_express.nit as CliNit',
+                'clientes_express.nombreEmpresa as CliName',
+                'clientes_express.direccion as SedeAddress',
+                'clientes_express.localidad as MunName'
+            )
+            ->where('clientes_express.id', $SolicitudServicio->FK_Cliente_Express) // O FK_SolSerCliente
+            ->union($clienteTradicional)
+            ->first();
 		$GenerResiduos = DB::table('solicitud_residuos')
 			->distinct()
 			->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
@@ -643,6 +699,7 @@ class ServiceExpressController extends Controller
 			->select('gener_sedes.GSedeName', 'residuos_geners.FK_SGener', 'generadors.GenerName','gener_sedes.GSedeSlug', 'gener_sedes.GSedeAddress')
 			->where('solicitud_residuos.FK_SolResSolSer', $SolicitudServicio->ID_SolSer)
 			->get();
+        log::info("GenerResiduos obtenidos: " . json_encode($GenerResiduos));
 		// $Residuos = DB::table('solicitud_residuos')
 		// 	->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
 		// 	->join('respels' , 'respels.ID_Respel', '=', 'residuos_geners.FK_Respel')
@@ -683,6 +740,8 @@ class ServiceExpressController extends Controller
 			}
 			return $item;
 		});
+
+        log::info("Residuos obtenidos: " . json_encode($Residuos));
 
 		$SolicitudServicio->Repetible = 0;
 
@@ -747,6 +806,7 @@ class ServiceExpressController extends Controller
 
 		// Optimización: Agrupar residuos por generador para evitar foreach anidado en la vista
 		$ResiduosPorGenerador = $Residuos->groupBy('FK_SGener');
+        log::info("Residuos agrupados por generador: " . json_encode($ResiduosPorGenerador));
 
 		$vehiculos = collect();
 		$conductores = collect();
@@ -781,6 +841,27 @@ class ServiceExpressController extends Controller
 			$programacionOriginal = ProgramacionVehiculo::where('FK_ProgServi', $SolicitudServicio->ID_SolSer)->where('ProgVehDelete', 0)->first();
 		}
 
+        /* return response()->json(compact(
+    'SolicitudServicio',
+    'Observaciones',
+    'ResiduosPorGenerador',
+    'Cliente',
+    'GenerResiduos',
+    'Residuos',
+    'SolSerCollectAddress',
+    'SolSerConductor',
+    'Municipio',
+    'TextProgramacion',
+    'Programaciones',
+    'ProgramacionesActivas',
+    'recibo',
+    'cantidadesXtratamiento',
+    'total',
+    'vehiculos',
+    'conductores',
+    'ayudantes',
+    'programacionOriginal'
+)); */
 		return view('serviciosexpress.show', compact(
 			'SolicitudServicio',
 			'Observaciones',
@@ -2187,11 +2268,23 @@ class ServiceExpressController extends Controller
 
 			$Cliente = Cliente::where('ID_Cli', $Solicitud->FK_SolSerCliente)->first();
 
+            if(!$Cliente){
+                $Cliente = DB::table('clientes_express')
+                    ->where('id', $Solicitud->FK_Cliente_Express)
+                    ->select('clientes_express.*', 'id as CliSlug', 'nombreEmpresa as CliName', 'nit as CliNit', 'direccion as CliAdress')
+                    ->first();
+
+                $Sede = DB::table('sedes_express')
+                    ->where('idClienteExpress', $Cliente->id)
+                    ->select('sedes_express.*', 'id as SedeSlug', 'nombreSede as SedeName', 'direccion as SedeAdress', 'localidad as FK_SedeMun')
+                    ->first();
+            } else {
+                $Sede = Sede::where('FK_SedeCli', $Cliente->ID_Cli)->first();
+            }
+
 			$Persona = Personal::where('ID_Pers', $Solicitud->FK_SolSerPersona)
 				->select('PersSlug','PersFirstName','PersLastName')
 				->first();
-
-			$Sede = Sede::where('FK_SedeCli', $Cliente->ID_Cli)->first();
 
 			return view('serviciosexpress.addrespel', compact('Solicitud','Cliente','Sede','Persona'));
 		}
@@ -3366,11 +3459,12 @@ class ServiceExpressController extends Controller
 	public function recibomaterialExpress($id)
 	{
 		$users = Auth::user();
-
+        log::info('Id recibido: ' , [$id]);
 		// ===================== CARGA INICIAL DE LA SOLICITUD =====================
-		$SolicitudServicio = DB::table('solicitud_servicios')
-			->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
-			->join('cargos', 'personals.FK_PersCargo', '=', 'ID_Carg')
+		/* $SolicitudServicio = DB::table('solicitud_servicios')
+			->leftjoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+			->leftjoin('cargos', 'personals.FK_PersCargo', '=', 'ID_Carg')
+            ->leftjoin('clientes_express', 'clientes_express.id', '=', 'solicitud_servicios.FK_Cliente_Express')
 			->select(
 				'solicitud_servicios.*',
 				'personals.PersFirstName', 'personals.PersLastName',
@@ -3378,7 +3472,23 @@ class ServiceExpressController extends Controller
 				'cargos.CargName'
 			)
 			->where('solicitud_servicios.SolSerSlug', $id)
-			->first();
+			->first(); */
+
+        $SolicitudServicio = DB::table('solicitud_servicios')
+            ->leftJoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+            ->leftJoin('cargos', 'personals.FK_PersCargo', '=', 'cargos.ID_Carg')
+            ->leftJoin('clientes_express', 'clientes_express.id', '=', 'solicitud_servicios.FK_Cliente_Express')
+            ->select(
+                'solicitud_servicios.*',
+                DB::raw('COALESCE(clientes_express.encargado, personals.PersFirstName) as PersFirstName'),
+                DB::raw("CASE WHEN solicitud_servicios.FK_Cliente_Express IS NOT NULL THEN '' ELSE personals.PersLastName END as PersLastName"),
+                DB::raw('COALESCE(clientes_express.correoEmpresa, personals.PersEmail) as PersEmail'),
+                DB::raw('COALESCE(clientes_express.numero_contacto, personals.PersCellphone) as PersCellphone'),
+                DB::raw("CASE WHEN solicitud_servicios.FK_Cliente_Express IS NOT NULL THEN '' ELSE cargos.CargName END as PersLastName")
+            )
+            ->where('solicitud_servicios.SolSerSlug', $id)
+            ->first();
+        log::info('SolicitudServicio LINA: ' , [$SolicitudServicio]);
 
 		if (!$SolicitudServicio) {
 			abort(404);
@@ -3662,7 +3772,7 @@ class ServiceExpressController extends Controller
 		} else {
 
 			// ===================== RAMA ELSE (recolecciones) =====================
-			$SolicitudServicio = DB::table('solicitud_servicios')
+			/* $SolicitudServicio = DB::table('solicitud_servicios')
 				->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
 				->join('cargos', 'personals.FK_PersCargo', '=', 'ID_Carg')
 				->select(
@@ -3672,7 +3782,22 @@ class ServiceExpressController extends Controller
 					'cargos.CargName'
 				)
 				->where('solicitud_servicios.SolSerSlug', $id)
-				->first();
+				->first(); */
+                $SolicitudServicio = DB::table('solicitud_servicios')
+                    ->leftJoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+                    ->leftJoin('cargos', 'personals.FK_PersCargo', '=', 'cargos.ID_Carg')
+                    ->leftJoin('clientes_express', 'clientes_express.id', '=', 'solicitud_servicios.FK_Cliente_Express')
+                    ->select(
+                        'solicitud_servicios.*',
+                        DB::raw('COALESCE(clientes_express.encargado, personals.PersFirstName) as PersFirstName'),
+                        DB::raw("CASE WHEN solicitud_servicios.FK_Cliente_Express IS NOT NULL THEN '' ELSE personals.PersLastName END as PersLastName"),
+                        DB::raw('COALESCE(clientes_express.correoEmpresa, personals.PersEmail) as PersEmail'),
+                        DB::raw('COALESCE(clientes_express.numero_contacto, personals.PersCellphone) as PersCellphone'),
+                        DB::raw("CASE WHEN solicitud_servicios.FK_Cliente_Express IS NOT NULL THEN 'Encargado' ELSE cargos.CargName END as CargName")
+                    )
+                    ->where('solicitud_servicios.SolSerSlug', $id)
+                    ->first();
+                log::info('SolicitudServicio LINA: ' , [$SolicitudServicio]);
 
 			if (!$SolicitudServicio) {
 				abort(404);
@@ -3705,6 +3830,13 @@ class ServiceExpressController extends Controller
 				->select('clientes.CliNit', 'clientes.CliName', 'sedes.SedeAddress', 'municipios.MunName')
 				->where('clientes.ID_Cli', $SolicitudServicio->FK_SolSerCliente)
 				->first();
+
+            if(!$Cliente) {
+                $Cliente = DB::table('clientes_express')
+                    ->select('clientes_express.nit as CliNit', 'clientes_express.nombreEmpresa as CliName', 'clientes_express.direccion as SedeAddress', 'clientes_express.ciudadEmpresa as MunName')
+                    ->where('clientes_express.id', $SolicitudServicio->FK_Cliente_Express)
+                    ->first();
+            }
 
 			$GenerResiduos = DB::table('solicitud_residuos')
 				->distinct()
@@ -4011,26 +4143,56 @@ class ServiceExpressController extends Controller
 	public function rmtemplate($id, $slug)
 	{
 		// Obtener información de firmas
-		$firmas = DB::table('firmas_servicio')
+		/* $firmas = DB::table('firmas_servicio')
 			->join('solicitud_servicios', 'solicitud_servicios.ID_SolSer', '=', 'firmas_servicio.FK_SolSer')
 			->join('clientes', 'clientes.ID_Cli', '=', 'solicitud_servicios.FK_SolSerCliente')
 			->join('generadors', 'generadors.ID_Gener', '=', 'firmas_servicio.FK_Gener')
 			->where('firmas_servicio.FK_SGener', $id)
 			->where('solicitud_servicios.SolSerSlug', $slug)
 			->select('firmas_servicio.*', 'clientes.CliName', 'generadors.*')
-			->first();
+			->first(); */
+
+        $firmas = DB::table('firmas_servicio')
+            ->join('solicitud_servicios', 'solicitud_servicios.ID_SolSer', '=', 'firmas_servicio.FK_SolSer')
+            ->leftJoin('clientes', 'clientes.ID_Cli', '=', 'solicitud_servicios.FK_SolSerCliente')
+            ->leftJoin('clientes_express', 'clientes_express.id', '=', 'solicitud_servicios.FK_Cliente_Express')
+            ->join('generadors', 'generadors.ID_Gener', '=', 'firmas_servicio.FK_Gener')
+            ->where('firmas_servicio.FK_SGener', $id)
+            ->where('solicitud_servicios.SolSerSlug', $slug)
+            ->select(
+                'firmas_servicio.*',
+                'generadors.*',
+                // Toma el nombre de clientes_express si existe, o clientes.CliName en su lugar
+                DB::raw('COALESCE(clientes_express.nombreEmpresa, clientes.CliName) as CliName')
+            )
+            ->first();
 
 		if (!$firmas) {
 			abort(404);
 		}
 
 		// Obtener información del servicio
-		$SolicitudServicio = DB::table('solicitud_servicios')
+		/* $SolicitudServicio = DB::table('solicitud_servicios')
 			->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
 			->join('cargos', 'personals.FK_PersCargo', '=', 'ID_Carg')
 			->select('solicitud_servicios.*', 'personals.PersFirstName', 'personals.PersLastName', 'personals.PersEmail', 'personals.PersCellphone', 'cargos.CargName')
 			->where('solicitud_servicios.ID_SolSer', $firmas->FK_SolSer)
 			->first();
+ */
+        $SolicitudServicio = DB::table('solicitud_servicios')
+            ->leftJoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+            ->leftJoin('cargos', 'personals.FK_PersCargo', '=', 'cargos.ID_Carg')
+            ->leftJoin('clientes_express', 'clientes_express.id', '=', 'solicitud_servicios.FK_Cliente_Express')
+            ->select(
+                'solicitud_servicios.*',
+                DB::raw('COALESCE(clientes_express.encargado, personals.PersFirstName) as PersFirstName'),
+                DB::raw("CASE WHEN solicitud_servicios.FK_Cliente_Express IS NOT NULL THEN '' ELSE personals.PersLastName END as PersLastName"),
+                DB::raw('COALESCE(clientes_express.correoEmpresa, personals.PersEmail) as PersEmail'),
+                DB::raw('COALESCE(clientes_express.numero_contacto, personals.PersCellphone) as PersCellphone'),
+                DB::raw("CASE WHEN solicitud_servicios.FK_Cliente_Express IS NOT NULL THEN 'Encargado' ELSE cargos.CargName END as CargName")
+            )
+            ->where('solicitud_servicios.ID_SolSer', $firmas->FK_SolSer)
+            ->first();
 
 		if (!$SolicitudServicio) {
 			abort(404);

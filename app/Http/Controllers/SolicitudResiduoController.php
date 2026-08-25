@@ -152,7 +152,7 @@ class SolicitudResiduoController extends Controller
 
 			$Cliente = Cliente::where('ID_Cli', $SolSer->FK_SolSerCliente)->first();
 			$id = $SolSer->SolSerSlug;
-			
+
 			// 1) Si viene desde RM, respeta el origen por Referer (Express vs Regular)
 			if ($request->has('from_recibo') && $request->input('from_recibo') == 'true') {
 				if (in_array(Auth::user()->UsRol, Permisos::RECIBOMATERIAL) || in_array(Auth::user()->UsRol2, Permisos::RECIBOMATERIAL)) {
@@ -163,21 +163,31 @@ class SolicitudResiduoController extends Controller
 					return redirect()->route('recibo.material', ['id' => $id]);
 				}
 			}
-			
+
 			// 2) Flujo normal sin from_recibo
 			if ($Cliente && $Cliente->CliCategoria == 'ClientePrepago') {
 				return redirect()->route('serviciosexpress.show', ['serviciosexpress' => $id]);
 			}
-			
+
 			if (in_array(Auth::user()->UsRol, Permisos::SUPERVISOR) || in_array(Auth::user()->UsRol, Permisos::SUPERVISOR)) {
 				return redirect()->route('informe');
 			}
-			
+
 			return redirect()->route('solicitud-servicio.show', ['solicitud_servicio' => $id]);
 		}
 
 
 		$Cliente = Cliente::where('ID_Cli', $SolSer->FK_SolSerCliente)->first();
+
+        if(!$Cliente) {
+            $Cliente = DB::table('clientes_express')
+                ->where('id', $SolSer->FK_Cliente_Express)
+                ->first();
+
+            if ($Cliente) {
+                $Cliente->CliCategoria = 'ClientePrepago';
+            }
+        }
 
 		if ($Cliente->CliCategoria == 'ClientePrepago') {
 			$Validate = $request->validate([
@@ -198,7 +208,7 @@ class SolicitudResiduoController extends Controller
 					break;
 				case 'No Conciliado':
 				case 'Completado':
-				case 'Recepcionado':	
+				case 'Recepcionado':
 					if($SolRes->SolResTypeUnidad == 'Litros' || $SolRes->SolResTypeUnidad == 'Unidad'){
 						$SolRes->SolResCantiUnidadConciliada = $request->input('SolResCantiUnidadConciliada');
 						$SolRes->SolResKgConciliado = $request->input('SolResKg');
@@ -280,7 +290,7 @@ return redirect()->route('serviciosexpress.show', ['serviciosexpress' => $id]);
 					break;
 				case 'No Conciliado':
 				case 'Completado':
-				case 'Recepcionado':	
+				case 'Recepcionado':
 					if($SolRes->SolResTypeUnidad == 'Litros' || $SolRes->SolResTypeUnidad == 'Unidad'){
 						$SolRes->SolResCantiUnidadConciliada = $request->input('SolResCantiUnidadConciliada');
 						$SolRes->SolResKgConciliado = $request->input('SolResKg');
@@ -340,14 +350,14 @@ return redirect()->route('serviciosexpress.show', ['serviciosexpress' => $id]);
 			$log->save();
 
 		$id = $SolSer->SolSerSlug;
-		
+
 		// Si viene desde RM, vuelve al RM Regular
 		if ($request->has('from_recibo') && $request->input('from_recibo') == 'true') {
 			if (in_array(Auth::user()->UsRol, Permisos::RECIBOMATERIAL) || in_array(Auth::user()->UsRol2, Permisos::RECIBOMATERIAL)) {
 				return redirect()->route('recibo.material', ['id' => $id]);
 			}
 		}
-		
+
 		// Flujo normal (desde modal de conciliación)
 		if(in_array(Auth::user()->UsRol, Permisos::SUPERVISOR) || in_array(Auth::user()->UsRol, Permisos::SUPERVISOR)) {
 			return redirect()->route('informe');
@@ -672,7 +682,7 @@ return redirect()->route('serviciosexpress.show', ['serviciosexpress' => $id]);
 		if ($request->isMethod('post')) {
 			return $this->reportesRegulares($request);
 		}
-		
+
 		// Si es GET, mostrar el formulario
 		if (in_array(Auth::user()->UsRol, Permisos::CLIENTE)) {
 			$cliente_id = userController::IDClienteSegunUsuario();
@@ -684,12 +694,12 @@ return redirect()->route('serviciosexpress.show', ['serviciosexpress' => $id]);
 				->where('CliCategoria', 'Cliente')
 				->get();
 		}
-		
+
 		// Obtener todos los tratamientos activos
 		$tratamientos = Tratamiento::where('TratDelete', 0)
 			->orderBy('TratName', 'asc')
 			->get();
-		
+
 		return view('reportes.ReportRegular', compact('clientes', 'tratamientos'));
 	}
 
@@ -698,12 +708,12 @@ return redirect()->route('serviciosexpress.show', ['serviciosexpress' => $id]);
 		// Convertir fechas de DD/MM/YYYY a YYYY-MM-DD
 		$fechaInicio = $request->input('Fecha_Inicio');
 		$fechaFin = $request->input('Fecha_Fin');
-		
+
 		try {
 			// Intentar parsear con formato DD/MM/YYYY
 			$FechaInicial = \DateTime::createFromFormat('d/m/Y', $fechaInicio);
 			$FechaFinal = \DateTime::createFromFormat('d/m/Y', $fechaFin);
-			
+
 			if ($FechaInicial && $FechaFinal) {
 				$FechaInicial = $FechaInicial->format('Y-m-d');
 				$FechaFinal = $FechaFinal->format('Y-m-d');
@@ -760,7 +770,7 @@ return redirect()->route('serviciosexpress.show', ['serviciosexpress' => $id]);
 
 		return view('reportes.Regular', compact('servicios', 'Residuosoriginal'));
 	}
-	
+
 public function reportesCliente()
 	 {
 		 if (!in_array(Auth::user()->UsRol, Permisos::CLIENTE)) {
@@ -795,7 +805,7 @@ public function reportesCliente()
 				 // Intentar parsear con formato DD/MM/YYYY
 				 $fecha_inicio_obj = \DateTime::createFromFormat('d/m/Y', $fechaInicio);
 				 $fecha_fin_obj = \DateTime::createFromFormat('d/m/Y', $fechaFin);
-				 
+
 				 if ($fecha_inicio_obj && $fecha_fin_obj) {
 					 $fecha_inicio = $fecha_inicio_obj->format('Y-m-d');
 					 $fecha_fin = $fecha_fin_obj->format('Y-m-d');
@@ -903,7 +913,7 @@ public function reportesCliente()
 		 // Convertir fechas de DD/MM/YYYY a YYYY-MM-DD
 		 $fechaInicio = $request->input('Fecha_Inicio');
 		 $fechaFin = $request->input('Fecha_Fin');
-		 
+
 		 try {
 			 // Si vienen en formato YYYY-MM-DD (del input type="date"), usarlas directamente
 			 if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaInicio) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaFin)) {
@@ -913,7 +923,7 @@ public function reportesCliente()
 				 // Intentar parsear con formato DD/MM/YYYY
 				 $fecha_inicio_obj = \DateTime::createFromFormat('d/m/Y', $fechaInicio);
 				 $fecha_fin_obj = \DateTime::createFromFormat('d/m/Y', $fechaFin);
-				 
+
 				 if ($fecha_inicio_obj && $fecha_fin_obj) {
 					 $fecha_inicio = $fecha_inicio_obj->format('Y-m-d');
 					 $fecha_fin = $fecha_fin_obj->format('Y-m-d');
@@ -1069,7 +1079,7 @@ public function reportesCliente()
 	{
 
 		$FechaInicial = $request->input('Fecha_Inicio');
-		$FechaFinal = $request->input('Fecha_Fin');	
+		$FechaFinal = $request->input('Fecha_Fin');
 
 		$servicios = DB::table('solicitud_servicios')
 			->join('progvehiculos', 'progvehiculos.FK_ProgServi', '=', 'solicitud_servicios.ID_SolSer')
@@ -1115,16 +1125,16 @@ public function reportesCliente()
 	 */
 	public function reportesExpr(Request $request)
 	{
-	
+
 		$fechaInicio = $request->input('Fecha_Inicio');
-		$fechaFin = $request->input('Fecha_Fin');	
+		$fechaFin = $request->input('Fecha_Fin');
 
 		// Convertir fechas de DD/MM/YYYY a YYYY-MM-DD
 		try {
 			// Intentar parsear con formato DD/MM/YYYY
 			$FechaInicial = \DateTime::createFromFormat('d/m/Y', $fechaInicio);
 			$FechaFinal = \DateTime::createFromFormat('d/m/Y', $fechaFin);
-			
+
 			if ($FechaInicial && $FechaFinal) {
 				$FechaInicial = $FechaInicial->format('Y-m-d');
 				$FechaFinal = $FechaFinal->format('Y-m-d');
@@ -1151,7 +1161,7 @@ public function reportesCliente()
 				case ('Tesorería'):
 				case ('AsistenteLogistica'):
 				case ('JefeLogistica'):
-					
+
 					$servicios = SolicitudServicio::with([
 						'SolicitudResiduo.generespel.respels',
 						'SolicitudResiduo.generespel.gener_sedes.generadors',
@@ -1170,7 +1180,7 @@ public function reportesCliente()
 					->where('CliCategoria', 'ClientePrepago')
 					->where('progvehiculos.ProgVehDelete', '=', 0)
 					->get();
-					break;	
+					break;
 
 				case ('Comercial'):
 					$servicios = SolicitudServicio::with([
@@ -1191,8 +1201,8 @@ public function reportesCliente()
 					->where('CliCategoria', 'ClientePrepago')
 					->where('progvehiculos.ProgVehDelete', '=', 0)
 					->get();
-					
-					break;	 
+
+					break;
 
 				default:
 				$servicios = SolicitudServicio::with([
@@ -1213,7 +1223,7 @@ public function reportesCliente()
 				->where('CliCategoria', 'ClientePrepago')
 				->where('progvehiculos.ProgVehDelete', '=', 0)
 				->get();
-				break;	
+				break;
 			}
 
 			//return $servicios;
@@ -1224,7 +1234,7 @@ public function reportesCliente()
 			abort(503, "no tiene permisos para acceder a la pagina de reportes");
 		}
 	}
-	
+
 
 	/**
 	 * Display a listing of the resource.
@@ -1233,9 +1243,9 @@ public function reportesCliente()
 	 */
 	public function registroentrada(Request $request)
 	{
-	
+
 		$FechaInicial = $request->input('Fecha_Inicio');
-		$FechaFinal = $request->input('Fecha_Fin');	
+		$FechaFinal = $request->input('Fecha_Fin');
 
 		if (in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) || in_array(Auth::user()->UsRol, Permisos::TODOPROSARC)) {
 
@@ -1249,7 +1259,7 @@ public function reportesCliente()
 				case ('Tesorería'):
 				case ('AsistenteLogistica'):
 				case ('JefeLogistica'):
-					
+
 					$servicios = SolicitudServicio::with([
 						'SolicitudResiduo.generespel.respels',
 						'SolicitudResiduo.generespel.gener_sedes',
@@ -1267,8 +1277,8 @@ public function reportesCliente()
 					->whereBetween('progvehiculos.ProgVehSalida',[$FechaInicial, $FechaFinal])
 					->where('progvehiculos.ProgVehDelete', '=', 0)
 					->get();
-					
-					break;	
+
+					break;
 
 				case ('Comercial'):
 					$idcomercial = Auth::user()->persona->ID_Pers;
@@ -1313,7 +1323,7 @@ public function reportesCliente()
 				//->select('progvehiculos.ProgVehSalida')
 				->whereBetween('progvehiculos.ProgVehSalida',[$FechaInicial, $FechaFinal])
 				->get();
-				break;	
+				break;
 			}
 
 			//return $FechaInicial;
@@ -1430,11 +1440,11 @@ public function reportesCliente()
 		->whereBetween('respels.created_at',['2024-01-01 00:00:00','2024-12-31 23:59:00'])
 		->select('*')
 		->get();
-		
-		
+
+
 		//return $SolicitudServicio->ID_SolSer;
 		return view('solicitud-serv.AñadirNuevoRespel', compact('Generadors', 'Respels', 'SolicitudServicio'));
-		 
+
 	 }
 
 	/**
@@ -1452,7 +1462,7 @@ public function reportesCliente()
 				->whereIn('CliCategoria', ['Cliente', 'ClientePrepago'])
 				->get();
 		}
-		
+
 		return view('reportes.ReportLogistica', compact('clientes'));
 	}
 
@@ -1464,13 +1474,13 @@ public function reportesCliente()
 	 // Convertir fechas de DD/MM/YYYY a YYYY-MM-DD con validación
 	 $fechaInicio = $request->input('Fecha_Inicio');
 		$fechaFin = $request->input('Fecha_Fin');
-		
+
 		// Convertir fechas de DD/MM/YYYY a YYYY-MM-DD
 		try {
 			// Intentar parsear con formato DD/MM/YYYY
 			$FechaInicial = \DateTime::createFromFormat('d/m/Y', $fechaInicio);
 			$FechaFinal = \DateTime::createFromFormat('d/m/Y', $fechaFin);
-			
+
 			if ($FechaInicial && $FechaFinal) {
 				$FechaInicial = $FechaInicial->format('Y-m-d');
 				$FechaFinal = $FechaFinal->format('Y-m-d');
@@ -1484,9 +1494,9 @@ public function reportesCliente()
 			$FechaInicial = date('Y-m-d', strtotime('-30 days'));
 			$FechaFinal = date('Y-m-d');
 		}
-		
+
 		$cliente_id = $request->input('cliente_id');
-		
+
 		// Si es un cliente, solo puede ver sus propias solicitudes
 		if (in_array(Auth::user()->UsRol, Permisos::CLIENTE)) {
 			$cliente_id = userController::IDClienteSegunUsuario();
@@ -1525,7 +1535,7 @@ public function reportesCliente()
 		->whereHas('programaciones', function($q) use ($FechaInicial, $FechaFinal, $tipoTransporte) {
 			$q->whereBetween('ProgVehSalida', [$FechaInicial . ' 00:00:00', $FechaFinal . ' 23:59:59'])
 			  ->where('ProgVehDelete', '=', 0);
-			
+
 			// Aplicar filtro de tipo de transporte si existe
 			if ($tipoTransporte !== null) {
 				$q->where('ProgVehtipo', $tipoTransporte);
@@ -1540,7 +1550,7 @@ public function reportesCliente()
 
 		// Cargar las solicitudes sin JOINs que causen duplicados
 		$servicios = $query->get();
-		
+
 		// Agregar atributos de programación a cada servicio para compatibilidad con la vista
 		$servicios->each(function($servicio) use ($FechaInicial, $FechaFinal) {
 			// Obtener la primera programación válida en el rango de fechas
@@ -1549,14 +1559,14 @@ public function reportesCliente()
 				->whereBetween('ProgVehSalida', [$FechaInicial . ' 00:00:00', $FechaFinal . ' 23:59:59'])
 				->sortByDesc('ProgVehSalida')
 				->first();
-			
+
 			if ($programacion) {
 				$servicio->ProgVehtipo = $programacion->ProgVehtipo;
 				$servicio->ProgVehExclusive = $programacion->ProgVehExclusive;
 				$servicio->ProgVehNameConductorEXT = $programacion->ProgVehNameConductorEXT;
 				$servicio->ProgVehNameAuxiliarEXT = $programacion->ProgVehNameAuxiliarEXT;
 				$servicio->ProgVehPlacaEXT = $programacion->ProgVehPlacaEXT;
-				
+
 				// Datos del conductor y ayudante si existen
 				if ($programacion->conductor) {
 					$servicio->conductor_nombre = $programacion->conductor->PersFirstName;
@@ -1569,7 +1579,7 @@ public function reportesCliente()
 				if ($programacion->vehiculo) {
 					$servicio->vehiculo_placa = $programacion->vehiculo->VehicPlaca;
 				}
-				
+
 				// Calcular tipo de transporte
 				$caseTipoTransporte = "";
 				switch($programacion->ProgVehtipo) {

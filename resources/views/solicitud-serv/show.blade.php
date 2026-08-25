@@ -2111,11 +2111,7 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Residuo Faltante')" style="margin-right:1em;" class="btn btn-warning pull-right"><i class="fas fa-exclamation-triangle"></i> Residuo Faltante</a>
 							`);
 					@endif
-					@if(in_array(Auth::user()->UsRol, Permisos::ADMINPLANTA) && $ultimoRecordatorio->ObsRepeat > 3)
-						$('#titulo').append(`
-							<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Conciliada')" style="float: right;" class="btn btn-success"><i class="fas fa-clipboard-check"></i> {{__('adminlte::message.solserstatusconciliado')}}</a>
-						`);
-					@endif
+
 
 					$('#titulo').append(`
 						<b>{{__('adminlte::message.solsershowcomple')}}</b>

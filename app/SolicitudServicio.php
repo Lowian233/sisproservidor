@@ -8,7 +8,7 @@ class SolicitudServicio extends Model
 {
     protected $table='solicitud_servicios';
 
-    protected $fillable=['SolSerStatus', 'SolSerTipo', 'SolSerFrecuencia',' SolSerAuditable', 'SolSerConducExter','SolSerVehicExter', 'SolSerSlug', 'Fk_SolSerTransportador', 'FK_SolSerCliente', 'FK_SolSerPersona','SolSerDelete', 'created_at', 'updated_at', 'SolSerCityTrans', 'FK_SolSerCollectMun' ,'SolSerRMs', 'SolSerTranspPrecio', 'SolSerFecha', 'SolNumeroFactura'];
+    protected $fillable=['SolSerStatus', 'SolSerTipo', 'SolSerFrecuencia',' SolSerAuditable', 'SolSerConducExter','SolSerVehicExter', 'SolSerSlug', 'Fk_SolSerTransportador', 'FK_SolSerCliente', 'FK_SolSerPersona','SolSerDelete', 'created_at', 'updated_at', 'SolSerCityTrans', 'FK_SolSerCollectMun' ,'SolSerRMs', 'SolSerTranspPrecio', 'SolSerFecha', 'SolNumeroFactura', 'FK_Cliente_Express'];
     protected $primaryKey = 'ID_SolSer';
     	/**
 	 * Get the route key for the model.
@@ -75,6 +75,12 @@ class SolicitudServicio extends Model
 	public function cliente()
 	{
 	 return $this->belongsTo('App\Cliente', 'FK_SolSerCliente', 'ID_Cli');
+	}
+
+	// especificar foranea del modelo sede
+	public function clienteExpress()
+	{
+	 return $this->belongsTo('App\ClienteExpress', 'FK_Cliente_Express', 'id');
 	}
 
 	public function programaciones()

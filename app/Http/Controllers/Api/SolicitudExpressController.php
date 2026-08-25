@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Services\CreateSolicitudExpressService;
 
 class SolicitudExpressController extends Controller
 {
@@ -95,6 +96,19 @@ class SolicitudExpressController extends Controller
                 ], 404);
             }
 
+            if (isset($datos['estado']) && $datos['estado'] === 'Pagado') {
+                try {
+                    $service = new CreateSolicitudExpressService();
+                    $solicitudServicio = $service->createSolicitud($datos, $idSolicitud);
+                } catch (\Exception $e) {
+                    Log::error('Error al crear SolicitudServicio: ' . $e->getMessage());
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error interno al procesar la solicitud: ' . $e->getMessage(),
+                    ], 500);
+                }
+            }
+
             return response()->json([
                 'success'     => true,
                 'message'     => 'Solicitud actualizada correctamente',
@@ -129,7 +143,7 @@ class SolicitudExpressController extends Controller
         }
     }
 
-    private function calcularPrecio(string $peso): int|string
+     private function calcularPrecio(string $peso): int|string
     {
         // Opcion numerica (Wati envia "1", "2", etc.)
         if (is_numeric(trim($peso))) {
@@ -157,7 +171,7 @@ class SolicitudExpressController extends Controller
      * Parsea el peso recibido y devuelve [peso, precio].
      * Soporta 3 formatos: opcion numerica, texto nuevo Wati, texto antiguo.
      */
-    private function parsearPesoYPrecio(string $peso): array
+     private function parsearPesoYPrecio(string $peso): array
     {
         $peso = trim($peso);
 
@@ -187,5 +201,5 @@ class SolicitudExpressController extends Controller
 
         // Formato antiguo: "Menos de 20 kg"
         return ['peso' => $peso, 'precio' => $this->calcularPrecio($peso)];
-    }   
+    }
 }

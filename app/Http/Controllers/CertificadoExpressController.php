@@ -39,8 +39,8 @@ class CertificadoExpressController extends Controller
     {
          return view('certificadosExpress.ano');
        //return view('CertificadosExpress.year');
-       
-                                 
+
+
     }
 
           /**
@@ -54,20 +54,20 @@ class CertificadoExpressController extends Controller
         $clienteStatus= Cliente::where('ID_Cli', $clienteID)->first('CliStatus');
         if ($clienteStatus->CliStatus == 'Bloqueado') {
             abort(403, "el acceso a la lista de certificados se encuentra bloqueado, comuniquese con su asesor comercial en PROSARC S.A. ESP");
-        }      
-   
+        }
+
         $certificados = CertificadoExpress::where(function($query){
           $years = DB :: table('certificadosexpress')
               ->select(DB::raw('distinct year(created_at) as year'))
               ->orderBy('year', 'desc')
-              ->get(); 
+              ->get();
 
               foreach ($years as $year) {
                 $registros = DB::table('certificadosexpress')
                 ->whereYear('created_at', $year='2023')
                 ->get();
               }
-  
+
             switch (Auth::user()->UsRol) {
                 case 'Cliente':
                     /*se define la sede del usuario actual*/
@@ -79,11 +79,11 @@ class CertificadoExpressController extends Controller
                     ->where('personals.ID_Pers', Auth::user()->FK_UserPers)
                     ->where('clientes.CliStatus', 'Autorizado')
                     ->value('clientes.ID_Cli');
-  
+
                     $servicioscertificadosdelcliente = SolicitudServicio::where('FK_SolSerCliente',$UserSedeID)
                     ->where('SolServCertStatus', 2)
                     ->get('ID_SolSer');
-  
+
                     //$query->whereYear('created_at', $year='2020')
                     $query->where('FK_CertCliente', $UserSedeID);
                     $query->where('CertAuthJo', '!=', 0);
@@ -91,15 +91,15 @@ class CertificadoExpressController extends Controller
                     $query->where('CertAuthDp', '!=', 0);
                     $query->whereIn('FK_CertSolser', $servicioscertificadosdelcliente);
                     break;
-  
+
                 case 'Comercial':
                     /*se define la sede del usuario actual*/
                     $clientes = Cliente::where('CliDelete', 0)->where('CliCategoria', 'Cliente')->where('CliComercial', Auth::user()->FK_UserPers)->get('ID_Cli');
-  
+
                     // return $clientes;
                     $query->whereIn('FK_CertCliente', $clientes);
                     break;
-  
+
                 default:
                     // $query->where('ID_Cert', '>', 0);
                     break;
@@ -109,7 +109,7 @@ class CertificadoExpressController extends Controller
         ->whereYear('created_at', $year='2023')
         ->get();
         $certificados->map(function ($certificado) {
-          
+
             $fecharecepcionenplanta = $certificado->SolicitudServicio->programacionesrecibidas()->first('ProgVehSalida');
             if ($fecharecepcionenplanta != null) {
                 $certificado->recepcion = $fecharecepcionenplanta->ProgVehSalida;
@@ -119,12 +119,12 @@ class CertificadoExpressController extends Controller
             $certificado->cliente = $certificado->SolicitudServicio->cliente()->first('CliName')->CliName;
             $certificado->SolSerStatus = $certificado->SolicitudServicio()->first('SolSerStatus')->SolSerStatus;
             return $certificado ;
-        
+
       });
-           
+
         // return $registros;
-        return view ('certificadosExpress.2023', compact('certificados'));  
-        
+        return view ('certificadosExpress.2023', compact('certificados'));
+
       }
 
            /**
@@ -138,20 +138,20 @@ class CertificadoExpressController extends Controller
         $clienteStatus= Cliente::where('ID_Cli', $clienteID)->first('CliStatus');
         if ($clienteStatus->CliStatus == 'Bloqueado') {
             abort(403, "el acceso a la lista de certificados se encuentra bloqueado, comuniquese con su asesor comercial en PROSARC S.A. ESP");
-        }      
-   
+        }
+
         $certificados = CertificadoExpress::where(function($query){
           $years = DB :: table('certificadosexpress')
               ->select(DB::raw('distinct year(created_at) as year'))
               ->orderBy('year', 'desc')
-              ->get(); 
+              ->get();
 
               foreach ($years as $year) {
                 $registros = DB::table('certificadosexpress')
                 ->whereYear('created_at', $year='2024')
                 ->get();
               }
-  
+
             switch (Auth::user()->UsRol) {
                 case 'Cliente':
                     /*se define la sede del usuario actual*/
@@ -163,11 +163,11 @@ class CertificadoExpressController extends Controller
                     ->where('personals.ID_Pers', Auth::user()->FK_UserPers)
                     ->where('clientes.CliStatus', 'Autorizado')
                     ->value('clientes.ID_Cli');
-  
+
                     $servicioscertificadosdelcliente = SolicitudServicio::where('FK_SolSerCliente',$UserSedeID)
                     ->where('SolServCertStatus', 2)
                     ->get('ID_SolSer');
-  
+
                     //$query->whereYear('created_at', $year='2020')
                     $query->where('FK_CertCliente', $UserSedeID);
                     $query->where('CertAuthJo', '!=', 0);
@@ -175,15 +175,15 @@ class CertificadoExpressController extends Controller
                     $query->where('CertAuthDp', '!=', 0);
                     $query->whereIn('FK_CertSolser', $servicioscertificadosdelcliente);
                     break;
-  
+
                 case 'Comercial':
                     /*se define la sede del usuario actual*/
                     $clientes = Cliente::where('CliDelete', 0)->where('CliCategoria', 'Cliente')->where('CliComercial', Auth::user()->FK_UserPers)->get('ID_Cli');
-  
+
                     // return $clientes;
                     $query->whereIn('FK_CertCliente', $clientes);
                     break;
-  
+
                 default:
                     // $query->where('ID_Cert', '>', 0);
                     break;
@@ -193,7 +193,7 @@ class CertificadoExpressController extends Controller
         ->whereYear('created_at', $year='2024')
         ->get();
         $certificados->map(function ($certificado) {
-          
+
             $fecharecepcionenplanta = $certificado->SolicitudServicio->programacionesrecibidas()->first('ProgVehSalida');
             if ($fecharecepcionenplanta != null) {
                 $certificado->recepcion = $fecharecepcionenplanta->ProgVehSalida;
@@ -217,12 +217,12 @@ class CertificadoExpressController extends Controller
 
     return $certificado;
       });
-           
+
         // return $registros;
-        return view ('certificadosExpress.2024', compact('certificados'));  
-        
+        return view ('certificadosExpress.2024', compact('certificados'));
+
       }
-      
+
       /**
      * Show the form for creating a new resource.
      *
@@ -230,20 +230,20 @@ class CertificadoExpressController extends Controller
      */
       public function certex2025(){
         // validacion del status del cliente segun cartera
-        
-   
+
+
         $certificados = CertificadoExpress::where(function($query){
           $years = DB :: table('certificadosexpress')
               ->select(DB::raw('distinct year(created_at) as year'))
               ->orderBy('year', 'desc')
-              ->get(); 
+              ->get();
 
               foreach ($years as $year) {
                 $registros = DB::table('certificadosexpress')
                 ->whereYear('created_at', $year='2025')
                 ->get();
               }
-  
+
             switch (Auth::user()->UsRol) {
                 case 'Cliente':
                     /*se define la sede del usuario actual*/
@@ -255,11 +255,11 @@ class CertificadoExpressController extends Controller
                     ->where('personals.ID_Pers', Auth::user()->FK_UserPers)
                     ->where('clientes.CliStatus', 'Autorizado')
                     ->value('clientes.ID_Cli');
-  
+
                     $servicioscertificadosdelcliente = SolicitudServicio::where('FK_SolSerCliente',$UserSedeID)
                     ->where('SolServCertStatus', 2)
                     ->get('ID_SolSer');
-  
+
                     //$query->whereYear('created_at', $year='2020')
                     $query->where('FK_CertCliente', $UserSedeID);
                     $query->where('CertAuthJo', '!=', 0);
@@ -267,15 +267,15 @@ class CertificadoExpressController extends Controller
                     $query->where('CertAuthDp', '!=', 0);
                     $query->whereIn('FK_CertSolser', $servicioscertificadosdelcliente);
                     break;
-  
+
                 case 'Comercial':
                     /*se define la sede del usuario actual*/
                     $clientes = Cliente::where('CliDelete', 0)->where('CliCategoria', 'Cliente')->where('CliComercial', Auth::user()->FK_UserPers)->get('ID_Cli');
-  
+
                     // return $clientes;
                     $query->whereIn('FK_CertCliente', $clientes);
                     break;
-  
+
                 default:
                     // $query->where('ID_Cert', '>', 0);
                     break;
@@ -285,7 +285,7 @@ class CertificadoExpressController extends Controller
         ->whereYear('created_at', $year='2025')
         ->get();
         $certificados->map(function ($certificado) {
-          
+
             $fecharecepcionenplanta = $certificado->SolicitudServicio->programacionesrecibidas()->first('ProgVehSalida');
             if ($fecharecepcionenplanta != null) {
                 $certificado->recepcion = $fecharecepcionenplanta->ProgVehSalida;
@@ -309,12 +309,12 @@ class CertificadoExpressController extends Controller
 
     return $certificado;
       });
-           
+
         // return $registros;
-        return view ('certificadosExpress.2025', compact('certificados'));  
-        
+        return view ('certificadosExpress.2025', compact('certificados'));
+
       }
-      
+
      /**
      * Show the form for creating a new resource.
      *
@@ -322,20 +322,20 @@ class CertificadoExpressController extends Controller
      */
       public function certex2026(){
         // validacion del status del cliente segun cartera
-        
-   
+
+
         $certificados = CertificadoExpress::where(function($query){
           $years = DB :: table('certificadosexpress')
               ->select(DB::raw('distinct year(created_at) as year'))
               ->orderBy('year', 'desc')
-              ->get(); 
+              ->get();
 
               foreach ($years as $year) {
                 $registros = DB::table('certificadosexpress')
                 ->whereYear('created_at', $year='2025')
                 ->get();
               }
-  
+
             switch (Auth::user()->UsRol) {
                 case 'Cliente':
                     /*se define la sede del usuario actual*/
@@ -347,11 +347,11 @@ class CertificadoExpressController extends Controller
                     ->where('personals.ID_Pers', Auth::user()->FK_UserPers)
                     ->where('clientes.CliStatus', 'Autorizado')
                     ->value('clientes.ID_Cli');
-  
+
                     $servicioscertificadosdelcliente = SolicitudServicio::where('FK_SolSerCliente',$UserSedeID)
                     ->where('SolServCertStatus', 2)
                     ->get('ID_SolSer');
-  
+
                     //$query->whereYear('created_at', $year='2020')
                     $query->where('FK_CertCliente', $UserSedeID);
                     $query->where('CertAuthJo', '!=', 0);
@@ -359,15 +359,15 @@ class CertificadoExpressController extends Controller
                     $query->where('CertAuthDp', '!=', 0);
                     $query->whereIn('FK_CertSolser', $servicioscertificadosdelcliente);
                     break;
-  
+
                 case 'Comercial':
                     /*se define la sede del usuario actual*/
                     $clientes = Cliente::where('CliDelete', 0)->where('CliCategoria', 'Cliente')->where('CliComercial', Auth::user()->FK_UserPers)->get('ID_Cli');
-  
+
                     // return $clientes;
                     $query->whereIn('FK_CertCliente', $clientes);
                     break;
-  
+
                 default:
                     // $query->where('ID_Cert', '>', 0);
                     break;
@@ -377,14 +377,25 @@ class CertificadoExpressController extends Controller
         ->whereYear('created_at', $year='2026')
         ->get();
         $certificados->map(function ($certificado) {
-          
+
             $fecharecepcionenplanta = $certificado->SolicitudServicio->programacionesrecibidas()->first('ProgVehSalida');
             if ($fecharecepcionenplanta != null) {
                 $certificado->recepcion = $fecharecepcionenplanta->ProgVehSalida;
             }else{
                 $certificado->recepcion = "";
             }
-            $certificado->cliente = $certificado->SolicitudServicio->cliente()->first('CliName')->CliName;
+            $solicitud = $certificado->SolicitudServicio;
+
+            if ($solicitud->FK_Cliente_Express) {
+                // Si es Cliente Express, consultamos la relación o tabla clientes_express
+                $certificado->cliente = DB::table('clientes_express')
+                    ->where('id', $solicitud->FK_Cliente_Express)
+                    ->value('nombreEmpresa');
+            } else {
+                // Si es Cliente Estándar, mantenemos la lógica anterior
+                $certificado->cliente = $solicitud->cliente()->first('CliName')?->CliName;
+            }
+            //$certificado->cliente = $certificado->SolicitudServicio->cliente()->first('CliName')->CliName;
             $certificado->SolSerStatus = $certificado->SolicitudServicio()->first('SolSerStatus')->SolSerStatus;
             $certificado->url_pdf = null;
     switch ($certificado->CertType) {
@@ -401,10 +412,10 @@ class CertificadoExpressController extends Controller
 
     return $certificado;
       });
-           
+
         // return $registros;
-        return view ('certificadosExpress.2026', compact('certificados'));  
-        
+        return view ('certificadosExpress.2026', compact('certificados'));
+
       }
 
 
@@ -436,7 +447,7 @@ class CertificadoExpressController extends Controller
         // $certificado->update();
 
 
-        // return view('certificadosExpress.edit', compact('SolicitudServicio')); 
+        // return view('certificadosExpress.edit', compact('SolicitudServicio'));
 
         // return redirect()->route('solicitud-servicio.solservdocindex', compact('id'));
     }
@@ -470,7 +481,7 @@ class CertificadoExpressController extends Controller
                 $query->with('generespel.respels');
                 $query->with('requerimiento');
             }]);
-            
+
         }, 'cliente.sedes.Municipios.Departamento', 'sedegenerador.generadors', 'sedegenerador.municipio.Departamento', 'gestor.sedes.Municipios.Departamento', 'tratamiento', 'transportador.sedes.Municipios.Departamento','certdato.solres'])
         ->where('CertSlug', $id)
         ->first();
@@ -480,9 +491,9 @@ class CertificadoExpressController extends Controller
 	        $item->SolResRM2 = $rm->SolResRM;
 		  	return $item;
 		});
-        
+
         // return $certificado;
-        return view('certificadosExpress.show', compact('certificado')); 
+        return view('certificadosExpress.show', compact('certificado'));
     }
 
     /**
@@ -501,14 +512,14 @@ class CertificadoExpressController extends Controller
                     $query->with('generespel.respels');
                     $query->with('requerimiento');
                 }]);
-                
+
             }, 'cliente.sedes.Municipios.Departamento', 'sedegenerador.generadors', 'sedegenerador.municipio.Departamento', 'gestor.sedes.Municipios.Departamento', 'tratamiento', 'transportador.sedes.Municipios.Departamento'])
             ->where('CertSlug', $id)
             ->first();
 
             $ultimoCertificado = CertificadoExpress::where('CertNumero', '!=', NULL)->orderBy('CertNumero', 'desc')->first('CertNumero');
             $proximoCertificado = ($ultimoCertificado->CertNumero == NULL) ? 1 : $ultimoCertificado->CertNumero+1 ;
-            
+
             $ultimoManif = CertificadoExpress::where('CertManifNumero', '!=', NULL)->orderBy('CertManifNumero', 'desc')->first('CertManifNumero');
 			$proximoManif = ($ultimoManif == NULL) ? 1 : ($ultimoManif->CertManifNumero+1);
             $certificado->SolicitudServicio->SolicitudResiduo = $certificado->SolicitudServicio->SolicitudResiduo->map(function ($item) {
@@ -525,11 +536,11 @@ class CertificadoExpressController extends Controller
             $qrCode->setRoundBlockSize(true, QrCode::ROUND_BLOCK_SIZE_MODE_SHRINK);
 
                 // return $qrCode->writeDataUri();
-            return view('certificadosExpress.edit', compact(['certificado', 'proximoCertificado', 'proximoManif', 'qrCode']))->withHeaders('Content-Type', $qrCode->getContentType()); 
+            return view('certificadosExpress.edit', compact(['certificado', 'proximoCertificado', 'proximoManif', 'qrCode']))->withHeaders('Content-Type', $qrCode->getContentType());
         }else{
             abort(404, "no posee permisos para la edición de certificados");
         }
-        
+
     }
 
     /**
@@ -647,7 +658,7 @@ class CertificadoExpressController extends Controller
                 }
                 $certificado->CertSrcExt = $hoja;
                 break;
-            
+
             default:
                 $certificado->CertNumero = $request->input('CertNumero');
                 break;
@@ -663,7 +674,7 @@ class CertificadoExpressController extends Controller
             Mail::to(self::MAIL_EXPRESS_INTERNO)->send(new CertUpdated($certificado, $servicio, $cliente));
 
         }
-        
+
         $log = new audit();
         $log->AuditTabla="certificadosexpress";
         $log->AuditType="actualizado";
@@ -671,8 +682,8 @@ class CertificadoExpressController extends Controller
         $log->AuditUser=Auth::user()->email;
         $log->Auditlog=json_encode($id);
         $log->save();
-        
-           // return view('certificadosExpress.edit', compact('certificado')); 
+
+           // return view('certificadosExpress.edit', compact('certificado'));
         // return redirect()->action('CertificadoController@edit', ['CertSlug' => $certificado->CertSlug]);
         return redirect()->route('certificados.index');
 
@@ -741,7 +752,7 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
 
                 case 'AsistenteLogistica':
@@ -766,10 +777,10 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
 
-                    
+
                 case 'Programador':
                     if (($certificado->CertAuthDp == 0)&&($certificado->CertAuthJl == 0)&&($certificado->CertAuthJo == 0)) {
                         # code...
@@ -792,9 +803,9 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
-                
+
                 default:
                     # code...
                     break;
@@ -839,7 +850,7 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
 
                 case 'AsistenteLogistica':
@@ -864,10 +875,10 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
 
-                    
+
                 case 'Programador':
                     if (($certificado->CertAuthDp == 0)&&($certificado->CertAuthJl == 0)&&($certificado->CertAuthJo == 0)) {
                         # code...
@@ -890,9 +901,9 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
-                
+
                 default:
                     # code...
                     break;
@@ -915,7 +926,7 @@ class CertificadoExpressController extends Controller
                 Mail::to(self::MAIL_EXPRESS_INTERNO)->send(new CertUpdatedComercial($certificado, $servicio, $cliente));
             }
         }
-                  
+
 
         return redirect()->route('solicitud-servicio.documentos', [$servicio]);
     }
@@ -973,7 +984,7 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
 
                 case 'AsistenteLogistica':
@@ -998,10 +1009,10 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
 
-                    
+
                 case 'Programador':
                     if (($certificado->CertAuthDp == 0)&&($certificado->CertAuthJl == 0)&&($certificado->CertAuthJo == 0)) {
                         # code...
@@ -1024,9 +1035,9 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
-                
+
                 default:
                     # code...
                     break;
@@ -1071,7 +1082,7 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
 
                 case 'AsistenteLogistica':
@@ -1096,10 +1107,10 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
 
-                    
+
                 case 'Programador':
                     if (($certificado->CertAuthDp == 0)&&($certificado->CertAuthJl == 0)&&($certificado->CertAuthJo == 0)) {
                         # code...
@@ -1122,9 +1133,9 @@ class CertificadoExpressController extends Controller
                             $c=$c+1;
                         }
                     }
-                    
+
                     break;
-                
+
                 default:
                     # code...
                     break;
@@ -1168,7 +1179,7 @@ class CertificadoExpressController extends Controller
                 $query->with('generespel.respels');
                 $query->with('requerimiento');
             }]);
-            
+
         }, 'cliente.sedes.Municipios.Departamento', 'sedegenerador.generadors', 'sedegenerador.municipio.Departamento', 'gestor.sedes.Municipios.Departamento', 'tratamiento', 'transportador.sedes.Municipios.Departamento','certdato.solres'])
         ->where('CertSlug', $id)
         ->first();
@@ -1183,20 +1194,20 @@ class CertificadoExpressController extends Controller
         // return $certificado;
         switch ($certificado->tratamiento->TratName) {
             case 'TermoDestrucción':
-                return view('certificadosExpress.imprimible', compact('certificado')); 
+                return view('certificadosExpress.imprimible', compact('certificado'));
                 break;
             case 'Posconsumo luminarias':
-                return view('certificadosExpress.luminarias', compact('certificado')); 
+                return view('certificadosExpress.luminarias', compact('certificado'));
                 break;
             default:
-                return view('certificadosExpress.manifiesto', compact('certificado')); 
+                return view('certificadosExpress.manifiesto', compact('certificado'));
                 break;
         }
     }
 
 
     public function independiente(Request $request, $id)
-	{        
+	{
         $certificadoOld = CertificadoExpress::where('ID_Cert', $id)->first();
 
         $certificadoNew = $certificadoOld->replicate()->fill([
@@ -1212,7 +1223,7 @@ class CertificadoExpressController extends Controller
             'CertAuthDp' => 0,
         ]);
         $certificadoNew->save();
-        
+
         foreach ($request->input('residuos') as $key => $value) {
             $certdato = CertExpressdato::where('ID_CertDato', $value)->first();
             $certdato->FK_DatoCert = $certificadoNew->ID_Cert;
@@ -1226,7 +1237,7 @@ class CertificadoExpressController extends Controller
         $log->AuditUser=Auth::user()->email;
         $log->Auditlog=json_encode($request);
         $log->save();
-        
+
         return redirect()->route('certificados.show', ['id' => $certificadoNew->CertSlug]);
 	}
 }

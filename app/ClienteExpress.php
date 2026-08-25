@@ -22,6 +22,7 @@ class ClienteExpress extends Model
         'lugarExpedicion',
         'localidad'
     ];
+    protected $primaryKey = 'id';
 
     public function sedes()
     {
