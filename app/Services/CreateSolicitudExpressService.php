@@ -27,8 +27,13 @@ class CreateSolicitudExpressService
      */
     public function createSolicitud(array $datos, $idSolicitud): SolicitudServicio
     {
-        $idSede = $datos['idSede'] ?? null;
         $idCliente = $datos['idCliente'] ?? null;
+        if(!$idCliente) {
+            $idCliente = DB::table('solicitudes_express')
+                ->where('idSolicitud', $idSolicitud)
+                ->first();
+            $idSede = $idCliente->idSede;
+        }
 
         $direccionObj = DB::table('sedes_express')
             ->where('id', $idSede)
@@ -63,7 +68,7 @@ class CreateSolicitudExpressService
         $solExpress->SolSerDevolucion = 0;
         $solExpress->SolSerDevolucionTipo = null;
         $solExpress->FK_SolSerPersona = null;
-        $solExpress->FK_Cliente_Express = $idCliente;
+        $solExpress->FK_Cliente_Express = $idCliente->idCliente;
         $solExpress->SolSerDescript = null;
         $solExpress->SolSerSupport = null;
         $solExpress->SolServCertStatus = 0;
@@ -92,7 +97,11 @@ class CreateSolicitudExpressService
         $observacion->FK_ObsSolSer = $solExpress->ID_SolSer;
         $observacion->save();
 
-        $this->createProgramacion($solExpress, $datos['localidad'] ?? '');
+        $programacion = $this->createProgramacion($solExpress, $datos['localidad'] ?? '');
+
+        log::info('Programación creada con ID: ' . $programacion->ID_ProgVehiculo . ' para SolicitudServicio ID: ' . $solExpress->ID_SolSer . 'En la fecha: ' . $programacion->ProgVehFecha);
+
+        $solExpress->ProgVehFecha = $programacion->ProgVehFecha;
 
         return $solExpress;
     }

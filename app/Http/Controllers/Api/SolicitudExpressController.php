@@ -21,6 +21,7 @@ class SolicitudExpressController extends Controller
     public function solicitud(Request $request)
     {
         try {
+            log::info('Esta es la información que esta llegando: ', $request->all());
             $idSolicitud  = $request->input('idSolicitud');
             $tipoResiduo  = $request->input('tipoResiduo');
 
@@ -98,8 +99,15 @@ class SolicitudExpressController extends Controller
 
             if (isset($datos['estado']) && $datos['estado'] === 'Pagado') {
                 try {
+                    log::info('Creando SolicitudServicio para idSolicitud API: ' . $idSolicitud);
                     $service = new CreateSolicitudExpressService();
                     $solicitudServicio = $service->createSolicitud($datos, $idSolicitud);
+                    return response()->json([
+                        'success'     => true,
+                        'message'     => 'Solicitud programada correctamente',
+                        'idSolicitud' => $idSolicitud,
+                        'fecha'        => $solicitudServicio->ProgVehFecha ?? null,
+                    ], 200);
                 } catch (\Exception $e) {
                     Log::error('Error al crear SolicitudServicio: ' . $e->getMessage());
                     return response()->json([
