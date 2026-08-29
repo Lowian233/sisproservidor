@@ -3555,11 +3555,13 @@ public function changestatus(Request $request)
 		 $SolicitudServicio = DB::table('solicitud_servicios')
 			 ->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
 			 ->join('cargos', 'personals.FK_PersCargo', '=', 'ID_Carg')
+             ->join('progvehiculos', 'progvehiculos.FK_ProgServi', '=', 'solicitud_servicios.ID_SolSer')
 			 ->select(
 				 'solicitud_servicios.*',
 				 'personals.PersFirstName', 'personals.PersLastName',
 				 'personals.PersEmail', 'personals.PersCellphone',
-				 'cargos.CargName'
+				 'cargos.CargName',
+                 'progvehiculos.ProgVehPrecintos'
 			 )
 			 ->where('solicitud_servicios.SolSerSlug', $id)
 			 ->first();
@@ -4054,6 +4056,7 @@ public function changestatus(Request $request)
 					 ));
 					 break;
 				 case 'Programado':
+                    //return $Programaciones;
 					 return view('solicitud-serv.rm', compact(
 						 'SolicitudServicio', 'Residuos', 'GenerResiduos', 'Cliente',
 						 'SolSerConductor', 'Programaciones', 'ProgramacionesActivas',
@@ -5120,4 +5123,40 @@ public function changestatus(Request $request)
 		return $this->recibomaterial($id);
 
 	 }
+
+    public function updatePrecinto(Request $request, $id)
+    {
+        $request->validate([
+            'ProgVehPrecintos' => 'required'
+        ]);
+
+        // Procesar los precintos en formato array/JSON
+        $precintosInput = $request->input('ProgVehPrecintos');
+
+        if (is_string($precintosInput)) {
+            // Convertir string separado por comas en array sin espacios vacíos
+            $arrayPrecintos = array_map('trim', explode(',', $precintosInput));
+            $arrayPrecintos = array_values(array_filter($arrayPrecintos));
+            $precintosFinal = json_encode($arrayPrecintos);
+        } else {
+            $precintosFinal = json_encode($precintosInput);
+        }
+
+        // Actualizar en la programación del vehículo o solicitud correspondiente
+        $programacion = ProgramacionVehiculo::where('FK_ProgServi', $id)->first();
+
+        if ($programacion) {
+            $programacion->ProgVehPrecintos = $precintosFinal;
+            $programacion->save();
+        }
+
+        // Opcional: Actualizar también en SolicitudServicio si la tabla lo almacena
+        $solicitud = SolicitudServicio::find($id);
+        if ($solicitud) {
+            $solicitud->Precintos = $precintosFinal;
+            $solicitud->save();
+        }
+
+        return redirect()->back()->with('success', 'Precintos actualizados correctamente.');
+}
 }

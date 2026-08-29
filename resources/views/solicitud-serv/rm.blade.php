@@ -27,7 +27,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
         <div>
             <p style="text-align: center; font-family: , serif; font-size: 24px; font-weight: bold; color: #333;">Información del cliente</p>
         </div>
-        
+
         <div class="container-fluid spark-screen">
             <table class=MsoTable15Grid2Accent3 border=1 cellspacing=0 cellpadding=0
             style='width:100.0%;border-collapse:collapse;border:none'>
@@ -147,14 +147,53 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                 style='color:black'>{{$SolicitudServicio->SolSerVehiculo}}</span></p>
                 </td>
             </tr>
+            <tr style='height:26.85pt'>
+                <td width=340 style='width:255.05pt;border-bottom:solid windowtext 1.0pt;border-top:solid windowtext 1.0pt;
+                background:white;padding:0cm 5.4pt 0cm 5.4pt;height:26.85pt'>
+                <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
+                style='color:black'>PRECINTO:</span></b></p>
+                </td>
+                <td width=340 style='width:255.05pt;border-top:solid windowtext 1.0pt;
+                border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+                background:white;padding:0cm 5.4pt 0cm 5.4pt;height:26.85pt'>
+                    <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'>
+                        <span style='color:black'>
+                            @php
+                                $todosPrecintos = [];
+                                foreach ($Programaciones as $prog) {
+                                    $p = is_string($prog->ProgVehPrecintos)
+                                        ? json_decode($prog->ProgVehPrecintos, true)
+                                        : $prog->ProgVehPrecintos;
+
+                                    if (is_array($p)) {
+                                        $todosPrecintos = array_merge($todosPrecintos, $p);
+                                    } elseif (!empty($p)) {
+                                        $todosPrecintos[] = $p;
+                                    }
+                                }
+                            @endphp
+                            {{ count($todosPrecintos) ? implode(', ', array_unique($todosPrecintos)) : 'N/A' }}
+                        </span>
+                    </p>
+                </td>
+                <td colspan="2" style='border-top:solid windowtext 1.0pt; border-bottom:solid windowtext 1.0pt; border-right:solid windowtext 1.0pt; border-left:none; background:white; padding:0cm 5.4pt; height:26.85pt; text-align: center; vertical-align: middle;'>
+                    <button type="button"
+                            class="btn-change-precinto"
+                            data-toggle="modal"
+                            data-target="#modalCambiarPrecinto"
+                            style="background: none; border: none; padding: 0; color: #0056b3; cursor: pointer; font-weight: bold;">
+                        <i class="fa fa-edit"></i> Cambiar precinto
+                    </button>
+                </td>
+            </tr>
             </table>
         </div>
     </main>
     @foreach($GenerResiduos as $generadores)
-            <main style="border:solid windowtext 1.0pt; padding:30px;"> 
+            <main style="border:solid windowtext 1.0pt; padding:30px;">
                 <div>
                     <p style="text-align: center; font-family: , serif; font-size: 24px; font-weight: bold; color: #333;">Información de recolección por generadores</p>
-                    <a href="/solicitud-servicio/{{$SolicitudServicio->SolSerSlug}}/add-respel" class="btn btn-primary pull-right"><i class="fas fa-plus"></i><b> Añadir Residuo</b></a>                    
+                    <a href="/solicitud-servicio/{{$SolicitudServicio->SolSerSlug}}/add-respel" class="btn btn-primary pull-right"><i class="fas fa-plus"></i><b> Añadir Residuo</b></a>
                 </div>
                 <br>
                 <br>
@@ -225,7 +264,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                     </tr>
                     </table>
                     <table id="SolserGenerTable" class="table table-bordered">
-                            @php 
+                            @php
                                 // $TotalEnv = 0;
                                 // $TotalRec = 0;
                                 // $TotalCons = 0;
@@ -236,7 +275,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                                     <th>{{__('adminlte::message.solserrespel')}}</th>
                                     <th>Tratamiento</th>
                                     <th>Corriente</th>
-                                    <th>Embalaje</th> 
+                                    <th>Embalaje</th>
 									<th>Cantidad <br> Embalaje</th>
                                     <th>Cantidad <br> Declarada</th>
                                     <th>Cantidad <br> Recibida</th>
@@ -263,7 +302,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                                                     break;
                                             }
                                         @endphp
-                                    <tr>    
+                                    <tr>
                                         <td><a title="Ver Residuo" href="/respels/{{$Residuo->RespelSlug}}" target="_blank" {{(in_array(Auth::user()->UsRol, Permisos::AREALOGISTICA))&&($Residuo->RespelStatus != "Revisado") ? 'style=color:red;' : ""}} >
                                             <i class="fas fa-external-link-alt"></i>
                                             </a>
@@ -284,7 +323,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                                             @else
                                                 <td class="text-center">N/D</td>
                                             @endif
-                                        @endif	
+                                        @endif
                                         @endforeach
                                         <td>{{$Residuo->SolResEmbalaje}}</td>
                                         <td style="text-align: center;">@if(in_array(Auth::user()->UsRol, Permisos::SolSer1) || in_array(Auth::user()->UsRol2, Permisos::SolSer1))
@@ -301,7 +340,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                                                     @if($Residuo->SolResTypeUnidad == 'Litros' || $Residuo->SolResTypeUnidad == 'Unidad')
 													<a onclick="addkg(`{{$Residuo->SolResSlug}}`, `{{$Residuo->SolResCantiUnidadRecibida}}`, `{{$Residuo->SolResCantiUnidadConciliada}}`, `{{$TypeUnidad}}`, `{{$Residuo->SolResKgRecibido == 0 ? '' : number_format($Residuo->SolResKgRecibido, $decimals = 2, $dec_point = ',', $thousands_sep = '.')}}`, null, `{!!json_encode($Residuo->SolResRM2, JSON_NUMERIC_CHECK)!!}`)">
                                                     @else
-													<a onclick="addkg(`{{$Residuo->SolResSlug}}`, `{{$Residuo->SolResCantiUnidadRecibida}}`, `{{$Residuo->SolResCantiUnidadConciliada}}`, `{{$TypeUnidad}}`, `{{$Residuo->SolResKgRecibido == 0 ? '' : number_format($Residuo->SolResKgRecibido, $decimals = 2, $dec_point = ',', $thousands_sep = '.')}}`, null, `{!!json_encode($Residuo->SolResRM2, JSON_NUMERIC_CHECK)!!}`)"> 
+													<a onclick="addkg(`{{$Residuo->SolResSlug}}`, `{{$Residuo->SolResCantiUnidadRecibida}}`, `{{$Residuo->SolResCantiUnidadConciliada}}`, `{{$TypeUnidad}}`, `{{$Residuo->SolResKgRecibido == 0 ? '' : number_format($Residuo->SolResKgRecibido, $decimals = 2, $dec_point = ',', $thousands_sep = '.')}}`, null, `{!!json_encode($Residuo->SolResRM2, JSON_NUMERIC_CHECK)!!}`)">
                                                     @endif
                                                 @else
                                                     <a style="color: black">
@@ -331,7 +370,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                         <a target="_blank" href="/solicitud-servicio/{{$generadores->FK_SGener}}/{{$SolicitudServicio->SolSerSlug}}/wordtemplate" class="btn btn-primary pull-right" style="margin-right: 1em"> <i class="fas fa-file-word"></i> <b>Recibo Material</b></a>
 					</td>
                         <br>
-                        <br>   
+                        <br>
                         <div id="addkgmodal"></div>
                         <div id="ModalStatusFirmaCliente"></div>
                         <div id="ModalStatusFirmaConductor"></div>
@@ -352,8 +391,71 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 		</div>
 		<div id="ModalStatus"></div>
         <div id="ModalStatusPDA"></div>
-        
-</div>        
+
+</div>
+<!-- Modal Cambiar Precinto -->
+<div class="modal fade" id="modalCambiarPrecinto" tabindex="-1" role="dialog" aria-labelledby="modalCambiarPrecintoLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <form action="{{ route('vehicle-programacion.updatePrecinto', $SolicitudServicio->ID_SolSer) }}" method="POST">
+                @csrf
+                @method('PUT')
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCambiarPrecintoLabel">
+                        <i class="fa fa-edit"></i> Cambiar Precinto
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="inputPrecintos">Ingrese los nuevos precintos:</label>
+
+                        @php
+                            $todosPrecintos = [];
+                            if (isset($Programaciones)) {
+                                foreach ($Programaciones as $prog) {
+                                    $p = is_string($prog->ProgVehPrecintos)
+                                        ? json_decode($prog->ProgVehPrecintos, true)
+                                        : $prog->ProgVehPrecintos;
+
+                                    if (is_array($p)) {
+                                        $todosPrecintos = array_merge($todosPrecintos, $p);
+                                    } elseif (!empty($p)) {
+                                        $todosPrecintos[] = $p;
+                                    }
+                                }
+                            }
+                            $precintosVal = count($todosPrecintos) ? implode(', ', array_unique($todosPrecintos)) : '';
+                        @endphp
+
+                        <input type="text"
+                               class="form-control"
+                               id="inputPrecintos"
+                               name="ProgVehPrecintos"
+                               placeholder="Ej: P-001, P-002"
+                               value="{{ $precintosVal }}"
+                               required>
+                        <small class="form-text text-muted">Separe los precintos por comas si son varios.</small>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
 @endsection
 
 <script>
@@ -389,7 +491,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 		`;
 		$('#modalEditEmbalaje').modal();
 		$('#FormEmbalaje').validator('update');
-		$('#FormEmbalaje').validator('validate');		
+		$('#FormEmbalaje').validator('validate');
 	}
 </script>
 
@@ -449,23 +551,23 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                                             <small class="help-block with-errors">*</small>
                                             <input type="number" step=".01" class="form-control numberKg" id="SolResKgRecibido" name="SolResKg" maxlength="5" value="`+cantidadKG+`" required>
                                         </div>
-                                        <div class="form-group col-md-12">	
+                                        <div class="form-group col-md-12">
                                              `+(tipo != 'Kilogramos' ? '<label for="SolResCantiUnidadRecibida">Cantidad Recibida '+tipo+'</label><small class="help-block with-errors">*</small><input type="number" step=".1" min="0" class="form-control numberKg" id="SolResCantiUnidadRecibida" name="SolResCantiUnidadRecibida" maxlength="5" value="'+cantidad+'" required>' : '')+`
                                         </div>
                                             @break
                                         @case('No Conciliado')
                                         @case('Completado')
-                                        <div class="form-group col-md-12">	
+                                        <div class="form-group col-md-12">
                                             <label for="SolResKgConciliado">Cantidad Conciliada (kg)</label><small class="help-block with-errors">*</small><input type="number" step=".01" min="0" class="form-control" id="SolResKgConciliado" name="SolResKg" maxlength="5" value="`+cantidadKG+`" required>
                                         </div>
-                                        <div class="form-group col-md-12">	
+                                        <div class="form-group col-md-12">
                                                 `+(tipo != 'Kilogramos' ? '<label for="SolResCantiUnidadConciliada">Cantidad Conciliada '+tipo+' </label><small class="help-block with-errors">*</small><input type="number" step=".1" min="0" class="form-control" id="SolResCantiUnidadConciliada" name="SolResCantiUnidadConciliada" maxlength="5" value="'+cantidad+'" required>' : '')+`
                                         </div>
                                             @break
                                         @case('Conciliado')
                                         @case('Certificacion')
                                         @case('Facturado')
-                                        <div class="form-group col-md-12">	
+                                        <div class="form-group col-md-12">
                                             <label for="SolResKgTratado">Cantidad Tratada (kg)</label>
                                             <small class="help-block with-errors">*</small>
                                             <div class="input-group">
@@ -476,7 +578,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="form-group col-md-12">	
+                                        <div class="form-group col-md-12">
                                             `+(tipo != 'Kilogramos' ? '<label for="SolResCantiUnidadTratada">Cantidad Tratada '+tipo+' </label><small class="help-block with-errors">*</small><input type="number" step=".1" min="0" class="form-control" id="SolResCantiUnidadTratada" name="SolResCantiUnidadTratada" maxlength="5" max="'+cantidadmax+'" value="'+cantidad+'" required>' : '')+`
                                         </div>
                                             @break
@@ -518,7 +620,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
         SelectsMultiple();
         $('#FormKg').validator('update');
     };
-	
+
 
     function ModalStatusFirmaCliente(slug, FK_SGener){
 		$('#ModalStatusFirmaCliente').empty();
@@ -562,15 +664,15 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 								<input type="text" name="solserslug" value="`+slug+`" style="display: none;">
 								<br>
 								<div class="form-group col-md-12">
-									<label  color: black; text-align: left;" data-placement="auto" data-trigger="hover" data-html="true" data-toggle="popover" title="<b>Observación</b>" data-content="Describa la observación del servicio"><i style="font-size: 1.8rem; color: Dodgerblue;" class="fas fa-info-circle fa-2x fa-spin"></i>Observación</label>					
+									<label  color: black; text-align: left;" data-placement="auto" data-trigger="hover" data-html="true" data-toggle="popover" title="<b>Observación</b>" data-content="Describa la observación del servicio"><i style="font-size: 1.8rem; color: Dodgerblue;" class="fas fa-info-circle fa-2x fa-spin"></i>Observación</label>
 									<textarea id="Observacion" rows ="1" style="resize: vertical;" maxlength="4000" class="form-control col-xs-12" name="Observacion"></textarea>
 								</div>
 								<div class="form-group col-md-12">
-									<label  color: black; text-align: left;" data-placement="auto" data-trigger="hover" data-html="true" data-toggle="popover" title="<b>Funcionario</b>" data-content="Ingrese el nombre de la persona que entrega los residuos @if($tienePrecintos)(obligatorio cuando hay precintos)@endif"><i style="font-size: 1.8rem; color: Dodgerblue;" class="fas fa-info-circle fa-2x fa-spin"></i>Nombre del Funcionario</label>					
+									<label  color: black; text-align: left;" data-placement="auto" data-trigger="hover" data-html="true" data-toggle="popover" title="<b>Funcionario</b>" data-content="Ingrese el nombre de la persona que entrega los residuos @if($tienePrecintos)(obligatorio cuando hay precintos)@endif"><i style="font-size: 1.8rem; color: Dodgerblue;" class="fas fa-info-circle fa-2x fa-spin"></i>Nombre del Funcionario</label>
 									<textarea id="NombreFuncionario" rows ="1" style="resize: vertical;" maxlength="4000" class="form-control col-xs-12" name="NombreFuncionario" @if($tienePrecintos) required @endif placeholder="{{ $tienePrecintos ? 'Obligatorio cuando hay precintos' : 'Opcional' }}"></textarea>
 								</div>
 								<div class="form-group col-md-12">
-									<label  color: black; text-align: left;" data-placement="auto" data-trigger="hover" data-html="true" data-toggle="popover" title="<b>Documento</b>" data-content="Ingrese el numero de documento de la persona que entrega los residuos @if($tienePrecintos)(obligatorio cuando hay precintos)@endif"><i style="font-size: 1.8rem; color: Dodgerblue;" class="fas fa-info-circle fa-2x fa-spin"></i>Numero de documento</label>					
+									<label  color: black; text-align: left;" data-placement="auto" data-trigger="hover" data-html="true" data-toggle="popover" title="<b>Documento</b>" data-content="Ingrese el numero de documento de la persona que entrega los residuos @if($tienePrecintos)(obligatorio cuando hay precintos)@endif"><i style="font-size: 1.8rem; color: Dodgerblue;" class="fas fa-info-circle fa-2x fa-spin"></i>Numero de documento</label>
 									<textarea id="CedulaFuncionario" rows ="1" style="resize: vertical;" maxlength="4000" class="form-control col-xs-12" name="CedulaFuncionario" @if($tienePrecintos) required @endif placeholder="{{ $tienePrecintos ? 'Obligatorio cuando hay precintos' : 'Opcional' }}"></textarea>
 								</div>
 							</div>
@@ -712,7 +814,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 		$('#myModal').modal();
 	}
 
-    
+
     function ModalStatusFirmaConductor(slug, FK_SGener){
 		$('#ModalStatusFirmaConductor').empty();
 		$('#ModalStatusFirmaConductor').append(`
@@ -1085,7 +1187,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 								<input type="submit" id="Cambiar`+slug+`" style="display: none;">
 								<input type="text" name="solserslug" value="`+slug+`" style="display: none;">
 								<input type="text" name="solserstatus" value="`+status+`" style="display: none;">
-							</div> 
+							</div>
 							<div class="modal-footer">
 								<button type="button" class="btn btn-warning pull-left" data-dismiss="modal">Cancelar</button>
 								<label for="Cambiar`+slug+`" class='btn btn-success'>Enviar</label>
@@ -1111,14 +1213,14 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 	// **NUEVO FLUJO**: Detectar clic en "Recibo Material" para habilitar botón "Recibido"
 	document.addEventListener('DOMContentLoaded', function() {
 		console.log('Configurando listener para "Recibo Material"');
-		
-		// Buscar todos los enlaces de "Recibo Material" 
+
+		// Buscar todos los enlaces de "Recibo Material"
 		const reciboMaterialLinks = document.querySelectorAll('a[href*="wordtemplate"]');
-		
+
 		reciboMaterialLinks.forEach(function(link) {
 			link.addEventListener('click', function(e) {
 				console.log('¡Usuario hizo clic en "Recibo Material"!');
-				
+
 				// Mostrar notificación inmediata
 				if (typeof Swal !== 'undefined') {
 					Swal.fire({
@@ -1128,7 +1230,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 						timer: 2000,
 						showConfirmButton: false
 					});
-					
+
 					// Después de 2.5 segundos, habilitar el botón "Recibido"
 					setTimeout(function() {
 						habilitarBotonRecibido();
@@ -1142,7 +1244,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 			});
 		});
 	});
-	
+
 	function habilitarBotonRecibido() {
 		const btnRecibido = document.getElementById('btn-recibido');
 		if (btnRecibido) {
@@ -1152,9 +1254,9 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 			btnRecibido.style.pointerEvents = 'auto';
 			btnRecibido.style.opacity = '1';
 			btnRecibido.innerHTML = '<i class="fas fa-clipboard-check"></i> {{__("adminlte::message.solserstatusrecibido")}}';
-			
+
 			console.log('✅ Botón "Recibido" habilitado exitosamente');
-			
+
 			// Notificación visual
 			if (typeof Swal !== 'undefined') {
 				Swal.fire({
@@ -1172,4 +1274,4 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 
 
 
-</script>    
+</script>

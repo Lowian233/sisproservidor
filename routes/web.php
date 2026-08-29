@@ -337,6 +337,7 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 	Route::get('/solicitud-servicio/{id}/{slug}/wordtemplate', 'SolicitudServicioController@rmtemplate')->name('recibomaterial');
 	Route::get('/solicitud-servicio/{slug}/duplicarpesos', 'SolicitudServicioController@duplicarpesos')->name('duplicarpesos');
 	Route::post('/solicitud-servicio/{id}/NuevoRespel', 'SolicitudServicioController@NuevoRespel');
+    Route::put('/solicitud-servicio/updatePrecinto/{id}', 'SolicitudServicioController@updatePrecinto')->name('vehicle-programacion.updatePrecinto');
 
 	/*Rutas para ver las solicitudes por año*/
 	Route::get('solicitud-serv.2020', ['as' => 'solicitud-serv.2020', 'uses' => 'SolicitudServicioController@soli2020']);

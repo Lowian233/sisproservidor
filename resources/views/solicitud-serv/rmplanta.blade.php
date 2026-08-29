@@ -170,6 +170,45 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                 style='color:black'>{{$SolicitudServicio->recepcion ?? 'N/A'}}</span></p>
                 </td>
             </tr>
+            <tr style='height:26.85pt'>
+                <td width=340 style='width:255.05pt;border-bottom:solid windowtext 1.0pt;border-top:solid windowtext 1.0pt;
+                background:white;padding:0cm 5.4pt 0cm 5.4pt;height:26.85pt'>
+                <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span
+                style='color:black'>PRECINTO:</span></b></p>
+                </td>
+                <td width=340 style='width:255.05pt;border-top:solid windowtext 1.0pt;
+                border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+                background:white;padding:0cm 5.4pt 0cm 5.4pt;height:26.85pt'>
+                    <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'>
+                        <span style='color:black'>
+                            @php
+                                $todosPrecintos = [];
+                                foreach ($Programaciones as $prog) {
+                                    $p = is_string($prog->ProgVehPrecintos)
+                                        ? json_decode($prog->ProgVehPrecintos, true)
+                                        : $prog->ProgVehPrecintos;
+
+                                    if (is_array($p)) {
+                                        $todosPrecintos = array_merge($todosPrecintos, $p);
+                                    } elseif (!empty($p)) {
+                                        $todosPrecintos[] = $p;
+                                    }
+                                }
+                            @endphp
+                            {{ count($todosPrecintos) ? implode(', ', array_unique($todosPrecintos)) : 'N/A' }}
+                        </span>
+                    </p>
+                </td>
+                <td colspan="2" style='border-top:solid windowtext 1.0pt; border-bottom:solid windowtext 1.0pt; border-right:solid windowtext 1.0pt; border-left:none; background:white; padding:0cm 5.4pt; height:26.85pt; text-align: center; vertical-align: middle;'>
+                    <button type="button"
+                            class="btn-change-precinto"
+                            data-toggle="modal"
+                            data-target="#modalCambiarPrecinto"
+                            style="background: none; border: none; padding: 0; color: #0056b3; cursor: pointer; font-weight: bold;">
+                        <i class="fa fa-edit"></i> Cambiar precinto
+                    </button>
+                </td>
+            </tr>
             </table>
         </div>
     </main>
@@ -320,6 +359,69 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
             <div id="ModalStatus"></div>
 
 
+</div>
+<!-- Modal Cambiar Precinto -->
+<div class="modal fade" id="modalCambiarPrecinto" tabindex="-1" role="dialog" aria-labelledby="modalCambiarPrecintoLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <form action="{{ route('vehicle-programacion.updatePrecinto', $SolicitudServicio->ID_SolSer) }}" method="POST">
+                @csrf
+                @method('PUT')
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCambiarPrecintoLabel">
+                        <i class="fa fa-edit"></i> Cambiar Precinto
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="inputPrecintos">Ingrese los nuevos precintos:</label>
+
+                        @php
+                            $todosPrecintos = [];
+                            if (isset($Programaciones)) {
+                                foreach ($Programaciones as $prog) {
+                                    $p = is_string($prog->ProgVehPrecintos)
+                                        ? json_decode($prog->ProgVehPrecintos, true)
+                                        : $prog->ProgVehPrecintos;
+
+                                    if (is_array($p)) {
+                                        $todosPrecintos = array_merge($todosPrecintos, $p);
+                                    } elseif (!empty($p)) {
+                                        $todosPrecintos[] = $p;
+                                    }
+                                }
+                            }
+                            $precintosVal = count($todosPrecintos) ? implode(', ', array_unique($todosPrecintos)) : '';
+                        @endphp
+
+                        <input type="text"
+                               class="form-control"
+                               id="inputPrecintos"
+                               name="ProgVehPrecintos"
+                               placeholder="Ej: P-001, P-002"
+                               value="{{ $precintosVal }}"
+                               required>
+                        <small class="form-text text-muted">Separe los precintos por comas si son varios.</small>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
 </div>
 @endsection
 <script>
