@@ -338,10 +338,13 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 										<li class="dropdown-header">Observaciones</li>
 										<li role="separator" class="divider"></li>
 										<li><a data-toggle='modal' data-target='#ModalNewObserv'>Añadir Observación</a></li>
-										@if ($SolicitudServicio->SolSerStatus == 'Completado' && in_array(Auth::user()->UsRol, Permisos::ProgVehic2))
+										@if ($SolicitudServicio->SolSerStatus == 'Recepcionado' && in_array(Auth::user()->UsRol, Permisos::ProgVehic2))
 										<li>
-											<a data-toggle='modal' data-target='#ModalSendRecordatorio'>Enviar Recordatorio {{$ultimoRecordatorio->ObsRepeat + 1 }} <br>Ultimo: {{date('d-m-Y',strtotime($ultimoRecordatorio->ObsDate))}}</a>
-										</li>
+                                            <a data-toggle='modal' data-target='#ModalSendRecordatorio'>
+                                                Enviar Recordatorio {{ data_get($ultimoRecordatorio ?? null, 'ObsRepeat', 0) + 1 }} <br>
+                                                Ultimo: {{ isset($ultimoRecordatorio->ObsDate) ? date('d-m-Y', strtotime($ultimoRecordatorio->ObsDate)) : 'Sin registros' }}
+                                            </a>
+                                        </li>
 										@endif
 										@if ($SolicitudServicio->SolSerStatus !== 'Aprobado' && in_array(Auth::user()->UsRol, Permisos::SolSer2))
 										<li>
@@ -484,6 +487,9 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 														case 'Litros':
 															$TypeUnidad = 'Litros';
 															break;
+                                                        case 'Galones':
+                                                            $TypeUnidad = 'Galones';
+                                                            break;
 														default:
 															$TypeUnidad = 'Kilogramos';
 															break;
@@ -757,7 +763,7 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 							</div>
 							{{-- END Modal --}}
 							{{--  Modal --}}
-							@if ($SolicitudServicio->SolSerStatus == 'Completado' && in_array(Auth::user()->UsRol, Permisos::ProgVehic2))
+							@if ($SolicitudServicio->SolSerStatus == 'Recepcionado' && in_array(Auth::user()->UsRol, Permisos::ProgVehic2))
 								<div class="modal modal-default fade in" id="ModalSendRecordatorio" tabindex="-1" role="dialog"
 									aria-labelledby="myModalLabel">
 									<div class="modal-dialog" role="document">
