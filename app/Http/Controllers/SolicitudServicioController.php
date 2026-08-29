@@ -591,6 +591,8 @@ public function index(Request $request)
 	 */
 	public function store(SolServStoreRequest $request)
 	{
+        log::info('Datos que llegan para crear solicitud de servicio: ', $request->all());
+        //return $request;
 		$log = new audit();
 		$log->AuditTabla="solicitud_servicios";
 		$log->AuditType="request store PRE-saved";
@@ -725,6 +727,7 @@ public function index(Request $request)
 		$SolicitudServicio->SolSerDescript = $request->input('SolSerDescript');
 		$SolicitudServicio->SolSerTypeCollect = $request->input('SolSerTypeCollect');
 		$SolicitudServicio->SolSerCollectAddress = $direccioncollect;
+		$SolicitudServicio->Precintos = $request->input('Precintos') ?? null;
 		if($request->input('SolSerBascula')){
 			$SolicitudServicio->SolSerBascula = 1;
 		}

@@ -513,6 +513,10 @@
 				<label for="ProgVehEntrada">{{ __('adminlte::message.progvehicllegada2') }}</label><small class="help-block with-errors">*</small>
 				<input type="time" class="form-control" id="ProgVehEntrada" name="ProgVehEntrada" value="{{$programacion->ProgVehEntrada <> null ? date('H:i', strtotime($programacion->ProgVehEntrada)) : ''}}" disabled="">
 			</div>
+            <div class="form-group col-md-6">
+                <label for="precintos">Precintos</label><small class="help-block with-errors">*</small>
+                <input type="text" class="form-control" id="precintos" name="precintos" value="{{ is_array($programacion->ProgVehPrecintos) ? implode(', ', $programacion->ProgVehPrecintos) : $programacion->ProgVehPrecintos }}" disabled="">
+            </div>
 		</div>
 		<div class="box box-info">
 			<div class="box-footer">

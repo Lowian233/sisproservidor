@@ -9,6 +9,7 @@ function TransportadorProsarc() {
 	$("#transportador").attr('hidden', true);
 	$("#Conductor").attr('hidden', true);
 	$("#Vehiculo").attr('hidden', true);
+	$("#divPrecintos").attr('hidden', true);
 	$("#typeaditable").removeClass('col-md-12');
 	$("#typeaditable").addClass('col-md-6');
 	if (SolSerBascula) {
@@ -101,6 +102,7 @@ function TransportadorExtr() {
 	$("#transportador").attr('hidden', false);
 	$("#Conductor").attr('hidden', false);
 	$("#Vehiculo").attr('hidden', false);
+	$("#divPrecintos").attr('hidden', false);
 	$("#typeaditable").removeClass('col-md-6');
 	$("#typeaditable").addClass('col-md-12');
 	$("#SolSerBascula").bootstrapSwitch('state',false);

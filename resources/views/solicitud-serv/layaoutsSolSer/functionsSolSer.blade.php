@@ -121,6 +121,7 @@ function TransportadorExtr() {
 	$("#transportador").attr('hidden', false);
 	$("#Conductor").attr('hidden', false);
 	$("#Vehiculo").attr('hidden', false);
+	$("#divPrecintos").attr('hidden', false);
 	inputsize('typeaditable', '12');
 	$("#SolSerBascula").bootstrapSwitch('state',false);
 	$("#SolSerBascula").bootstrapSwitch('disabled',true);
@@ -664,6 +665,7 @@ function RemoveGenerador(id) {
 function showconductorInputs() {
 	$("#Conductor").attr('hidden', false);
 	$("#Vehiculo").attr('hidden', false);
+    $("#divPrecintos").attr('hidden', false);
 }
 
 function hidedateInput(){
@@ -677,6 +679,7 @@ function showdateInput(){
 function hideconductorInputs() {
 	$("#Conductor").attr('hidden', true);
 	$("#Vehiculo").attr('hidden', true);
+    $("#divPrecintos").attr('hidden', true);
 }
 
 $("#departamento2").change(function(e){

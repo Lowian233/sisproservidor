@@ -198,6 +198,10 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 										<label>Fecha llegada a Planta:</label><br>
 										<a>{{$SolicitudServicio->SolSerFecha}}</a>
 									</div>
+                                    <div class="col-md-6">
+										<label>Precintos:</label><br>
+										<a>{{$SolicitudServicio->Precintos}}</a>
+									</div>
 									@endif
 								</div>
 							</div>

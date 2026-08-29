@@ -131,6 +131,10 @@
 										<label for="SolSerFecha">Fecha llegada a Planta</label>
 										<input type="date" class="form-control fecha" id="SolSerFecha" name="SolSerFecha" value="{{old('SolSerFecha')}}">
 									</div>
+                                    <div id="divPrecintos" class="form-group col-md-6" hidden>
+                                        <label for="Precintos"># Precintos</label>
+                                        <input type="number" class="form-control" id="Precintos" name="Precintos" value="{{old('Precintos')}}">
+                                    </div>
 									<div id="typeaditable" class="form-group col-md-6">
 										<label data-placement="auto" data-trigger="hover" data-html="true" data-toggle="popover" title="<b>{{ __('adminlte::message.solseraudi') }}</b>" data-content="{{ __('adminlte::message.solseraudidescrit') }}"><i style="font-size: 1.8rem; color: Dodgerblue;" class="fas fa-info-circle fa-2x fa-spin"></i>{{ __('adminlte::message.solseraudi') }}</label>
 										<small class="help-block with-errors">*</small>

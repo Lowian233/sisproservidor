@@ -166,7 +166,7 @@ public function index()
 				->where('vehiculos.FK_VehiSede', 1)
 				->where('VehicDelete', 0)
 				->get();
-			
+
 			if(in_array(Auth::user()->UsRol, Permisos::JefeOperaciones) || in_array(Auth::user()->UsRol2, Permisos::SUPERVISOR)){
 				$serviciosnoprogramados = DB::table('solicitud_servicios')
 				->join('clientes', 'solicitud_servicios.FK_SolSerCliente', '=', 'clientes.ID_Cli')
@@ -215,6 +215,8 @@ public function index()
 	 */
 	public function store(Request $request)
 	{
+        log::info('Datos que llegan para crear programación de vehículo: ', $request->all());
+        //return $request;
 		$validate = $request->validate([
 			// 'ProgVehPrecintos'   =>   'max:16|min:1'
 		]);
@@ -254,6 +256,7 @@ public function index()
 
                 // Normaliza precintos a JSON o null para evitar "Array to string conversion"
                 $precintos = $request->input('ProgVehPrecintos');
+                log::info('Precintos recibidos en la solicitud: ', ['precintos' => $precintos]);
                 if (is_array($precintos)) {
                     $precintos = array_values(array_filter($precintos, function ($v) { return $v !== null && $v !== ''; }));
                     $programacion->ProgVehPrecintos = count($precintos) ? json_encode($precintos) : null;
@@ -341,6 +344,48 @@ public function index()
 			$vehiculo = null;
 			$programacion->ProgVehtipo = 0;
 		}
+        $precintosInput = $request->input('ProgVehPrecintos');
+        log::info('Precintos recibidos en la solicitud: ', ['precintos' => $precintosInput]);
+
+        // Filtrar si viene como Array
+        if (is_array($precintosInput)) {
+            $precintosInput = array_values(array_filter($precintosInput, function ($v) {
+                return $v !== null && $v !== '';
+            }));
+        }
+
+        if (!empty($precintosInput)) {
+            // Si llegaron precintos válidos en el Request, los guardamos en JSON
+            $programacion->ProgVehPrecintos = is_array($precintosInput)
+                ? json_encode($precintosInput)
+                : json_encode([$precintosInput]);
+        } else {
+            // Si no llegaron precintos en el Request, consultamos la tabla SolicitudServicio
+            Log::info('No se recibieron precintos en el request. Buscando en la solicitud de servicio..., esta es la solicitud: ' . $request->FK_ProgServi);
+            $solicitudOriginal = SolicitudServicio::where('ID_SolSer', $request->FK_ProgServi)->first();
+            log::info('Solicitud encontrada: ', ['solicitud' => $solicitudOriginal]);
+
+            if ($solicitudOriginal && !empty($solicitudOriginal->Precintos)) {
+                // Normalizamos si en SolicitudServicio viene como string, array o JSON
+                $precintoSol = $solicitudOriginal->Precintos;
+
+                if (is_array($precintoSol)) {
+                    $programacion->ProgVehPrecintos = json_encode(array_values(array_filter($precintoSol)));
+                } elseif (is_string($precintoSol) && trim($precintoSol) !== '') {
+                    // Si el string ya viene como un JSON codificado previa de la BD
+                    $decoded = json_decode($precintoSol, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $programacion->ProgVehPrecintos = $precintoSol;
+                    } else {
+                        $programacion->ProgVehPrecintos = json_encode([$precintoSol]);
+                    }
+                } else {
+                    $programacion->ProgVehPrecintos = null;
+                }
+            } else {
+                $programacion->ProgVehPrecintos = null;
+            }
+        }
         $programacion->FK_ProgServi = is_array($request->input('FK_ProgServi'))
             ? (count($request->input('FK_ProgServi')) ? $request->input('FK_ProgServi')[0] : null)
             : $request->input('FK_ProgServi');
@@ -797,7 +842,7 @@ public function index()
 	        // ->where('forevaluation', 0)
 			->get();
 		$Observaciones = Observacion::where('FK_ObsSolSer', $SolicitudServicio->ID_SolSer)
-			->first();	
+			->first();
 		$Residuos = $Residuosoriginal->map(function ($item) {
 		  $requerimientos = Requerimiento::with(['pretratamientosSelected'])
 	        ->where('ID_Req', $item->FK_SolResRequerimiento)
@@ -851,7 +896,7 @@ public function index()
 					->select('sedes.ID_Sede')
 					->where('vehiculos.ID_Vehic', $programacion->FK_ProgVehiculo)
 					->first();
-					$Vehiculos2 = $SedeVehiculo 
+					$Vehiculos2 = $SedeVehiculo
 					? DB::table('vehiculos')
 						->select('VehicPlaca', 'ID_Vehic')
 						->where('FK_VehiSede', $SedeVehiculo->ID_Sede)
@@ -1346,14 +1391,14 @@ public function index()
 		->where('ProgVehDelete', 0)
 		//->where('FK_ProgVehiculo', 8)
 		->first();
-		
+
 		foreach ($SolicitudServicio->SolicitudResiduo as $key => $value){
 			$respel = $value->requerimiento->respel;
-			
+
 			if($respel->AceiteUsado == 1 && $programaciones->FK_ProgVehiculo == 8){
 				$cantidadDeAceitesUsados++;
 				}
-			}	
+			}
 
 		// return $cantidadDeResiduosControlados;
 
@@ -1619,7 +1664,7 @@ public function index()
 			DB::beginTransaction();
 
 			$programacion = ProgramacionVehiculo::findOrFail($id);
-			
+
 			// Validar que la programación existe
 			if (!$programacion) {
 				throw new \Exception('No se encontró la programación');
@@ -1645,7 +1690,7 @@ public function index()
 				$programacion->FK_ProgVehiculo = $request->FK_ProgVehiculo;
 				$programacion->FK_ProgConductor = $request->FK_ProgConductor;
 				$programacion->FK_ProgAyudante = $request->FK_ProgAyudante;
-				
+
 				// Limpiar campos de transportador alquilado
 				$programacion->ProgVehDocConductorEXT = null;
 				$programacion->ProgVehNameConductorEXT = null;
@@ -1653,24 +1698,24 @@ public function index()
 				$programacion->ProgVehNameAuxiliarEXT = null;
 				$programacion->ProgVehPlacaEXT = null;
 				$programacion->ProgVehTipoEXT = null;
-				
+
 				// Obtener datos del conductor y vehículo
 				$conductor = Personal::select('PersFirstName', 'PersLastName')
 					->where('ID_Pers', $request->FK_ProgConductor)
 					->first();
-				
+
 				if (!$conductor) {
 					throw new \Exception('No se encontró el conductor seleccionado');
 				}
-				
+
 				$vehiculo = Vehiculo::select('VehicPlaca')
 					->where('ID_Vehic', $request->FK_ProgVehiculo)
 					->first();
-				
+
 				if (!$vehiculo) {
 					throw new \Exception('No se encontró el vehículo seleccionado');
 				}
-				
+
 				// Actualizar conductor y vehículo en SolicitudServicio
 				$SolicitudServicio->SolSerConductor = $conductor->PersFirstName . " " . $conductor->PersLastName;
 				$SolicitudServicio->SolSerVehiculo = $vehiculo->VehicPlaca;
@@ -1704,11 +1749,11 @@ public function index()
 				$programacion->ProgVehPlacaEXT = $request->ProgVehPlacaEXT;
 				$programacion->ProgVehTipoEXT = $request->ProgVehTipoEXT;
 				$programacion->FK_ProgAyudante = $request->FK_ProgAyudante;
-				
+
 				// Limpiar campos de transportador Prosarc
 				$programacion->FK_ProgVehiculo = null;
 				$programacion->FK_ProgConductor = null;
-				
+
 				// Actualizar conductor y vehículo en SolicitudServicio
 				$SolicitudServicio->SolSerConductor = $request->ProgVehNameConductorEXT;
 				$SolicitudServicio->SolSerVehiculo = $request->ProgVehPlacaEXT;
@@ -1988,7 +2033,7 @@ public function index()
 
 			return view('ProgramacionVehicle.preoperacional', compact('programacion', 'vehiculo', 'conductor', 'ayudante', 'vehiculosDisponibles', 'ayudantesDisponibles', 'ordenRutaOptions', 'prefillDocumentacion', 'prefillEquipo', 'prefillMercanciasPeligrosas'));
 		}
-		
+
 		abort(403, 'No tiene permisos para acceder a esta funcionalidad');
 	}
 
@@ -2018,7 +2063,7 @@ public function index()
 
 				return redirect()->back()->with('success', 'Preoperacional guardado (modo prueba). No se registró en base de datos.');
 			}
-			
+
 			$programacion = ProgramacionVehiculo::where('ID_ProgVeh', $id)
 				->where('FK_ProgConductor', Auth::user()->FK_UserPers)
 				->first();
@@ -2075,7 +2120,7 @@ public function index()
 			// Si se proporciona kilometraje final, actualizar también progVehKm
 			if ($request->input('ProgVehKmFinal')) {
 				$programacion->progVehKm = $request->input('ProgVehKmFinal');
-				
+
 				// Actualizar kilometraje actual del vehículo
 				if ($vehiculo) {
 					$vehiculo->VehicKmActual = $request->input('ProgVehKmFinal');
@@ -2088,17 +2133,17 @@ public function index()
 				// OJO: usar el facade importado (Pdf), no depender del alias global PDF
 				$pdf = Pdf::setPaper('letter', 'portrait')
 					->loadView('ProgramacionVehicle.pdf-preoperacional', compact('programacion', 'vehiculo', 'conductor', 'firmaBase64'));
-				
+
 				// Generar nombre único para el PDF
 				$nombrePdf = 'preoperacional_' . $programacion->ID_ProgVeh . '_' . date('YmdHis') . '.pdf';
 				$path = 'public/Preoperacionales/' . $nombrePdf;
-				
+
 				// Crear directorio si no existe
 				Storage::makeDirectory('public/Preoperacionales');
-				
+
 				// Guardar PDF (disco local: storage/app/public/Preoperacionales)
 				Storage::put($path, $pdf->output(), ['visibility' => 'public']);
-				
+
 				// Guardar nombre del PDF en la programación
 				$programacion->ProgVehPdfPreoperacional = $nombrePdf;
 			} catch (\Throwable $e) {
@@ -2133,15 +2178,15 @@ public function index()
 				->orderBy('ProgVehFecha', 'asc')
 				->orderBy('ProgVehSalida', 'asc')
 				->first();
-			
+
 			if ($programacionPendiente) {
 				return redirect()->route('vehicle-programacion.preoperacional', $programacionPendiente->ID_ProgVeh)
 					->with('success', 'Formulario preoperacional guardado exitosamente. Complete el siguiente formulario.');
 			}
-			
+
 			return redirect()->route('vehicle-programacion.index')->with('success', 'Formulario preoperacional guardado exitosamente');
 		}
-		
+
 		abort(403, 'No tiene permisos para realizar esta acción');
 	}
 
@@ -2189,7 +2234,7 @@ public function index()
 	{
 		// Verificar permisos - conductores solo ven los suyos, otros roles ven todos
 		if(in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) || in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC) || in_array(Auth::user()->UsRol, Permisos::CONDUCTOR) || in_array(Auth::user()->UsRol2, Permisos::CONDUCTOR)){
-			
+
 			$query = DB::table('progvehiculos')
 				->join('solicitud_servicios', 'progvehiculos.FK_ProgServi', '=', 'solicitud_servicios.ID_SolSer')
 				->join('clientes', 'solicitud_servicios.FK_SolSerCliente', 'clientes.ID_Cli')
@@ -2210,14 +2255,14 @@ public function index()
 			$personals = DB::table('personals')
 				->select('ID_Pers', 'PersFirstName', 'PersLastName')
 				->get();
-			
+
 			$vehiculos = DB::table('vehiculos')
 				->select('ID_Vehic','VehicPlaca')
 				->get();
 
 			return view('ProgramacionVehicle.historial-preoperacional', compact('programaciones', 'personals', 'vehiculos'));
 		}
-		
+
 		abort(403, 'No tiene permisos para acceder a esta funcionalidad');
 	}
 
@@ -2231,7 +2276,7 @@ public function index()
 	{
 		// Verificar permisos
 		if(in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) || in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC) || in_array(Auth::user()->UsRol, Permisos::CONDUCTOR) || in_array(Auth::user()->UsRol2, Permisos::CONDUCTOR)){
-			
+
 			$programacion = ProgramacionVehiculo::with(['servicio', 'puntosderecoleccion'])
 				->where('ID_ProgVeh', $id)
 				->where('ProgVehPreoperacionalCompletado', true)
@@ -2280,7 +2325,7 @@ public function index()
 			$pdfPath = storage_path('app/' . $storageFile);
 			return response()->download($pdfPath, 'preoperacional_' . $programacion->ID_ProgVeh . '.pdf');
 		}
-		
+
 		abort(403, 'No tiene permisos para acceder a esta funcionalidad');
 	}
 }
