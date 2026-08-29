@@ -186,5 +186,15 @@ class Cliente extends Model
 	public function PersonalCliente(){
 		return $this->sedes()->with('Areas.Cargos.Personal'); //Pendiente completar
 	}
+
+    public function Telefonos()
+    {
+        $this->loadMissing('sedes.Areas.Cargos.Personal');
+        return $this->sedes
+            ->pluck('Areas')->flatten()
+            ->pluck('Cargos')->flatten()
+            ->pluck('Personal')->flatten()
+            ->unique('ID_Pers');
+    }
 }
 
