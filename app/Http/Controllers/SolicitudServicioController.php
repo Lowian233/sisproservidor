@@ -276,8 +276,8 @@ public function index(Request $request)
 	{
 		$query = DB::table('solicitud_servicios')
 			->join('clientes', 'clientes.ID_Cli', '=', 'solicitud_servicios.FK_SolSerCliente')
-			->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
-			->join('personals as Comercial', 'Comercial.ID_Pers', '=', 'clientes.CliComercial')
+			->leftjoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+			->leftjoin('personals as Comercial', 'Comercial.ID_Pers', '=', 'clientes.CliComercial')
 			->select(
 				'solicitud_servicios.ID_SolSer',
 				'solicitud_servicios.SolSerStatus',
@@ -1211,7 +1211,7 @@ public function index(Request $request)
 	public function show($id)
 	{
 		$SolicitudServicio = DB::table('solicitud_servicios')
-			->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+			->leftjoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
 			->select('solicitud_servicios.*','personals.PersFirstName','personals.PersLastName', 'personals.PersEmail')
 			->where('solicitud_servicios.SolSerSlug', $id)
 			->first();
