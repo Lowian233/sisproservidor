@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Console\Commands\EnviarRecordatoriosWatiCommand;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +42,29 @@ Route::group(['prefix' => 'v1'], function () {
     // Verificación de comprobantes de pago via OCR
     Route::post('/verificar-pago', 'Api\VerificarPagoController@verificar');
     Route::get('/resultado-pago/{phone}', 'Api\VerificarPagoController@resultado');
+    Route::get('/test-wati', function () {
+        try {
+            // Ejecuta el comando nativo directamente desde la solicitud web
+            Artisan::call('wati:enviar-recordatorios');
+
+            // Obtiene la salida formateada que genera el comando en la consola
+            $output = Artisan::output();
+
+            return response()->json([
+                'status' => 'OK',
+                'mensaje' => 'Comando ejecutado correctamente.',
+                'salida_artisan' => trim($output)
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al ejecutar comando WATI por HTTP: ' . $e->getMessage());
+
+            return response()->json([
+                'status' => 'Error',
+                'mensaje' => $e->getMessage(),
+                'linea' => $e->getLine()
+            ], 500);
+        }
+    });
 });
 
 Route::group(['prefix' => 'v1','middleware' => 'auth:api'], function () {
