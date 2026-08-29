@@ -338,8 +338,22 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                         @endif
 						@if($generadorBoton)
                         <a target="_blank" href="/solicitud-servicio/{{$generadorBoton->SlugFirmas}}/{{$SolicitudServicio->SolSerSlug}}/wordtemplate" class="btn btn-primary pull-right" style="margin-right: 1em"> <i class="fas fa-file-word"></i> <b>Recibo Material</b></a>
+                        <button type="button"
+                                class="btn btn-info pull-right"
+                                style="margin-right: 1em"
+                                data-toggle="modal"
+                                data-target="#modalVistaPrevia">
+                            <i class="fas fa-eye"></i> <b>Vista Previa</b>
+                        </button>
 						@else
 						<button type="button" class="btn btn-default pull-right" style="margin-right: 1em" disabled><i class="fas fa-file-word"></i> <b>Recibo Material</b></button>
+                        <button type="button"
+                                class="btn btn-info pull-right"
+                                style="margin-right: 1em"
+                                data-toggle="modal"
+                                data-target="#modalVistaPrevia">
+                            <i class="fas fa-eye"></i> <b>Vista Previa</b>
+                        </button>
 						@endif
 					</td>
                         <br>
@@ -420,6 +434,29 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
 
             </form>
 
+        </div>
+    </div>
+</div>
+
+<!-- Modal Vista Previa -->
+<div class="modal fade" id="modalVistaPrevia" tabindex="-1" role="dialog" aria-labelledby="modalVistaPreviaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document" style="max-width: 80%; width: 80%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalVistaPreviaLabel">
+                    <i class="fas fa-file-word"></i> Vista Previa del Documento
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-0" style="height: 75vh;">
+                <iframe src="/solicitud-servicio/{{$generadores->FK_SGener}}/{{$SolicitudServicio->SolSerSlug}}/wordtemplate"
+                        style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
         </div>
     </div>
 </div>

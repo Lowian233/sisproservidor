@@ -5150,7 +5150,6 @@ public function changestatus(Request $request)
             $programacion->save();
         }
 
-        // Opcional: Actualizar también en SolicitudServicio si la tabla lo almacena
         $solicitud = SolicitudServicio::find($id);
         if ($solicitud) {
             $solicitud->Precintos = $precintosFinal;
