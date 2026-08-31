@@ -2103,6 +2103,7 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 							<ul class="dropdown-menu">
 								<li><a onclick="ModalReversar('{{$SolicitudServicio->SolSerSlug}}', 'Notificado')" href="#">Notificado</a></li>
 							</ul>
+
 						</div>
 					`);
 					@endif
@@ -2119,6 +2120,14 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 						`);
 						$('#titulo').append(`
 								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Residuo Faltante')" style="margin-right:1em;" class="btn btn-warning pull-right"><i class="fas fa-exclamation-triangle"></i> Residuo Faltante</a>
+							`);
+					@endif
+                    @if(in_array(Auth::user()->UsRol, Permisos::RECIBOMATERIAL) || in_array(Auth::user()->UsRol2, Permisos::RECIBOMATERIAL))
+					$('#titulo').append(`
+							<a href="/solicitud-servicio/{{$SolicitudServicio->SolSerSlug}}/recibomaterial" class="btn btn-success pull-right">Recibo Material</a>
+						`);
+						$('#titulo').append(`
+								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Fallido')" style="margin-right:1em;" class="btn btn-danger pull-right"><i class="fas fa-exclamation-triangle"></i> Servicio Fallido</a>
 							`);
 					@endif
 
@@ -2156,6 +2165,14 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 						$('#titulo').append(`
 							<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Residuo Faltante')" style="margin-right:1em;" class="btn btn-warning pull-right"><i class="fas fa-exclamation-triangle"></i> Residuo Faltante</a>
 						`);
+					@endif
+                    @if(in_array(Auth::user()->UsRol, Permisos::RECIBOMATERIAL) || in_array(Auth::user()->UsRol2, Permisos::RECIBOMATERIAL))
+					$('#titulo').append(`
+							<a href="/solicitud-servicio/{{$SolicitudServicio->SolSerSlug}}/recibomaterial" class="btn btn-success pull-right">Recibo Material</a>
+						`);
+						$('#titulo').append(`
+								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Fallido')" style="margin-right:1em;" class="btn btn-danger pull-right"><i class="fas fa-exclamation-triangle"></i> Servicio Fallido</a>
+							`);
 					@endif
 					$('#titulo').append(`
 						<b>{{__('adminlte::message.solsershowcomple')}}</b>
@@ -2207,6 +2224,14 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 						@endif
 						@endif
 					@endif
+                    @if(in_array(Auth::user()->UsRol, Permisos::RECIBOMATERIAL) || in_array(Auth::user()->UsRol2, Permisos::RECIBOMATERIAL))
+					$('#titulo').append(`
+							<a href="/solicitud-servicio/{{$SolicitudServicio->SolSerSlug}}/recibomaterial" class="btn btn-success pull-right">Recibo Material</a>
+						`);
+						$('#titulo').append(`
+								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Fallido')" style="margin-right:1em;" class="btn btn-danger pull-right"><i class="fas fa-exclamation-triangle"></i> Servicio Fallido</a>
+							`);
+					@endif
 				@break
 				@case('Tratado')
 					$('#titulo').empty();
@@ -2250,6 +2275,14 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 						`);
 						@endif
 						@endif
+					@endif
+                    @if(in_array(Auth::user()->UsRol, Permisos::RECIBOMATERIAL) || in_array(Auth::user()->UsRol2, Permisos::RECIBOMATERIAL))
+					$('#titulo').append(`
+							<a href="/solicitud-servicio/{{$SolicitudServicio->SolSerSlug}}/recibomaterial" class="btn btn-success pull-right">Recibo Material</a>
+						`);
+						$('#titulo').append(`
+								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Fallido')" style="margin-right:1em;" class="btn btn-danger pull-right"><i class="fas fa-exclamation-triangle"></i> Servicio Fallido</a>
+							`);
 					@endif
 				@break
 				@case('Certificacion')
@@ -2295,6 +2328,14 @@ Solicitud de servicio N° {{$SolicitudServicio->ID_SolSer}}
 							`);
 							@endif
 						@endif
+					@endif
+                    @if(in_array(Auth::user()->UsRol, Permisos::RECIBOMATERIAL) || in_array(Auth::user()->UsRol2, Permisos::RECIBOMATERIAL))
+					$('#titulo').append(`
+							<a href="/solicitud-servicio/{{$SolicitudServicio->SolSerSlug}}/recibomaterial" class="btn btn-success pull-right">Recibo Material</a>
+						`);
+						$('#titulo').append(`
+								<a href='#' onclick="ModalStatus('{{$SolicitudServicio->SolSerSlug}}', 'Fallido')" style="margin-right:1em;" class="btn btn-danger pull-right"><i class="fas fa-exclamation-triangle"></i> Servicio Fallido</a>
+							`);
 					@endif
 				@break
 				@case('Facturado')

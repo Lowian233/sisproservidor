@@ -335,6 +335,7 @@ Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
 	Route::post('/solicitud-servicio/{id}/firmaconductor', 'SolicitudServicioController@firmaconductor');
 	Route::post('/solicitud-servicio/{id}/firmapda', 'SolicitudServicioController@firmapda');
 	Route::get('/solicitud-servicio/{id}/{slug}/wordtemplate', 'SolicitudServicioController@rmtemplate')->name('recibomaterial');
+    Route::get('/solicitud-servicio/{id}/{slug}/viewwordtemplate', 'SolicitudServicioController@viewwordtemplate')->name('viewwordtemplate');
 	Route::get('/solicitud-servicio/{slug}/duplicarpesos', 'SolicitudServicioController@duplicarpesos')->name('duplicarpesos');
 	Route::post('/solicitud-servicio/{id}/NuevoRespel', 'SolicitudServicioController@NuevoRespel');
     Route::put('/solicitud-servicio/updatePrecinto/{id}', 'SolicitudServicioController@updatePrecinto')->name('vehicle-programacion.updatePrecinto');

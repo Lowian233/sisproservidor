@@ -4951,6 +4951,651 @@ public function changestatus(Request $request)
 		//return view ('solicitud-serv.rmtemplate', compact('SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente',  'SolSerConductor',  'Programaciones', 'totales', 'tratamientos', 'PublicRespels', 'precintosString', 'firmas'));
 		}
 	}
+
+    /**
+	 * ingresa el numero de factura a la base de datos.
+	 *
+	 * @param  \Illuminate\Http\Request  $request
+	 * @param  int  $id
+	 * @return \Illuminate\Http\Response
+	 */
+	public function viewwordtemplate($id, $slug)
+	{
+		// Priorizar coincidencia exacta por SlugFirmas (flujo de planta).
+		$firmas = DB::table('firmas_servicio')
+			->join('solicitud_servicios', 'solicitud_servicios.ID_SolSer', '=', 'firmas_servicio.FK_SolSer')
+			->join('clientes', 'clientes.ID_Cli', '=', 'solicitud_servicios.FK_SolSerCliente')
+			->join('generadors' , 'generadors.ID_Gener', '=', 'firmas_servicio.FK_Gener')
+			->where('firmas_servicio.SlugFirmas', $id)
+			->where('solicitud_servicios.SolSerSlug',$slug )
+			->select('firmas_servicio.*', 'clientes.CliName', 'generadors.*')
+			->first();
+
+		// Si la fila por slug no tiene firma aún, intentar usar la fila del mismo servicio
+		// que sí tenga firma (evita "Sin firma registrada" por desalineaciones puntuales).
+		if ($firmas && (empty($firmas->FirmaCliente) || $firmas->FirmaCliente === '0')) {
+			$firmasConFirma = DB::table('firmas_servicio')
+				->join('solicitud_servicios', 'solicitud_servicios.ID_SolSer', '=', 'firmas_servicio.FK_SolSer')
+				->join('clientes', 'clientes.ID_Cli', '=', 'solicitud_servicios.FK_SolSerCliente')
+				->join('generadors' , 'generadors.ID_Gener', '=', 'firmas_servicio.FK_Gener')
+				->where('solicitud_servicios.SolSerSlug', $slug)
+				->whereNotNull('firmas_servicio.FirmaCliente')
+				->where('firmas_servicio.FirmaCliente', '!=', '0')
+				->orderBy('firmas_servicio.updated_at', 'desc')
+				->select('firmas_servicio.*', 'clientes.CliName', 'generadors.*')
+				->first();
+			if ($firmasConFirma) {
+				$firmas = $firmasConFirma;
+			}
+		}
+
+		Log::info('RM wordtemplate firma seleccionada', [
+			'slug_firmas_url' => $id,
+			'slug_servicio' => $slug,
+			'id_firmas' => $firmas->ID_Firmas ?? null,
+			'fk_sgener' => $firmas->FK_SGener ?? null,
+			'slug_firmas_db' => $firmas->SlugFirmas ?? null,
+			'firma_cliente' => $firmas->FirmaCliente ?? null,
+		]);
+
+		if (!$firmas && (in_array(Auth::user()->UsRol, Permisos::JefeOperaciones) || in_array(Auth::user()->UsRol, Permisos::SUPERVISOR))) {
+    		$firmas = DB::table('firmas_servicio')
+    			->join('solicitud_servicios', 'solicitud_servicios.ID_SolSer', '=', 'firmas_servicio.FK_SolSer')
+    			->join('clientes', 'clientes.ID_Cli', '=', 'solicitud_servicios.FK_SolSerCliente')
+    			->join('generadors' , 'generadors.ID_Gener', '=', 'firmas_servicio.FK_Gener')
+    			//->where('firmas_servicio.FK_SGener', $id)
+    			->where('solicitud_servicios.SolSerSlug',$slug )
+    			->select('firmas_servicio.*', 'clientes.CliName', 'generadors.ID_Gener', 'generadors.GenerNit', 'generadors.GenerName', 'generadors.GenerShortname', 'generadors.GenerCode', 'generadors.GenerType', 'generadors.GenerSlug', 'generadors.FK_GenerCli', 'generadors.GenerDelete')
+    			->first();
+		} elseif (!$firmas) {
+		    	// Primero intentar buscar con el FK_SGener específico
+		    	$firmas = DB::table('firmas_servicio')
+    			->join('solicitud_servicios', 'solicitud_servicios.ID_SolSer', '=', 'firmas_servicio.FK_SolSer')
+    			->join('clientes', 'clientes.ID_Cli', '=', 'solicitud_servicios.FK_SolSerCliente')
+    			->join('generadors' , 'generadors.ID_Gener', '=', 'firmas_servicio.FK_Gener')
+    			->where('firmas_servicio.FK_SGener', $id)
+    			->where('solicitud_servicios.SolSerSlug',$slug )
+    			->select('firmas_servicio.*', 'clientes.CliName', 'generadors.*')
+    			->first();
+
+    		// Si no se encuentra, intentar buscar con FK_SGener = 0 (recepción en planta)
+    		if (!$firmas) {
+    			$firmas = DB::table('firmas_servicio')
+    				->join('solicitud_servicios', 'solicitud_servicios.ID_SolSer', '=', 'firmas_servicio.FK_SolSer')
+    				->join('clientes', 'clientes.ID_Cli', '=', 'solicitud_servicios.FK_SolSerCliente')
+    				->join('generadors' , 'generadors.ID_Gener', '=', 'firmas_servicio.FK_Gener')
+    				->where('firmas_servicio.FK_SGener', 0)
+    				->where('solicitud_servicios.SolSerSlug',$slug )
+    				->select('firmas_servicio.*', 'clientes.CliName', 'generadors.*')
+    				->first();
+    		}
+		}
+
+		// Validar que se encontró el registro de firmas
+		if (!$firmas) {
+			// Intentar obtener la solicitud de servicio directamente por el slug para diagnosticar
+			$solicitud = DB::table('solicitud_servicios')
+				->where('SolSerSlug', $slug)
+				->first();
+
+			if (!$solicitud) {
+				abort(404, 'No se encontró la solicitud de servicio con el slug proporcionado.');
+			}
+
+			// Verificar si existe alguna firma para esta solicitud
+			$firmasExistentes = DB::table('firmas_servicio')
+				->where('FK_SolSer', $solicitud->ID_SolSer)
+				->get();
+
+			if ($firmasExistentes->isEmpty()) {
+				abort(404, 'No se encontró ningún registro de firmas para esta solicitud de servicio. Es posible que falte crear el registro en la tabla firmas_servicio.');
+			}
+
+			// Si hay firmas pero no coinciden con el FK_SGener, mostrar información de diagnóstico
+			$firmasInfo = $firmasExistentes->map(function($f) {
+				return "FK_SGener: {$f->FK_SGener}, FK_Gener: {$f->FK_Gener}, FK_SolSer: {$f->FK_SolSer}";
+			})->implode(' | ');
+
+			abort(404, "No se encontró una firma que coincida con FK_SGener={$id} o FK_SGener=0 y SolSerSlug={$slug}. Firmas existentes: {$firmasInfo}");
+		}
+
+		//return $firmas;
+		$SolicitudServicio = DB::table('solicitud_servicios')
+			->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+			->join('cargos', 'personals.FK_PersCargo', '=', 'ID_Carg')
+			->select('solicitud_servicios.*','personals.PersFirstName','personals.PersLastName', 'personals.PersEmail', 'personals.PersCellphone', 'cargos.CargName')
+			->where('solicitud_servicios.ID_SolSer', $firmas->FK_SolSer)
+			->first();
+		//return $SolicitudServicio;
+
+		if (!$SolicitudServicio) {
+			abort(404);
+		}
+
+		if($SolicitudServicio->SolSerTypeCollect === Null){
+
+			$SolSerCollectAddress = $SolicitudServicio->SolSerCollectAddress;
+			$SolSerConductor = $SolicitudServicio->SolSerConductor;
+
+			//return $SolicitudServicio;
+
+			$Programaciones = DB::table('progvehiculos')
+				//->join('personals', 'personals.ID_Pers', '=', 'progvehiculos.FK_ProgAyudante')
+				->where('FK_ProgServi', $SolicitudServicio->ID_SolSer)
+				->where('ProgVehDelete', 0)
+				->select('*')
+				->first();
+			//return $Programaciones;
+
+			// Precintos: usar de Programaciones cuando haya vehículo asignado
+			if (!$Programaciones) {
+				$precintosString = 'No Aplica, el cliente trae en su propio equipo';
+			} elseif (!empty($Programaciones->ProgVehPrecintos)) {
+				$val = is_array($Programaciones->ProgVehPrecintos) ? $Programaciones->ProgVehPrecintos : json_decode($Programaciones->ProgVehPrecintos, true);
+				if (is_array($val) && count($val) > 0) {
+					$precintosString = implode(', ', $val);
+				} else {
+					$precintosString = 'No se asignó precinto';
+				}
+			} else {
+				$precintosString = 'No se asignó precinto';
+			}
+
+
+			$Cliente = DB::table('clientes')
+				->join('sedes', 'clientes.ID_Cli', '=', 'sedes.FK_SedeCli')
+				->join('municipios', 'sedes.FK_SedeMun', '=', 'municipios.ID_Mun')
+				->select('clientes.CliNit', 'clientes.CliName', 'sedes.SedeAddress', 'municipios.MunName')
+				->where('clientes.ID_Cli', $SolicitudServicio->FK_SolSerCliente)
+				->first();
+
+			if($firmas){
+			$GenerResiduos = DB::table('solicitud_residuos')
+				->distinct()
+				->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
+				->join('gener_sedes', 'gener_sedes.ID_GSede', '=', 'residuos_geners.FK_SGener')
+				->join('generadors' , 'generadors.ID_Gener', '=', 'gener_sedes.FK_GSede')
+				->join('municipios', 'municipios.ID_Mun', '=', 'gener_sedes.FK_GSedeMun')
+				->select('gener_sedes.GSedeName', 'residuos_geners.FK_SGener','generadors.ID_Gener', 'generadors.GenerName','gener_sedes.GSedeSlug', 'gener_sedes.GSedeAddress', 'gener_sedes.GSedeEmail', 'gener_sedes.GSedeCelular', 'municipios.MunName')
+				//->where('generadors.ID_Gener', $firmas->FK_Gener)
+				->where('solicitud_residuos.FK_SolResSolSer', $SolicitudServicio->ID_SolSer)
+				->get();
+			}
+			//return $GenerResiduos;
+
+			$Residuosoriginal = DB::table('solicitud_residuos')
+				->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
+				->join('gener_sedes', 'gener_sedes.ID_GSede', '=', 'residuos_geners.FK_SGener')
+				->join('generadors', 'generadors.ID_Gener', '=', 'gener_sedes.FK_GSede')
+				->join('respels' , 'respels.ID_Respel', '=', 'residuos_geners.FK_Respel')
+				->join('requerimientos' , 'solicitud_residuos.FK_SolResRequerimiento', '=', 'requerimientos.ID_Req')
+				->join('tratamientos' , 'requerimientos.FK_ReqTrata', '=', 'tratamientos.ID_Trat')
+				->join('sedes' , 'tratamientos.FK_TratProv', '=', 'sedes.ID_Sede')
+				->join('clientes' , 'sedes.FK_SedeCli', '=', 'clientes.ID_Cli')
+				->select('solicitud_residuos.*','residuos_geners.FK_SGener', 'respels.*', 'requerimientos.ID_Req', 'tratamientos.TratName', 'tratamientos.ID_Trat', 'clientes.CliShortName', 'gener_sedes.FK_GSede', 'generadors.*')
+				->where('solicitud_residuos.FK_SolResSolSer', $SolicitudServicio->ID_SolSer)
+				//->where('generadors.ID_Gener', $firmas->FK_Gener )
+				// ->where('requerimientos.ofertado', 1)
+				// ->where('forevaluation', 0)
+				->get();
+			//return $Residuosoriginal;
+
+			$Residuos = $Residuosoriginal->map(function ($item) {
+				$requerimientos = Requerimiento::with(['pretratamientosSelected', 'tarifa.rangos' => function($query){
+					$query->orderBy('TarifaDesde');
+				}])
+				->where('ID_Req', $item->FK_SolResRequerimiento)
+				// ->where('forevaluation', 0)
+				->first();
+
+				$rm = SolicitudResiduo::with('SolicitudServicio')->where('SolResSlug', $item->SolResSlug)->first(['SolResRM', 'FK_SolResSolSer']);
+
+				$item->pretratamientosSelected = $requerimientos->pretratamientosSelected;
+				$item->tarifa = $requerimientos->tarifa;
+				if ($requerimientos->tarifa->TarifaSpecial === 1) {
+					switch ($item->SolResTypeUnidad) {
+						case 'Unidad':
+							$tarifatipo = 'Unid';
+							break;
+
+						case 'Litros':
+							$tarifatipo = 'Lt';
+							break;
+
+						default:
+							$tarifatipo = 'Kg';
+							break;
+					}
+
+					$tarifaResiduo = CTarifa::with('rangos')
+						->where('FK_Cliente', $rm->SolicitudServicio->FK_SolSerCliente)
+						->where('FK_Tratamiento', $requerimientos->FK_ReqTrata)
+						->where('Tarifatipo', $tarifatipo)
+						->first();
+
+					if ($tarifaResiduo === null) {
+						$item->ctarifa = null;
+					}else{
+						$item->ctarifa = $tarifaResiduo;
+					}
+				}else{
+					$item->ctarifa = null;
+				}
+				$item->SolResRM2 = $rm->SolResRM;
+				return $item;
+			});
+
+			$SolicitudServicio->Repetible = 0;
+
+			/* se convierte el tipo de dato a aray mediante la consulta en el modelo de la columna SolSerRMs usando eloquent*/
+			$rms = SolicitudServicio::where('SolSerSlug', $SolicitudServicio->SolSerSlug)->first('SolSerRMs');
+			$SolicitudServicio->SolSerRMs = $rms->SolSerRMs;
+
+			// return $Residuos;
+
+			foreach ($Residuos as $residuo => $value) {
+				$requerimientos = Requerimiento::with(['pretratamientosSelected'])
+				->where('ID_Req', $value->FK_SolResRequerimiento)
+				->first();
+				$residuoSinTratamiento = Requerimiento::where('FK_ReqRespel', $requerimientos->FK_ReqRespel)
+				->where('ofertado', 1)
+				->where('forevaluation', 1)
+				->first();
+
+
+				if ($residuoSinTratamiento == null) {
+					$SolicitudServicio->Repetible++;
+				}
+			}
+
+			$SolicitudesServicioscount = DB::table('solicitud_servicios')
+				->join('solicitud_residuos' , 'solicitud_residuos.FK_SolResSolSer', '=', 'solicitud_servicios.ID_SolSer')
+				->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
+				->join('gener_sedes', 'gener_sedes.ID_GSede', '=', 'residuos_geners.FK_SGener')
+				->join('generadors' , 'generadors.ID_Gener', '=', 'gener_sedes.FK_GSede')
+				->where('ID_SolSer', $SolicitudServicio->ID_SolSer)
+				->select('solicitud_residuos.*', 'generadors.*')
+				->get();
+
+				$cantidadArreglos = $SolicitudesServicioscount->count();
+
+				$totales = 0;
+
+				foreach ($SolicitudesServicioscount as $servicio){
+
+					$pesorecibido = $servicio->SolResKgRecibido;
+					$totales = $totales + $pesorecibido;
+				}
+
+			if (in_array(Auth::user()->UsRol, Permisos::SolSer1) || in_array(Auth::user()->UsRol, Permisos::SolSer1)) {
+				$tratamientos = Tratamiento::join('sedes', 'sedes.ID_Sede', '=', 'tratamientos.FK_TratProv')
+				->join('clientes', 'clientes.ID_Cli', '=', 'sedes.FK_SedeCli')
+				->select('*')
+				->get();
+			}else{
+				$tratamientos = 'NoAutorizado';
+			}
+			//Buscar corrientes del residuo
+
+				$PublicRespels = DB::table('solicitud_residuos')
+				->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
+				->join('respels' , 'respels.ID_Respel', '=', 'residuos_geners.FK_Respel')
+				->select('respels.ID_Respel', 'respels.YRespelClasf4741', 'respels.ARespelClasf4741')
+				->where('solicitud_residuos.FK_SolResSolSer', $SolicitudServicio->ID_SolSer)
+				->distinct()
+				->get();
+
+			$user = Auth::user();
+
+			// Validación para encontrar la fecha de recepción en planta del servicio
+		$fechaRecepcion = SolicitudServicio::find($SolicitudServicio->ID_SolSer)->programacionesrecibidas()->first();
+		if($fechaRecepcion){
+			$SolicitudServicio->recepcion = $fechaRecepcion->ProgVehSalida;
+		}else{
+			$SolicitudServicio->recepcion = null;
+		}
+
+			//Generación de PDF
+				$pdf = PDF::setPaper('letter', 'portrait')->loadView('solicitud-serv.rmtemplateplanta', compact(['SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente',  'SolSerConductor',  'Programaciones',  'totales', 'tratamientos', 'PublicRespels', 'precintosString', 'firmas', 'user']));
+				$nombre = $firmas->SlugFirmas . '.pdf';
+				$path = 'RecibosdeMaterial/' . sprintf("%0s", $nombre);
+
+				Storage::disk('public')->makeDirectory('RecibosdeMaterial');
+				Storage::disk('public')->put($path, $pdf->output());
+
+				$pdfPath = storage_path('app/public/RecibosdeMaterial/' . $firmas->SlugFirmas . '.pdf');
+			//Envio de documento al correo
+
+			/* Mail::to(self::MAIL_RECIBO_MATERIAL_INTERNO)->send(new SolSerRM($pdf, $pdfPath, $Cliente, $GenerResiduos, $firmas));
+			if (!empty($SolicitudServicio->PersEmail)) {
+				Mail::to($SolicitudServicio->PersEmail)->send(new SolSerRM($pdf, $pdfPath, $Cliente, $GenerResiduos, $firmas));
+			} */
+
+			return response($pdf->output(), 200, [
+				'Content-Type' => 'application/pdf',
+				'Content-Disposition' => 'inline; filename="Recibo_Material_' . $SolicitudServicio->ID_SolSer . '.pdf"'
+			]);
+			//return view ('solicitud-serv.rmtemplate', compact('SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente',  'SolSerConductor',  'Programaciones', 'totales', 'tratamientos', 'PublicRespels', 'precintosString', 'firmas'));
+
+		} else {
+
+		$SolSerCollectAddress = $SolicitudServicio->SolSerCollectAddress;
+		$SolSerConductor = $SolicitudServicio->SolSerConductor;
+
+		$Programaciones = DB::table('progvehiculos')
+			->join('personals', 'personals.ID_Pers', '=', 'progvehiculos.FK_ProgAyudante')
+			->where('FK_ProgServi', $SolicitudServicio->ID_SolSer)
+			->where('ProgVehDelete', 0)
+			->select('*')
+			->first();
+		//return $Programaciones;
+
+		// Nombre del conductor para firma simulada en PDF (RM regular): priorizar programación de servicios
+		$nombreConductor = 'No asignado';
+		if ($Programaciones) {
+			if (!empty($Programaciones->ProgVehNameConductorEXT)) {
+				$nombreConductor = trim($Programaciones->ProgVehNameConductorEXT);
+			} elseif (!empty($Programaciones->FK_ProgConductor)) {
+				$pers = Personal::find($Programaciones->FK_ProgConductor);
+				if ($pers) {
+					$nombreConductor = trim(($pers->PersFirstName ?? '') . ' ' . ($pers->PersLastName ?? ''));
+				}
+			}
+		}
+		if ($nombreConductor === 'No asignado' && $SolicitudServicio->SolSerTipo == 'Interno' && is_numeric($SolicitudServicio->SolSerConductor)) {
+			$pers = Personal::find($SolicitudServicio->SolSerConductor);
+			if ($pers) {
+				$nombreConductor = trim(($pers->PersFirstName ?? '') . ' ' . ($pers->PersLastName ?? ''));
+			}
+		} elseif ($nombreConductor === 'No asignado' && !empty($SolicitudServicio->SolSerConductor)) {
+			$nombreConductor = trim((string) $SolicitudServicio->SolSerConductor);
+		}
+
+		// Precintos: usar de Programación cuando exista y tenga precintos (recolección)
+		$Precintos = ProgramacionVehiculo::where('FK_ProgServi', $SolicitudServicio->ID_SolSer)
+			->where('ProgVehDelete', 0)
+			->select('ProgVehPrecintos')
+			->first();
+
+		if ($Precintos && !empty($Precintos->ProgVehPrecintos)) {
+			$val = is_array($Precintos->ProgVehPrecintos) ? $Precintos->ProgVehPrecintos : json_decode($Precintos->ProgVehPrecintos, true);
+			if (is_array($val) && count($val) > 0) {
+				$precintosString = implode(', ', $val);
+			} else {
+				$precintosString = 'No se asignó precinto';
+			}
+		} else {
+			$precintosString = 'No se asignó precinto';
+		}
+
+
+		$Cliente = DB::table('clientes')
+			->join('sedes', 'clientes.ID_Cli', '=', 'sedes.FK_SedeCli')
+			->join('municipios', 'sedes.FK_SedeMun', '=', 'municipios.ID_Mun')
+			->select('clientes.CliNit', 'clientes.CliName', 'sedes.SedeAddress', 'municipios.MunName')
+			->where('clientes.ID_Cli', $SolicitudServicio->FK_SolSerCliente)
+			->first();
+		//return $firmas;
+		if($firmas){
+			$GenerResiduos = DB::table('solicitud_residuos')
+			->distinct()
+			->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
+			->join('gener_sedes', 'gener_sedes.ID_GSede', '=', 'residuos_geners.FK_SGener')
+			->join('generadors' , 'generadors.ID_Gener', '=', 'gener_sedes.FK_GSede')
+			->join('firmas_servicio', 'firmas_servicio.FK_Gener', '=', 'generadors.ID_Gener')
+			->join('municipios', 'municipios.ID_Mun', '=', 'gener_sedes.FK_GSedeMun')
+			->select('gener_sedes.GSedeName', 'residuos_geners.FK_SGener','generadors.ID_Gener', 'generadors.GenerName','gener_sedes.GSedeSlug', 'gener_sedes.GSedeAddress', 'gener_sedes.GSedeEmail', 'gener_sedes.GSedeCelular', 'municipios.MunName')
+			->where('solicitud_residuos.FK_SolResSolSer', $SolicitudServicio->ID_SolSer)
+			->where('generadors.ID_Gener', $firmas->FK_Gener)
+			->where('residuos_geners.FK_SGener',$firmas->FK_SGener)
+			->get();
+
+		}
+
+		$Residuosoriginal = DB::table('solicitud_residuos')
+			->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
+			->join('gener_sedes', 'gener_sedes.ID_GSede', '=', 'residuos_geners.FK_SGener')
+			->join('generadors', 'generadors.ID_Gener', '=', 'gener_sedes.FK_GSede')
+			->join('respels' , 'respels.ID_Respel', '=', 'residuos_geners.FK_Respel')
+			->join('requerimientos' , 'solicitud_residuos.FK_SolResRequerimiento', '=', 'requerimientos.ID_Req')
+			->join('tratamientos' , 'requerimientos.FK_ReqTrata', '=', 'tratamientos.ID_Trat')
+			->join('sedes' , 'tratamientos.FK_TratProv', '=', 'sedes.ID_Sede')
+			->join('clientes' , 'sedes.FK_SedeCli', '=', 'clientes.ID_Cli')
+			->select('solicitud_residuos.*','residuos_geners.FK_SGener', 'respels.*', 'requerimientos.ID_Req', 'tratamientos.TratName', 'tratamientos.ID_Trat', 'clientes.CliShortName', 'gener_sedes.FK_GSede', 'generadors.*')
+			->where('solicitud_residuos.FK_SolResSolSer', $SolicitudServicio->ID_SolSer)
+			->where('generadors.ID_Gener', $firmas->FK_Gener )
+			->where('residuos_geners.FK_SGener', $firmas->FK_SGener)
+			->get();
+
+		// Fallback: si no hay residuos con el filtro de generador, probar sin filtro (desajuste firmas↔residuos en BD)
+		if ($Residuosoriginal->isEmpty()) {
+			$Residuosoriginal = DB::table('solicitud_residuos')
+				->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
+				->join('gener_sedes', 'gener_sedes.ID_GSede', '=', 'residuos_geners.FK_SGener')
+				->join('generadors', 'generadors.ID_Gener', '=', 'gener_sedes.FK_GSede')
+				->join('respels', 'respels.ID_Respel', '=', 'residuos_geners.FK_Respel')
+				->join('requerimientos', 'solicitud_residuos.FK_SolResRequerimiento', '=', 'requerimientos.ID_Req')
+				->join('tratamientos', 'requerimientos.FK_ReqTrata', '=', 'tratamientos.ID_Trat')
+				->join('sedes', 'tratamientos.FK_TratProv', '=', 'sedes.ID_Sede')
+				->join('clientes', 'sedes.FK_SedeCli', '=', 'clientes.ID_Cli')
+				->select('solicitud_residuos.*', 'residuos_geners.FK_SGener', 'respels.*', 'requerimientos.ID_Req', 'tratamientos.TratName', 'tratamientos.ID_Trat', 'clientes.CliShortName', 'gener_sedes.FK_GSede', 'generadors.*')
+				->where('solicitud_residuos.FK_SolResSolSer', $SolicitudServicio->ID_SolSer)
+				->get();
+			if (!$Residuosoriginal->isEmpty()) {
+				Log::warning('RM PDF: Residuos obtenidos sin filtro de generador. Revisar firmas_servicio (FK_Gener=' . ($firmas->FK_Gener ?? 'null') . ', FK_SGener=' . ($firmas->FK_SGener ?? 'null') . ') vs residuos del servicio ' . $SolicitudServicio->ID_SolSer);
+				$GenerResiduos = DB::table('solicitud_residuos')
+					->distinct()
+					->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
+					->join('gener_sedes', 'gener_sedes.ID_GSede', '=', 'residuos_geners.FK_SGener')
+					->join('generadors', 'generadors.ID_Gener', '=', 'gener_sedes.FK_GSede')
+					->join('municipios', 'municipios.ID_Mun', '=', 'gener_sedes.FK_GSedeMun')
+					->select('gener_sedes.GSedeName', 'residuos_geners.FK_SGener', 'generadors.ID_Gener', 'generadors.GenerName', 'gener_sedes.GSedeSlug', 'gener_sedes.GSedeAddress', 'gener_sedes.GSedeEmail', 'gener_sedes.GSedeCelular', 'municipios.MunName')
+					->where('solicitud_residuos.FK_SolResSolSer', $SolicitudServicio->ID_SolSer)
+					->get();
+			}
+		}
+
+		//return $Residuosoriginal;
+
+
+		$Residuos = $Residuosoriginal->map(function ($item) {
+			$requerimientos = Requerimiento::with(['pretratamientosSelected', 'tarifa.rangos' => function($query){
+				$query->orderBy('TarifaDesde');
+			}])
+			->where('ID_Req', $item->FK_SolResRequerimiento)
+			// ->where('forevaluation', 0)
+			->first();
+
+			$rm = SolicitudResiduo::with('SolicitudServicio')->where('SolResSlug', $item->SolResSlug)->first(['SolResRM', 'FK_SolResSolSer']);
+
+	        $item->pretratamientosSelected = $requerimientos->pretratamientosSelected;
+	        $item->tarifa = $requerimientos->tarifa;
+			if ($requerimientos->tarifa->TarifaSpecial === 1) {
+				switch ($item->SolResTypeUnidad) {
+					case 'Unidad':
+						$tarifatipo = 'Unid';
+						break;
+
+					case 'Litros':
+						$tarifatipo = 'Lt';
+						break;
+
+					default:
+						$tarifatipo = 'Kg';
+						break;
+				}
+
+				$tarifaResiduo = CTarifa::with('rangos')
+					->where('FK_Cliente', $rm->SolicitudServicio->FK_SolSerCliente)
+					->where('FK_Tratamiento', $requerimientos->FK_ReqTrata)
+					->where('Tarifatipo', $tarifatipo)
+					->first();
+
+				if ($tarifaResiduo === null) {
+					$item->ctarifa = null;
+				}else{
+					$item->ctarifa = $tarifaResiduo;
+				}
+			}else{
+				$item->ctarifa = null;
+			}
+	        $item->SolResRM2 = $rm->SolResRM;
+		  	return $item;
+		});
+
+
+		$SolicitudServicio->Repetible = 0;
+
+		/* se convierte el tipo de dato a aray mediante la consulta en el modelo de la columna SolSerRMs usando eloquent*/
+		$rms = SolicitudServicio::where('SolSerSlug', $SolicitudServicio->SolSerSlug)->first('SolSerRMs');
+		$SolicitudServicio->SolSerRMs = $rms->SolSerRMs;
+
+		// return $Residuos;
+
+		foreach ($Residuos as $residuo => $value) {
+			$requerimientos = Requerimiento::with(['pretratamientosSelected'])
+	        ->where('ID_Req', $value->FK_SolResRequerimiento)
+	        ->first();
+			$residuoSinTratamiento = Requerimiento::where('FK_ReqRespel', $requerimientos->FK_ReqRespel)
+			->where('ofertado', 1)
+			->where('forevaluation', 1)
+	        ->first();
+
+
+			if ($residuoSinTratamiento == null) {
+				$SolicitudServicio->Repetible++;
+			}
+		}
+
+		  $SolicitudesServicioscount = DB::table('solicitud_servicios')
+			  ->join('solicitud_residuos' , 'solicitud_residuos.FK_SolResSolSer', '=', 'solicitud_servicios.ID_SolSer')
+			  ->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
+			  ->join('gener_sedes', 'gener_sedes.ID_GSede', '=', 'residuos_geners.FK_SGener')
+			  ->join('generadors' , 'generadors.ID_Gener', '=', 'gener_sedes.FK_GSede')
+			  ->where('ID_SolSer', $SolicitudServicio->ID_SolSer)
+			  ->where('gener_sedes.ID_GSede', $firmas->FK_SGener)
+			  ->select('solicitud_residuos.*', 'generadors.*')
+			  ->get();
+
+			  $totales = 0;
+			  foreach ($SolicitudesServicioscount as $servicio) {
+				$totales += $servicio->SolResKgRecibido ?? 0;
+			  }
+			  // Si totales sigue en 0 (desajuste firmas/generador), sumar desde los residuos que sí tenemos
+			  if ($totales == 0 && $Residuosoriginal->isNotEmpty()) {
+				$totales = $Residuosoriginal->sum(function ($r) {
+					$recibido = (float) ($r->SolResKgRecibido ?? 0);
+					if ($recibido <= 0 && isset($r->SolResKgConciliado)) {
+						$recibido = (float) $r->SolResKgConciliado;
+					}
+					return $recibido;
+				});
+				if ($totales > 0) {
+					Log::warning('RM PDF: totales calculado desde Residuos (firmas no coincidían). Servicio ' . $SolicitudServicio->ID_SolSer);
+				}
+			  }
+
+		if (in_array(Auth::user()->UsRol, Permisos::SolSer1) || in_array(Auth::user()->UsRol, Permisos::SolSer1)) {
+			$tratamientos = Tratamiento::join('sedes', 'sedes.ID_Sede', '=', 'tratamientos.FK_TratProv')
+			->join('clientes', 'clientes.ID_Cli', '=', 'sedes.FK_SedeCli')
+			->select('*')
+			->get();
+		}else{
+			$tratamientos = 'NoAutorizado';
+		}
+		//Buscar corrientes del residuo
+
+			$PublicRespels = DB::table('solicitud_residuos')
+			->join('residuos_geners', 'residuos_geners.ID_SGenerRes', '=', 'solicitud_residuos.FK_SolResRg')
+			->join('respels' , 'respels.ID_Respel', '=', 'residuos_geners.FK_Respel')
+			->select('respels.ID_Respel', 'respels.YRespelClasf4741', 'respels.ARespelClasf4741')
+			->where('solicitud_residuos.FK_SolResSolSer', $SolicitudServicio->ID_SolSer)
+			->distinct()
+			->get();
+
+			$user = Auth::user();
+
+		// Validación para encontrar la fecha de recepción en planta del servicio
+		$fechaRecepcion = SolicitudServicio::find($SolicitudServicio->ID_SolSer)->programacionesrecibidas()->first();
+		if($fechaRecepcion){
+			$SolicitudServicio->recepcion = $fechaRecepcion->ProgVehSalida;
+		}else{
+			$SolicitudServicio->recepcion = null;
+		}
+
+		//	return $user;
+
+		//Generación de PDF
+		try {
+			// Validar que los datos necesarios estén presentes
+			if (empty($Residuos) || $Residuos->isEmpty()) {
+				Log::error('Error generando PDF RM: No hay residuos para el servicio', [
+					'servicio_id' => $SolicitudServicio->ID_SolSer ?? null,
+					'firmas_id' => $firmas->ID_Firmas ?? null
+				]);
+				throw new \Exception('No hay residuos para generar el PDF del RM');
+			}
+
+			$pdf = PDF::setPaper('letter', 'portrait')->loadView('solicitud-serv.rmtemplate', compact(['SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente',  'SolSerConductor',  'Programaciones',  'totales', 'tratamientos', 'PublicRespels', 'precintosString', 'firmas', 'user', 'nombreConductor']));
+            $nombre = $firmas->SlugFirmas . '.pdf';
+			$path = 'RecibosdeMaterial/' . sprintf("%0s", $nombre);
+        //return $GenerResiduos;
+		   Storage::disk('public')->makeDirectory('RecibosdeMaterial');
+		   Storage::disk('public')->put($path, $pdf->output());
+		} catch (\Exception $e) {
+			Log::error('Error generando PDF RM', [
+				'servicio_id' => $SolicitudServicio->ID_SolSer ?? null,
+				'firmas_id' => $firmas->ID_Firmas ?? null,
+				'error' => $e->getMessage(),
+				'trace' => $e->getTraceAsString(),
+				'residuos_count' => $Residuos->count() ?? 0,
+				'gener_residuos_count' => $GenerResiduos->count() ?? 0
+			]);
+			throw $e;
+		}
+
+
+			$pdfPath = storage_path('app/public/RecibosdeMaterial/' . $firmas->SlugFirmas . '.pdf');
+		//Envio de documento al correo
+
+		$hostSmtp = (string) env('MAIL_HOST');
+		$usuarioSmtp = (string) env('MAIL_USERNAME');
+		$relaySinAuth = empty($usuarioSmtp) && str_contains($hostSmtp, 'mail.protection.outlook.com');
+
+		/* if ($relaySinAuth) {
+			try {
+				Mail::to(self::MAIL_RECIBO_MATERIAL_INTERNO)->send(new SolSerRM($pdf, $pdfPath, $Cliente, $GenerResiduos, $firmas));
+				if (!empty($SolicitudServicio->PersEmail)) {
+					Mail::to($SolicitudServicio->PersEmail)->send(new SolSerRM($pdf, $pdfPath, $Cliente, $GenerResiduos, $firmas));
+				}
+			} catch (\Throwable $e) {
+				Log::warning('Fallo envio RM (relay sin auth)', [
+					'servicio_id' => $SolicitudServicio->ID_SolSer,
+					'error' => $e->getMessage(),
+				]);
+			}
+		} else {
+			try {
+				Mail::to(self::MAIL_RECIBO_MATERIAL_INTERNO)->send(new SolSerRM($pdf, $pdfPath, $Cliente, $GenerResiduos, $firmas));
+				if (!empty($SolicitudServicio->PersEmail)) {
+					Mail::to($SolicitudServicio->PersEmail)->send(new SolSerRM($pdf, $pdfPath, $Cliente, $GenerResiduos, $firmas));
+				}
+			} catch (\Throwable $e) {
+				Log::error('Fallo envio RM por SMTP', [
+					'servicio_id' => $SolicitudServicio->ID_SolSer,
+					'error' => $e->getMessage(),
+				]);
+			}
+		} */
+
+		return response($pdf->output(), 200, [
+			'Content-Type' => 'application/pdf',
+			'Content-Disposition' => 'inline; filename="Recibo_Material_' . $SolicitudServicio->ID_SolSer . '.pdf"'
+		]);
+		//return view ('solicitud-serv.rmtemplate', compact('SolicitudServicio','Residuos', 'GenerResiduos', 'Cliente',  'SolSerConductor',  'Programaciones', 'totales', 'tratamientos', 'PublicRespels', 'precintosString', 'firmas'));
+		}
+	}
+
 	/**
      * Display a listing of the resource.
      *

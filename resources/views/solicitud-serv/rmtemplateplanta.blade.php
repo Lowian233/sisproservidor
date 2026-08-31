@@ -285,6 +285,20 @@ footer {
                         </td>
                     </tr>
                     <tr style='height:26.85pt'>
+                        <td style=' border-top:none; border-left:solid windowtext 1.0pt ;border-bottom:none;border-right:none; padding:0cm 5.4pt 0cm 5.4pt;height:26.85pt'>
+                             <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>GENERADOR:</span></b></p>
+                        </td>
+                        <td style='border-top:none; border-left:none ;border-bottom:none;border-right:none; padding:0cm 5.4pt 0cm 5.4pt;height:26.85pt'>
+                            <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>{{$GenerResiduo->GenerName ?? 'N/A' }}</span></p>
+                            </td>
+                        <td style='border-top:none; border-left:none ;border-bottom:none;border-right:none; padding:0cm 5.4pt 0cm 5.4pt;height:26.85pt'>
+                            <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>SEDE:</span></b></p>
+                        </td>
+                        <td style='border-top:none; border-left:none ;border-bottom:none;border-right:solid; padding:0cm 5.4pt 0cm 5.4pt;height:26.85pt'>
+                            <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>{{ $GenerResiduo->GSedeName ?? 'N/A' }}</span></p>
+                        </td>
+                    </tr>
+                    <tr style='height:26.85pt'>
                         <td style='border-top:none; border-left:solid windowtext 1.0pt ;border-bottom:none;border-right:none; padding:0cm 5.4pt 0cm 5.4pt;height:26.85pt'>
                             <p class=MsoNormal style='margin-bottom:0cm;line-height:normal'><b><span style='font-size:10.0pt;font-family:"Arial",sans-serif'>DIRECCIÓN:</span></b></p>
                         </td>

@@ -477,7 +477,7 @@ RM N° {{--{{$SolicitudServicio->ID_SolSer}}--}}
                 </button>
             </div>
             <div class="modal-body p-0" style="height: 75vh;">
-                <iframe src="/solicitud-servicio/{{$generadores->FK_SGener}}/{{$SolicitudServicio->SolSerSlug}}/wordtemplate"
+                <iframe src="/solicitud-servicio/{{$generadores->FK_SGener}}/{{$SolicitudServicio->SolSerSlug}}/viewwordtemplate"
                         style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
             <div class="modal-footer">
