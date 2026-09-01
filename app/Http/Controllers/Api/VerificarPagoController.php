@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\DescargarDocumentosWati;
 use App\Jobs\VerificarPagoWati;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class VerificarPagoController extends Controller
@@ -57,10 +58,21 @@ class VerificarPagoController extends Controller
 
         $resultado = json_decode(file_get_contents($archivo), true);
 
-        return response()->json(VerificarPagoWati::enriquecerResultado(
+        $respuesta = VerificarPagoWati::enriquecerResultado(
             $resultado ?? [],
             $request->input('monto')
-        ));
+        );
+
+        if ($respuesta['ok'] && $request->filled('idCliente')) {
+            $fechaProgramada = $this->obtenerFechaProgramada((int) $request->input('idCliente'));
+            $respuesta['fecha_programada'] = $fechaProgramada;
+
+            if ($fechaProgramada) {
+                $respuesta['mensaje'] .= ' Tu solicitud fue programada para el ' . $fechaProgramada . '.';
+            }
+        }
+
+        return response()->json($respuesta);
     }
 
     /**
@@ -125,5 +137,19 @@ class VerificarPagoController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Obtiene la programación vigente más reciente creada para un cliente express.
+     */
+    private function obtenerFechaProgramada(int $idCliente): ?string
+    {
+        return DB::table('progvehiculos as programacion')
+            ->join('solicitud_servicios as servicio', 'servicio.ID_SolSer', '=', 'programacion.FK_ProgServi')
+            ->where('servicio.FK_Cliente_Express', $idCliente)
+            ->where('servicio.SolSerDelete', 0)
+            ->where('programacion.ProgVehDelete', 0)
+            ->orderByDesc('programacion.ID_ProgVehiculo')
+            ->value('programacion.ProgVehFecha');
     }
 }

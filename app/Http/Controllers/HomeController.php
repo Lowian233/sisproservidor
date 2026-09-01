@@ -25,7 +25,11 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware(['auth', 'verified']);
+        $this->middleware('auth');
+
+        if (!app()->environment('local')) {
+            $this->middleware('verified');
+        }
     }
 
     /**
