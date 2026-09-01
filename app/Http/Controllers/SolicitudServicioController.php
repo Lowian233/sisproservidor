@@ -1213,6 +1213,7 @@ public function index(Request $request)
 	 */
 	public function show($id)
 	{
+        log::info('SolicitudServicioController@show called with id: ' . $id);
 		$SolicitudServicio = DB::table('solicitud_servicios')
 			->leftjoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
 			->select('solicitud_servicios.*','personals.PersFirstName','personals.PersLastName', 'personals.PersEmail')
