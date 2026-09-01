@@ -114,7 +114,6 @@ mix.js('resources/assets/js/app.js', 'public/js')
 				'node_modules/datatables.net-rowgroup/js/dataTables.rowGroup.js',
 				'node_modules/datatables.net-scroller/js/dataTables.scroller.js',
 				'node_modules/datatables.net-select/js/dataTables.select.js',
-				'node_modules/datatables.net-dt/css/jquery.dataTables.js',
 				'node_modules/datatables.net-buttons-dt/js/buttons.dataTables.js',
 				'node_modules/datatables.net-keytable-dt/js/keyTable.dataTables.js',
 				'node_modules/datatables.net-scroller-dt/js/scroller.dataTables.js',
@@ -141,7 +140,7 @@ mix.js('resources/assets/js/app.js', 'public/js')
 	 // .copy('node_modules/icheck/skins/square/blue@2x.png','public/css')
 
 	
-if (mix.config.inProduction) {
+if (mix.inProduction()) {
 	mix.version();
 	mix.minify();
 }

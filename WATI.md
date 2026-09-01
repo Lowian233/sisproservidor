@@ -159,7 +159,7 @@ GET /api/v1/resultado-pago/{phone}?idCliente=17&monto=80000
 ```
 1. Si no hay resultado aun: retorna `"Estamos verificando tu pago, espera unos segundos..."`
 2. Si hay resultado: guarda los comprobantes en `public/documentos/{idCliente}/{año}/{mes}/` (idempotente via marcador `.saved`)
-3. Retorna JSON con `ok`, `factura_valida`, `mensaje` (texto para mostrar al usuario en Wati)
+3. Retorna JSON con `ok`, `factura_valida`, `mensaje` (texto para mostrar al usuario en Wati) y, si el pago es válido y se envía `idCliente`, `fecha_programada` (`Y-m-d`). La fecha también se agrega a `mensaje`.
 
 ### 4.3 Metodos de extraccion de datos
 
@@ -306,3 +306,85 @@ Wati Cloud API
 | 15 | `resources/views/cotizacionExpres/index.blade.php` | UI de envio WhatsApp |
 | 16 | `resources/views/cotizacionExpres/show.blade.php` | Texto referencia Wati |
 | 17 | `resources/views/emails/Express/sendReciboExpress.blade.php` | Link WhatsApp estatico |
+
+---
+
+## 11. Aclaraciones operativas (importante)
+
+### 11.1 WATI en el menu lateral
+- No existe un modulo lateral llamado exactamente "WATI".
+- La parte funcional visible para usuario esta principalmente en **Cotizaciones Express** (envio de reportes) y en los flujos API/Webhook.
+- Por eso puede parecer que "no existe WATI" aunque la integracion si este activa en backend.
+
+### 11.2 Que depende de permisos de usuario
+- El acceso a **Cotizaciones Express** depende de roles permitidos por `Permisos::TODOPROSARC` en `config/menu.php`.
+- Si el usuario no tiene ese rol, no vera la opcion aunque la integracion WATI siga funcionando en API.
+
+### 11.3 Que depende de ambiente/configuracion
+- Si `WATI_ENDPOINT` o `WATI_TOKEN` estan vacios/invalidos, fallaran llamadas a WATI (`getMessages`, `getMedia`, `sendTemplateMessage`, `sendSessionFile`).
+- Si `OCR_SPACE_KEY` no esta configurado, la validacion OCR de comprobantes puede fallar para imagenes/PDF escaneados.
+
+---
+
+## 12. Checklist rapido de diagnostico
+
+Usar este checklist cuando "WATI no funciona":
+
+1. Verificar variables en `.env`:
+   - `WATI_ENDPOINT`
+   - `WATI_TOKEN`
+   - `OCR_SPACE_KEY` (si aplica validacion OCR)
+
+2. Confirmar que existen rutas API:
+   - `POST /api/v1/webhook/wati`
+   - `POST /api/v1/webhook/wati-documentos`
+   - `GET /api/v1/debug/wati-mensajes/{phone}`
+   - `POST /api/v1/verificar-pago`
+   - `GET /api/v1/resultado-pago/{phone}`
+
+3. Si no aparece en menu, validar rol del usuario (`UsRol`, `UsRol2`) contra permisos de menu.
+
+4. Revisar logs de Laravel (`storage/logs/laravel.log`) buscando:
+   - `Webhook Wati recibido`
+   - `Wati template fallido`
+   - `Wati archivo fallido`
+   - `Webhook Wati API fallida`
+
+5. Si hay errores HTTP 401/403 en WATI, normalmente es token invalido/expirado.
+
+6. Si hay error de OCR, validar tamano/tipo de archivo y clave `OCR_SPACE_KEY`.
+
+---
+
+## 13. Runbook corto (soporte)
+
+Caso reportado: "WATI no funciona"
+
+1. Confirmar configuracion en `.env`
+- `WATI_ENDPOINT` con URL valida de WATI.
+- `WATI_TOKEN` vigente.
+- `OCR_SPACE_KEY` si el caso incluye validacion de comprobantes.
+
+2. Confirmar rutas activas
+- `POST /api/v1/webhook/wati`
+- `POST /api/v1/webhook/wati-documentos`
+- `GET /api/v1/debug/wati-mensajes/{phone}`
+- `POST /api/v1/verificar-pago`
+- `GET /api/v1/resultado-pago/{phone}`
+
+3. Validar menu/permisos (si el problema es visual)
+- Si no aparece opcion en lateral, revisar `UsRol` y `UsRol2`.
+- La UI relacionada esta en "Cotizaciones Express", no en un menu llamado "WATI".
+
+4. Revisar logs
+- Archivo: `storage/logs/laravel.log`
+- Buscar: `Webhook Wati recibido`, `Wati template fallido`, `Wati archivo fallido`, `Webhook Wati API fallida`.
+
+5. Interpretacion rapida
+- `401/403` en llamadas a WATI: token invalido o expirado.
+- `404` en `getMedia`: nombre/ruta del archivo no coincide.
+- OCR sin resultado: archivo no legible, tamano alto, o `OCR_SPACE_KEY` faltante.
+
+6. Prueba minima de conectividad
+- Ejecutar `GET /api/v1/debug/wati-mensajes/{phone}` con un numero real de prueba.
+- Si responde OK, conectividad base WATI esta operativa.

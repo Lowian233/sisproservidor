@@ -22,6 +22,15 @@ Route::get('/', function () {
 
 Auth::routes(['verify' => true]);
 
+// In local development we allow navigation without confirmed email.
+$verifiedMiddleware = app()->environment('local')
+	? ['web', 'auth', 'bindings']
+	: ['web', 'auth', 'verified', 'bindings'];
+
+$verifiedAuthMiddleware = app()->environment('local')
+	? ['auth']
+	: ['auth', 'verified'];
+
 Route::get('/noscriptpage', function () {
     return view('noscriptpage');
 });
@@ -38,7 +47,7 @@ Route::get('/preguntas-frecuentes', function () {
 });
 
 // Rutas para fotos de cliente
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware($verifiedAuthMiddleware)->group(function () {
     Route::get('/fotos-cliente', 'FotosClienteController@index')->name('fotos-cliente.index');
     Route::get('/fotos-cliente/download/{id}', 'FotosClienteController@download')->name('fotos-cliente.download');
     Route::get('/fotos-cliente/download-all', 'FotosClienteController@downloadAll')->name('fotos-cliente.download-all');
@@ -72,7 +81,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
 
 
-Route::middleware(['web', 'auth', 'verified', 'bindings'])->group(function () {
+Route::middleware($verifiedMiddleware)->group(function () {
     //    Route::get('/link1', function ()    {
 	//        // Uses Auth Middleware
 	//    });
