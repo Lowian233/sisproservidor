@@ -68,11 +68,13 @@ class CreateSolicitudExpressService
         $solExpress->SolSerDevolucion = 0;
         $solExpress->SolSerDevolucionTipo = null;
         $solExpress->FK_SolSerPersona = null;
+        // clientes/personals no aplican al flujo express: no hay un ID valido al cual apuntar
+        $solExpress->FK_SolSerCliente = null;
         $solExpress->FK_Cliente_Express = $idCliente->idCliente;
         $solExpress->SolSerDescript = null;
         $solExpress->SolSerSupport = null;
         $solExpress->SolServCertStatus = 0;
-        $solExpress->SolServMailCopia = '';
+        $solExpress->SolServMailCopia = json_encode([]);
         $solExpress->SolSerRMs = null;
         $solExpress->SolSerTranspPrecio = 0;
         $solExpress->FK_ReciboSolserv = null;
@@ -124,7 +126,8 @@ class CreateSolicitudExpressService
             $generador->GenerCode = null;
             $generador->GenerType = null;
             $generador->GenerSlug = hash('sha256', rand() . time() . $cliente->nit);
-            $generador->FK_GenerCli = $cliente->id;
+            // FK_GenerCli referencia la tabla legada "sedes", que no aplica al flujo express
+            $generador->FK_GenerCli = null;
             $generador->GenerDelete = 0;
             $generador->save();
         }
@@ -264,7 +267,6 @@ class CreateSolicitudExpressService
         $programacion->FK_ProgAyudante = null;
         $programacion->ProgVehDelete = 0;
         $programacion->ProgVehStatus = 'Autorizado';
-        $programacion->ProgVehPreoperacionalCompletado = 1;
         $programacion->save();
 
         return $programacion;
