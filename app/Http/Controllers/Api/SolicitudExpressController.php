@@ -25,6 +25,12 @@ class SolicitudExpressController extends Controller
             $idSolicitud  = $request->input('idSolicitud');
             $tipoResiduo  = $request->input('tipoResiduo');
 
+            Log::info('Solicitud Express recibida desde Wati', [
+                'idSolicitud' => $idSolicitud,
+                'tipoResiduo' => $tipoResiduo,
+                'peso' => $request->input('peso'),
+            ]);
+
             // INSERT: llega tipoResiduo
             if ($tipoResiduo) {
                 if (!$idSolicitud || !is_numeric($idSolicitud) || $idSolicitud == '@idSolicitud') {
@@ -37,7 +43,7 @@ class SolicitudExpressController extends Controller
                 $datos = ['idSolicitud' => $idSolicitud, 'tipoResiduo' => $tipoResiduo];
 
                 if ($request->has('idCliente'))        $datos['idCliente']        = $request->input('idCliente');
-                if ($request->filled('idSede'))        $this->aplicarSede($request->input('idSede'), $datos);
+                if ($request->filled('idSede'))        $this->aplicarSede($request->input('idSede'), $datos['idCliente'] ?? null, $datos);
                 if ($request->has('localidad'))        $datos['localidad']        = $request->input('localidad');
                 if ($request->has('estado'))           $datos['estado']           = $request->input('estado');
                 if ($request->has('RequiereContrato')) $datos['RequiereContrato'] = $request->input('RequiereContrato');
@@ -69,7 +75,11 @@ class SolicitudExpressController extends Controller
             $datos       = [];
 
             if ($request->has('idCliente'))        $datos['idCliente']        = $request->input('idCliente');
-            if ($request->filled('idSede'))        $this->aplicarSede($request->input('idSede'), $datos);
+            if ($request->filled('idSede')) {
+                $idClienteSede = $datos['idCliente']
+                    ?? DB::table('solicitudes_express')->where('idSolicitud', $idSolicitud)->value('idCliente');
+                $this->aplicarSede($request->input('idSede'), $idClienteSede, $datos);
+            }
             if ($request->has('localidad'))        $datos['localidad']        = $request->input('localidad');
             if ($request->has('estado'))           $datos['estado']           = $request->input('estado');
             if ($request->has('RequiereContrato')) $datos['RequiereContrato'] = $request->input('RequiereContrato');
@@ -138,11 +148,29 @@ class SolicitudExpressController extends Controller
      * como localidad de recolección (un `localidad` explícito en el request la
      * sobreescribe luego porque se procesa después). Si la sede no existe, se
      * guarda 0 (la solicitud usa la dirección del cliente).
+     *
+     * Wati envía el número de "opcion" (1..N) que verificarNit mostró en el
+     * listado de sedes, no el id real de sedes_express, así que se resuelve
+     * contra las sedes del cliente en el mismo orden (por id) que formatearSedes().
      */
-    private function aplicarSede($idSede, array &$datos): void
+    private function aplicarSede($idSede, $idCliente, array &$datos): void
     {
-        $idSede = (int) $idSede;
-        $sede   = SedeExpress::find($idSede);
+        $opcion = (int) $idSede;
+        $sede   = null;
+
+        if ($idCliente && $opcion > 0) {
+            $sede = SedeExpress::where('idClienteExpress', $idCliente)
+                ->orderBy('id')
+                ->get()
+                ->values()
+                ->get($opcion - 1);
+        } else {
+            // Sin idCliente no se puede mapear la opción con seguridad: no
+            // buscar por PK global, se cruzaría con la sede de otro cliente.
+            Log::warning('aplicarSede: no se pudo resolver idCliente para mapear la opción de sede', [
+                'opcion' => $opcion,
+            ]);
+        }
 
         $datos['idSede'] = $sede ? $sede->id : 0;
 

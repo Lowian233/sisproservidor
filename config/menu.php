@@ -18,8 +18,28 @@ Menu::macro('adminlteSeparator', function ($title) {
 	return Html::raw($title)->addParentClass('header');
 });
 Menu::macro('sidebar', function () {//COMIENZO DEL SIDEBAR EN VERSION DE MENU
-	if (! Auth::guest())
-		if (Auth::user()->email_verified_at <> null && Auth::user()->FK_UserPers <> NULL) {
+	if (! Auth::guest()) {
+		$user = Auth::user();
+
+		// Compatibilidad: algunos usuarios quedaron con rol genérico "Administrador".
+		// El menú ya trabaja con "AdministradorBogota" / "AdministradorPlanta".
+		if (($user->UsRol ?? null) === 'Administrador') {
+			$user->UsRol = 'AdministradorBogota';
+		}
+		if (($user->UsRol2 ?? null) === 'Administrador') {
+			$user->UsRol2 = 'AdministradorBogota';
+		}
+
+		$esRolCliente = in_array($user->UsRol, Permisos::CLIENTE) || in_array($user->UsRol2, Permisos::CLIENTE);
+		$emailVerificado = $user->email_verified_at <> null || app()->environment('local');
+		$perfilAsociado = !$esRolCliente || $user->FK_UserPers <> null;
+		$clienteIdUsuario = userController::IDClienteSegunUsuario();
+		$clienteSlugUsuario = null;
+		if ($clienteIdUsuario) {
+			$clienteSlugUsuario = optional(Cliente::where('ID_Cli', $clienteIdUsuario)->first())->CliSlug;
+		}
+
+		if ($emailVerificado && $perfilAsociado) {
 			/* Cliente en rol principal o secundario: el menú cliente debe ser coherente (antes solo "Documentos" comprobaba UsRol2). */
 			$esRolCliente = in_array(Auth::user()->UsRol, Permisos::CLIENTE) || in_array(Auth::user()->UsRol2, Permisos::CLIENTE);
 			return Menu::adminlteMenu()
@@ -31,7 +51,7 @@ Menu::macro('sidebar', function () {//COMIENZO DEL SIDEBAR EN VERSION DE MENU
 							->prepend('<a href="#"><i class="fas fa-user-shield"></i> <span>Prosarc</span><i class="fas fa-angle-left pull-right" style="color:#FFFFFF;" width="18" height="18"></i></a>')
 							->addParentClass('treeview')
 							/*PESTAÑA DE LAS SEDES DE PROSARC*/
-						    ->add(Link::toUrl(route('cliente-show', Cliente::where('ID_Cli', userController::IDClienteSegunUsuario())->first()->CliSlug), '<i class="fas fa-building"></i> <span>'.  __('adminlte::message.MenuSedes').'</span>'))
+							->addIf(!empty($clienteSlugUsuario), Link::toUrl(url('/cliente/'.$clienteSlugUsuario), '<i class="fas fa-building"></i> <span>'.  __('adminlte::message.MenuSedes').'</span>'))
 							/*PESTAÑA DE AREAS DE PROSARC*/
 							->addIf(in_array(Auth::user()->UsRol, Permisos::AREAS) || in_array(Auth::user()->UsRol2, Permisos::AREAS), Link::toUrl('/areasInterno', '<i class="fas fa-archive"></i> <span>'. __('adminlte::message.MenuPersAreas').' </span>'))
 							/*PESTAÑA DE CARGOS DE PROSARC*/
@@ -153,7 +173,7 @@ Menu::macro('sidebar', function () {//COMIENZO DEL SIDEBAR EN VERSION DE MENU
 							->addIf(in_array(Auth::user()->UsRol, Permisos::PROGRAMACIONES) || in_array(Auth::user()->UsRol2, Permisos::PROGRAMACIONES), (Link::toUrl('/programacion-express', '<i  style="color: #66B032;" class="fas fa-calendar-alt"></i> <span>'.  __('adminlte::message.MenuPrograVehicSidebar').'</span>')))
 							->addIf(in_array(Auth::user()->UsRol, Permisos::ProgVehic1) || in_array(Auth::user()->UsRol2, Permisos::ProgVehic1), (Link::toUrl('/programacion-express/create', '<i  style="color: #66B032;" class="fas fa-calendar-alt"></i> <span>Calendario</span>')))
 							/*PESTAÑA DE COTIZACIONES EXPRESS*/
-			             	->addIf(in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) || in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC),(Link::toUrl('/cotizacion-expres', '<i style="font-size: 1.2em; color: #0066cc;" class="fas fa-quote-left"></i> <span>Cotizaciones Express</span>')))
+				             	->addIf(in_array(Auth::user()->UsRol, Permisos::TODOPROSARC) || in_array(Auth::user()->UsRol2, Permisos::TODOPROSARC),(Link::toUrl('/cotizacion-expres', '<i style="font-size: 1.2em; color: #0066cc;" class="fas fa-quote-left"></i> <span>Cotizaciones Express</span>')))
 							->addClass('treeview-menu')
 						)
 					)
@@ -190,7 +210,7 @@ Menu::macro('sidebar', function () {//COMIENZO DEL SIDEBAR EN VERSION DE MENU
 							->prepend('<a href="#"><i class="fas fa-user-shield"></i> <span>'.  __('adminlte::message.MenuClien2').'</span><i class="fas fa-angle-left pull-right" style="color:#FFFFFF;" width="18" height="18"></i></a>')
 							->addParentClass('treeview')
 							/*PESTAÑA DE LAS SEDES DE PROSARC*/
-							->add(Link::toUrl(route('cliente-show', Cliente::where('ID_Cli', userController::IDClienteSegunUsuario())->first()->CliSlug), '<i class="fas fa-building"></i> <span>'.  __('adminlte::message.MenuSedes').'</span>'))
+							->addIf(!empty($clienteSlugUsuario), Link::toUrl(url('/cliente/'.$clienteSlugUsuario), '<i class="fas fa-building"></i> <span>'.  __('adminlte::message.MenuSedes').'</span>'))
 							/*PESTAÑA DE AREAS DE PROSARC*/
 							->addIf(in_array(Auth::user()->UsRol, Permisos::CLIENTE) || in_array(Auth::user()->UsRol2, Permisos::AREAS), Link::toUrl('/areas', '<i class="fas fa-archive"></i> <span>'. __('adminlte::message.MenuPersAreas').' </span>'))
 							/*PESTAÑA DE CARGOS DE PROSARC*/
@@ -245,6 +265,7 @@ Menu::macro('sidebar', function () {//COMIENZO DEL SIDEBAR EN VERSION DE MENU
 
 				->setActiveFromRequest();
 		}
+	}
 	else{
 		return Menu::adminlteMenu()
 				/*ECABEZAMIENTO TITULO*/
