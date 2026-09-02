@@ -69,6 +69,9 @@ class EnviarRecordatoriosWatiCommand extends Command
         $fechaManana = $fechaCarbon->format('Y-m-d');
         $fechaFormateadaMensaje = $fechaCarbon->format('d/m/Y');
 
+        /* $fechaManana = '2026-08-29';
+        $fechaFormateadaMensaje = '29/08/2026'; */
+
         // 1. Consultar programaciones para mañana asociando el servicio y su fecha
         $programacion = ProgramacionVehiculo::whereDate('ProgVehFecha', $fechaManana)
             ->get(['FK_ProgServi', 'ProgVehFecha']);

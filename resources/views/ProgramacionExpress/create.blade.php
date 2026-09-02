@@ -401,10 +401,10 @@
 						window.location.href = "{{url('/programacion-express')}}";
 					}
 				},
-                /* envirRecordatorio: { // Nombre del objeto del botón
+                envirRecordatorio: {
                     text: 'Recordatorio',
                     click: function() {
-                        fetch("{{ url('/api/v1/test-wati') }}")
+                        fetch("{{ secure_url('/api/v1/test-wati') }}")
                             .then(response => response.json())
                             .then(data => {
                                 if (data.status === 'OK') {
@@ -419,7 +419,7 @@
                                 alert('Ocurrió un error al procesar la solicitud.');
                             });
                     }
-                } */
+                }
 			},
 			header: {
 				left: 'dayGridMonth,timeGridWeek,timeGridDay',
@@ -428,7 +428,7 @@
 			},
 			footer: {
 				left: 'AddMantVehc',
-				center: 's',
+				center: 'envirRecordatorio',
 				right: 'ListProg'
 			},
 			aspectRatio: 2,
