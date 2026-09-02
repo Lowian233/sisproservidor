@@ -149,7 +149,7 @@ class VerificarPagoController extends Controller
             ->where('servicio.FK_Cliente_Express', $idCliente)
             ->where('servicio.SolSerDelete', 0)
             ->where('programacion.ProgVehDelete', 0)
-            ->orderByDesc('programacion.ID_ProgVehiculo')
+            ->orderByDesc('programacion.ID_ProgVeh')
             ->value('programacion.ProgVehFecha');
     }
 }
