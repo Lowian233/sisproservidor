@@ -32,6 +32,22 @@
 								<td>Desechos clínicos resultantes de la atención médica prestada en hospitales, centros médicos y clínicas</td>
 							</tr>
 							<tr>
+								<td>Y1.1</td>
+								<td>Desechos clinicos anatomopatologicos resultantes de la atención en salud en Hospitales, consultorios, clinicas y otros.</td>
+							</tr>
+							<tr>
+								<td>Y1.2</td>
+								<td>Desechos clinicos biosanitarios resultantes de la atención en salud en Hospitales, consultorios, clinicas y otros.</td>
+							</tr>
+							<tr>
+								<td>Y1.3</td>
+								<td>Desechos clinicos cortopunzantes resultantes de la atención en salud en Hospitales, consultorios, clinicas y otros.</td>
+							</tr>
+							<tr>
+								<td>Y1.4</td>
+								<td>Desechos de animales y afines de animales</td>
+							</tr>
+							<tr>
 								<td>Y2</td>
 								<td>Desechos resultantes de la producción y preparación de productos farmacéuticos</td>
 							</tr>
@@ -42,6 +58,30 @@
 							<tr>
 								<td>Y4</td>
 								<td>Desechos resultantes de la producción, la preparación y la utilización de biocidas y productos fitofarmacéuticos</td>
+							</tr>
+							<tr>
+								<td>Y4.1</td>
+								<td>Plaguicidas, biocidas, productos fitofarmacéuticos obsoletos. (Plaguicidas, insecticidas y herbicidas para control de plagas fuera de especificaciones, caducados o en desuso.)</td>
+							</tr>
+							<tr>
+								<td>Y4.2</td>
+								<td>Elementos o materiales contaminados con plaguicidas (Accesorios contaminados (mangueras, boquillas, máquinas), trampas para plagas, EPP contaminados con plaguicidas.)</td>
+							</tr>
+							<tr>
+								<td>Y4.3</td>
+								<td>Tierra o sedimentos impregnados con plaguicidas, biocidas o productos fitofarmacéuticos, Suelo contaminado por derrame de RF-254n, lodos contaminados con plaguicidas.</td>
+							</tr>
+							<tr>
+								<td>Y4.4</td>
+								<td>Residuos de bolsas plásticas impregnadas de plaguicidas o biocidas.</td>
+							</tr>
+							<tr>
+								<td>Y4.5</td>
+								<td>Envases, recipientes, canecas, bidones, bolsas plasticas, de papel, lonas o contenedores que contienen o que están contaminados con plaguicidas, biocidas o productos fitofarmacéuticos. (Residuos de empaques y envases de plaguicidas, generados durante actividades de fumigación.)</td>
+							</tr>
+							<tr>
+								<td>Y4.6</td>
+								<td>Otros residuos de plaguicidas, biocidas o productos farmaceuticos no calsificados previamente. (Residuos de plaguicidas o biocidas no que puedan clasificarse en las subdivisiones Y4.1, Y4.2, Y4.3, Y4.4, o Y4.5 (o A4030.1, A4030.2, A4030.3, o A4030.5) previa verificación exhaustiva.)</td>
 							</tr>
 							<tr>
 								<td>Y5</td>
@@ -60,8 +100,60 @@
 								<td>Desechos de aceites minerales no aptos para el uso a que estaban destinados</td>
 							</tr>
 							<tr>
+								<td>Y8.1</td>
+								<td>Aceite lubricante usado (aceite lubricante mineral, sintéctico, hidraúlico usado)</td>
+							</tr>
+							<tr>
+								<td>Y8.2</td>
+								<td>Elementos o materiales contaminados con aceite lubricante usado: estopas, textiles, plasticos, caucho, sierra, geomenbranas, filtros, aserrin, grasas minerales, tapas, EPP, madera entre otros.</td>
+							</tr>
+							<tr>
+								<td>Y8.3</td>
+								<td>Lodos, tierra o sedimentos impregnados de aceite lubricante usado</td>
+							</tr>
+							<tr>
+								<td>Y8.4</td>
+								<td>Mezclas de aceite lubricante usado con agua</td>
+							</tr>
+							<tr>
+								<td>Y8.5</td>
+								<td>Aceites dielectricos de desecho con una concentración menor a 50mg/kg, 50ppm de PCB. Si el aceite dielectrico contiene 50ppm o más de PCB, clasifiquelo por la correintes Y10.2  o A3180.2</td>
+							</tr>
+							<tr>
+								<td>Y8.6</td>
+								<td>Envases, recipientes, canecas, bidones, o contenedores que contienen o que estan contaminados con aceites usados</td>
+							</tr>
+							<tr>
+								<td>Y8.7</td>
+								<td>Otros desechos de mezclas de aceite y agua no clasificados previamente. </td>
+							</tr>
+							<tr>
 								<td>Y9</td>
 								<td>Mezclas y emulsiones de desechos de aceite y agua o de hidrocarburos y agua</td>
+							</tr>
+							<tr>
+								<td>Y9.1</td>
+								<td>Lodos y cortes de perforación base aceite, borras y lodos aceitosos.</td>
+							</tr>
+							<tr>
+								<td>Y9.2</td>
+								<td>Elementos o materiales contaminados con hidrocarburos, estopas, textiles, plasticos, caucho, sierra, geomenbranas, madera entre otros.</td>
+							</tr>
+							<tr>
+								<td>Y9.3</td>
+								<td>Sólidos o semisólidos impregnados con hidrocarburos, tierra, suelo, arena, aserrin.</td>
+							</tr>
+							<tr>
+								<td>Y9.4</td>
+								<td>Mezclas o emulsiones líquidas de agua con hidrocarburo con contenidos de sólidos <15% e hidrocarburo >3%</td>
+							</tr>
+							<tr>
+								<td>Y9.5</td>
+								<td>Envases recipientes canecas, bidones o contenedores que contienen o que estan contaminados con hidrocarburos. </td>
+							</tr>
+							<tr>
+								<td>Y9.6</td>
+								<td>Otros desechos de mezclas y emulsiones de hidrocarburos y agua no clasificados previamente</td>
 							</tr>
 							<tr>
 								<td>Y10</td>

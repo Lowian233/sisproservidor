@@ -155,6 +155,34 @@
 								<td>Aceites minerales de desecho no aptos para el uso al que estaban destinados</td>
 							</tr>
 							<tr>
+								<td>A3020.1</td>
+								<td>Aceite lubricante usado (aceite lubricante mineral, sintéctico, hidraúlico usado)</td>
+							</tr>
+							<tr>
+								<td>A3020.2</td>
+								<td>Elementos o materiales contaminados con aceite lubricante usado: estopas, textiles, plasticos, caucho, sierra, geomenbranas, filtros, aserrin, grasas minerales, tapas, EPP, madera entre otros.</td>
+							</tr>
+							<tr>
+								<td>A3020.3</td>
+								<td>Lodos, tierra o sedimentos impregnados de aceite lubricante usado</td>
+							</tr>
+							<tr>
+								<td>A3020.4</td>
+								<td>Mezclas de aceite lubricante usado con agua</td>
+							</tr>
+							<tr>
+								<td>A3020.5</td>
+								<td>Aceites dielectricos de desecho con una concentración menor a 50mg/kg, 50ppm de PCB. Si el aceite dielectrico contiene 50ppm o más de PCB, clasifiquelo por la correintes Y10.2  o A3180.2</td>
+							</tr>
+							<tr>
+								<td>A3020.6</td>
+								<td>Envases, recipientes, canecas, bidones, o contenedores que contienen o que estan contaminados con aceites usados</td>
+							</tr>
+							<tr>
+								<td>A3020.7</td>
+								<td>Otros desechos de mezclas de aceite y agua no clasificados previamente</td>
+							</tr>
+							<tr>
 								<td>A3030</td>
 								<td>Desechos que contengan, estén integrados o estén contaminados por lodos de compuestos antidetonantes con plomo</td>
 							</tr>
@@ -235,8 +263,48 @@
 								<td>Desechos clínicos y afines; es decir desechos resultantes de prácticas médicas, de enfermería, dentales, veterinarias o actividades similares, y desechos generados en hospitales u otras instalaciones durante actividades de investigación o el tratamiento de pacientes, o de proyectos de investigación</td>
 							</tr>
 							<tr>
+								<td>A4020.1</td>
+								<td>Desechos clinicos anatomopatologicos resultantes de la atención en salud en Hospitales, consultorios, clinicas y otros.</td>
+							</tr>
+							<tr>
+								<td>A4020.2</td>
+								<td>Desechos clinicos biosanitarios resultantes de la atención en salud en Hospitales, consultorios, clinicas y otros.</td>
+							</tr>
+							<tr>
+								<td>A4020.3</td>
+								<td>Desechos clinicos cortopunzantes resultantes de la atención en salud en Hospitales, consultorios, clinicas y otros.</td>
+							</tr>
+							<tr>
+								<td>A4020.4</td>
+								<td>Desechos de animales y afines de animales.</td>
+							</tr>
+							<tr>
 								<td>A4030</td>
 								<td>Desechos resultantes de la producción, ¡a preparación y la utilización de biocidas y productos fitofarmacéuticos, con inclusión de desechos de plaguicidas y herbicidas que no respondan a las especificaciones, caducados,en desuso o no aptos para el uso previsto originalmente.</td>
+							</tr>
+							<tr>
+								<td>A4030.1</td>
+								<td>Plaguicidas, biocidas, productos fitofarmacéuticos obsoletos. (Plaguicidas, insecticidas y herbicidas para control de plagas fuera de especificaciones, caducados o en desuso.)</td>
+							</tr>
+							<tr>
+								<td>A4030.2</td>
+								<td>Elementos o materiales contaminados con plaguicidas (Accesorios contaminados (mangueras, boquillas, máquinas), trampas para plagas, EPP contaminados con plaguicidas.)</td>
+							</tr>
+							<tr>
+								<td>A4030.3</td>
+								<td>Tierra o sedimentos impregnados con plaguicidas, biocidas o productos fitofarmacéuticos, Suelo contaminado por derrame de RF-254n, lodos contaminados con plaguicidas.</td>
+							</tr>
+							<tr>
+								<td>A4030.4</td>
+								<td>Residuos de bolsas plásticas impregnadas de plaguicidas o biocidas.</td>
+							</tr>
+							<tr>
+								<td>A4030.5</td>
+								<td>Envases, recipientes, canecas, bidones, bolsas plasticas, de papel, lonas o contenedores que contienen o que están contaminados con plaguicidas, biocidas o productos fitofarmacéuticos. (Residuos de empaques y envases de plaguicidas, generados durante actividades de fumigación.)</td>
+							</tr>
+							<tr>
+								<td>A4030.6</td>
+								<td>Otros residuos de plaguicidas, biocidas o productos farmaceuticos no calsificados previamente. (Residuos de plaguicidas o biocidas no que puedan clasificarse en las subdivisiones Y4.1, Y4.2, Y4.3, Y4.4, o Y4.5 (o A4030.1, A4030.2, A4030.3, o A4030.5) previa verificación exhaustiva.)</td>
 							</tr>
 							<tr>
 								<td>A4040</td>
@@ -252,6 +320,30 @@
 							<tr>
 								<td>A4060</td>
 								<td>Desechos de mezclas y emulsiones de aceite y agua o de hidrocarburos y agua</td>
+							</tr>
+							<tr>
+								<td>A4060.1</td>
+								<td>Lodos y cortes de perforación base aceite, borras y lodos aceitosos.</td>
+							</tr>
+							<tr>
+								<td>A4060.2</td>
+								<td>Elementos o materiales contaminados con hidrocarburos, estopas, textiles, plasticos, caucho, sierra, geomenbranas, madera entre otros.</td>
+							</tr>
+							<tr>
+								<td>A4060.3</td>
+								<td>Sólidos o semisólidos impregnados con hidrocarburos, tierra, suelo, arena, aserrin.</td>
+							</tr>
+							<tr>
+								<td>A4060.4</td>
+								<td>Mezclas o emulsiones líquidas de agua con hidrocarburo con contenidos de sólidos <15% e hidrocarburo >3%</td>
+							</tr>
+							<tr>
+								<td>A4060.5</td>
+								<td>Envases recipientes canecas, bidones o contenedores que contienen o que estan contaminados con hidrocarburos. </td>
+							</tr>
+							<tr>
+								<td>A4060.6</td>
+								<td>Otros desechos de mezclas y emulsiones de hidrocarburos y agua no clasificados previamente</td>
 							</tr>
 							<tr>
 								<td>A4070</td>
