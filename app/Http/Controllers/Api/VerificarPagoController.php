@@ -8,6 +8,7 @@ use App\Jobs\VerificarPagoWati;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\CreateSolicitudExpressService;
 
 class VerificarPagoController extends Controller
 {
@@ -64,6 +65,23 @@ class VerificarPagoController extends Controller
         );
 
         if ($respuesta['ok'] && $request->filled('idCliente')) {
+            try {
+                $datos = DB::table('solicitudes_express')
+                    ->where('idCliente', $request->input('idCliente'))
+                    ->orderByDesc('id')
+                    ->first();
+                $idSolicitud = $datos->id;
+                $idCliente = (int) $request->input('idCliente');
+                log::info('Este es el ID del cliente recibido: ' . $idCliente);
+                $service = new CreateSolicitudExpressService();
+                $solicitudServicio = $service->createSolicitud($idCliente, $idSolicitud);
+                } catch (\Exception $e) {
+                    Log::error('Error al crear SolicitudServicio: ' . $e->getMessage());
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error interno al procesar la solicitud: ' . $e->getMessage(),
+                    ], 500);
+                }
             $fechaProgramada = $this->obtenerFechaProgramada((int) $request->input('idCliente'));
             $respuesta['fecha_programada'] = $fechaProgramada;
 

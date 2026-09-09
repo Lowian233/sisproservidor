@@ -11,9 +11,11 @@ use App\ResiduosGener;
 use App\Observacion;
 use App\ProgramacionVehiculo;
 use App\SedeExpress;
+use App\Mail\NewSolServEmailExpress;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Mail;
 
 class CreateSolicitudExpressService
 {
@@ -25,22 +27,32 @@ class CreateSolicitudExpressService
      * @return SolicitudServicio
      * @throws Exception
      */
-    public function createSolicitud(array $datos, $idSolicitud): SolicitudServicio
+    public function createSolicitud(int $idCliente, int $idSolicitud): SolicitudServicio
     {
-        $idCliente = $datos['idCliente'] ?? null;
-        if(!$idCliente) {
+        //$idCliente = $datos['idCliente'] ?? null;
+       Log::info('Creando SolicitudServicio para idSolicitud: ' . $idSolicitud . ' con datos: ' . $idCliente);
+        //$idCliente = $idCliente;
+        /* if(!$idCliente) {
             $idCliente = DB::table('solicitudes_express')
                 ->where('idSolicitud', $idSolicitud)
                 ->first();
             $idSede = $idCliente->idSede;
-        }
+        } */
+
+        $idCliente = DB::table('solicitudes_express')
+            ->where('id', $idSolicitud)
+            ->first();
+        $idSede = $idCliente->idSede;
+
+       Log::info('ID del cliente obtenido: ' . $idCliente->idCliente . ', ID de la sede: ' . $idSede);
 
         $direccionObj = DB::table('sedes_express')
             ->where('id', $idSede)
-            ->select('direccion')
+            ->select('direccion', 'localidad')
             ->first();
 
         $direccion = $direccionObj->direccion ?? '';
+        $localidad = $direccionObj->localidad ?? '';
 
         $solExpress = new SolicitudServicio();
         $solExpress->SolSerStatus = 'Programado';
@@ -99,11 +111,15 @@ class CreateSolicitudExpressService
         $observacion->FK_ObsSolSer = $solExpress->ID_SolSer;
         $observacion->save();
 
-        $programacion = $this->createProgramacion($solExpress, $datos['localidad'] ?? '');
+        $programacion = $this->createProgramacion($solExpress, $localidad);
 
         log::info('Programación creada con ID: ' . $programacion->ID_ProgVehiculo . ' para SolicitudServicio ID: ' . $solExpress->ID_SolSer . 'En la fecha: ' . $programacion->ProgVehFecha);
 
         $solExpress->ProgVehFecha = $programacion->ProgVehFecha;
+
+        $destinatariorecepciom = ['lmcg2015@gmail.com', 'sercicioexpress@prosarc.com.co', 'asesorse2@prosarc.com.co', 'lidercomercial@prosarc.com.co'];
+
+        Mail::to($destinatariorecepciom)->send(new NewSolServEmailExpress($solExpress));
 
         return $solExpress;
     }
@@ -216,6 +232,7 @@ class CreateSolicitudExpressService
 
     public function createProgramacion(SolicitudServicio $solicitudServicio, $localidad)
     {
+        log::info('Localidad recibida para programación: ' . $localidad);
         $localidadDefinida = [
             1 => ['suba', 'engativa', 'barrios unidos'],
             2 => ['centro', 'restrepo', 'usme', 'ciudad bolivar', 'rafael uribe', 'san cristobal', 'antonio narino', 'tunjuelito'],
@@ -223,12 +240,18 @@ class CreateSolicitudExpressService
             4 => ['kennedy', 'puente aranda', 'bosa', 'fontibon', 'modelia'],
             5 => ['chapinero', 'teusaquillo', 'barrios unidos', 'engativa']
         ];
+        log::info('Localidad definida: ' . json_encode($localidadDefinida));
 
         $unwanted = ['á'=>'a', 'é'=>'e', 'í'=>'i', 'ó'=>'o', 'ú'=>'u', 'ñ'=>'n'];
         $localidadLimpia = strtr(mb_strtolower(trim($localidad)), $unwanted);
 
+        log::info('Localidad limpia para comparación: ' . $localidadLimpia);
+
         $fechaEvaluada = \Carbon\Carbon::now()->addDay();
+
+        log::info('Fecha inicial para evaluación: ' . $fechaEvaluada->toDateString());
         $fechaCalculada = null;
+        log::info('Fecha calculada: ' . $fechaCalculada);
 
         for ($i = 0; $i < 14; $i++) {
             $diaSemana = $fechaEvaluada->dayOfWeekIso;
@@ -244,6 +267,7 @@ class CreateSolicitudExpressService
 
             $fechaEvaluada->addDay();
         }
+        log::info('Fecha calculada después del bucle: ' . $fechaCalculada);
 
         if (!$fechaCalculada) {
             $fechaCalculada = \Carbon\Carbon::now()->addDay();
@@ -252,6 +276,7 @@ class CreateSolicitudExpressService
             }
             $fechaCalculada->startOfDay();
         }
+        log::info('Fecha calculada final: ' . $fechaCalculada);
 
         $programacion = new ProgramacionVehiculo();
         $programacion->ProgVehFecha = $fechaCalculada->format('Y-m-d');

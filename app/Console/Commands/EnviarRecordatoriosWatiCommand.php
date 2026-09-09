@@ -69,12 +69,19 @@ class EnviarRecordatoriosWatiCommand extends Command
         $fechaManana = $fechaCarbon->format('Y-m-d');
         $fechaFormateadaMensaje = $fechaCarbon->format('d/m/Y');
 
+        log::info('Fecha de mañana obtenida:', [
+            'fechaManana' => $fechaManana,
+            'fechaFormateadaMensaje' => $fechaFormateadaMensaje,
+        ]);
+
         /* $fechaManana = '2026-08-29';
         $fechaFormateadaMensaje = '29/08/2026'; */
 
         // 1. Consultar programaciones para mañana asociando el servicio y su fecha
         $programacion = ProgramacionVehiculo::whereDate('ProgVehFecha', $fechaManana)
             ->get(['FK_ProgServi', 'ProgVehFecha']);
+
+        log::info('Programaciones obtenidas para mañana:', $programacion->toArray());
 
         if ($programacion->isEmpty()) {
             return collect();
@@ -89,6 +96,8 @@ class EnviarRecordatoriosWatiCommand extends Command
             ->where('CliActivo', 1)
             ->pluck('ID_Cli')
             ->toArray();
+
+        log::info('IDs de clientes express obtenidos:', $clientesExpressIds);
 
         // 3. Consulta de Solicitudes
         $servicios = SolicitudServicio::with([
@@ -107,11 +116,18 @@ class EnviarRecordatoriosWatiCommand extends Command
             })
             ->get();
 
+        log::info('Servicios obtenidos:', $servicios->toArray());
+
         // 4. Transformación de datos
         return $servicios->map(function ($servicio) use ($fechasPorServicio, $fechaFormateadaMensaje) {
             if (!empty($servicio->FK_Cliente_Express) && $servicio->clienteExpress) {
                 $nombre   = $servicio->clienteExpress->nombreEmpresa ?? 'N/A';
                 $telefono = $servicio->clienteExpress->numeroEmpresa ?? '';
+
+                log::info('Servicio con cliente express:', [
+                    'nombre'   => $nombre,
+                    'telefono' => $telefono,
+                ]);
             } else {
                 $cliente = $servicio->cliente;
                 $nombre  = $cliente->CliName ?? 'N/A';
@@ -119,7 +135,15 @@ class EnviarRecordatoriosWatiCommand extends Command
                 $personalCollection = $cliente ? $cliente->PersonalCliente() : collect();
                 $primerPersonal     = $personalCollection->first();
 
-                $telefono = $primerPersonal->PersTelefono ?? '';
+                log::info('Información de servicio recordatorio: ', $servicio->toArray());
+                //$telefono = $primerPersonal->PersTelefono ?? '';
+                // Accedes a la primera sede del arreglo (índice 0)
+                $telefono = $servicio->cliente->sedes[0]->SedeCelular;
+
+                log::info('Servicio con cliente normal:', [
+                    'nombre'   => $nombre,
+                    'telefono' => $telefono,
+                ]);
             }
 
             // Sanitizar y validar teléfono
