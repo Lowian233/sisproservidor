@@ -107,7 +107,7 @@ class SolicitudExpressController extends Controller
                 ], 404);
             }
 
-            if (isset($datos['estado']) && $datos['estado'] === 'Pagado') {
+            /* if (isset($datos['estado']) && $datos['estado'] === 'Pagado') {
                 try {
                     log::info('Creando SolicitudServicio para idSolicitud API: ' . $idSolicitud);
                     $service = new CreateSolicitudExpressService();
@@ -125,7 +125,7 @@ class SolicitudExpressController extends Controller
                         'message' => 'Error interno al procesar la solicitud: ' . $e->getMessage(),
                     ], 500);
                 }
-            }
+            } */
 
             return response()->json([
                 'success'     => true,

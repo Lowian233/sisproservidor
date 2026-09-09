@@ -3554,8 +3554,8 @@ public function changestatus(Request $request)
 
 		 // ===================== CARGA INICIAL DE LA SOLICITUD =====================
 		 $SolicitudServicio = DB::table('solicitud_servicios')
-			 ->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
-			 ->join('cargos', 'personals.FK_PersCargo', '=', 'ID_Carg')
+			 ->leftJoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+			 ->leftJoin('cargos', 'personals.FK_PersCargo', '=', 'ID_Carg')
              ->join('progvehiculos', 'progvehiculos.FK_ProgServi', '=', 'solicitud_servicios.ID_SolSer')
 			 ->select(
 				 'solicitud_servicios.*',
@@ -3566,6 +3566,8 @@ public function changestatus(Request $request)
 			 )
 			 ->where('solicitud_servicios.SolSerSlug', $id)
 			 ->first();
+
+         log::info('recibomaterial: cargando solicitud', ['ID_SolSer' => $SolicitudServicio->ID_SolSer ?? null, 'SolSerSlug' => $id]);
 
 		 if (!$SolicitudServicio) {
 			 abort(404);
@@ -3840,6 +3842,14 @@ public function changestatus(Request $request)
 						 'total', 'cantidadesXtratamiento', 'tratamientos', 'PublicRespels'
 					 ));
 					 break;
+                 case 'Conciliado':
+                    return view('solicitud-serv.rmplanta', compact(
+						 'SolicitudServicio', 'Residuos', 'GenerResiduos', 'Cliente',
+						 'SolSerConductor', 'Programaciones', 'ProgramacionesActivas',
+						 'total', 'cantidadesXtratamiento', 'tratamientos', 'PublicRespels'
+					 ));
+					 break;
+
 				 case 'Corregido':
 				 case 'Completado':
 				 default:
@@ -3849,8 +3859,8 @@ public function changestatus(Request $request)
 
 			 // ===================== RAMA ELSE (recolecciones) =====================
 			 $SolicitudServicio = DB::table('solicitud_servicios')
-				 ->join('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
-				 ->join('cargos', 'personals.FK_PersCargo', '=', 'ID_Carg')
+				 ->leftjoin('personals', 'personals.ID_Pers', '=', 'solicitud_servicios.FK_SolSerPersona')
+				 ->leftjoin('cargos', 'personals.FK_PersCargo', '=', 'ID_Carg')
 				 ->select(
 					 'solicitud_servicios.*',
 					 'personals.PersFirstName', 'personals.PersLastName',
@@ -4059,6 +4069,13 @@ public function changestatus(Request $request)
 				 case 'Programado':
                     //return $Programaciones;
 					 return view('solicitud-serv.rm', compact(
+						 'SolicitudServicio', 'Residuos', 'GenerResiduos', 'Cliente',
+						 'SolSerConductor', 'Programaciones', 'ProgramacionesActivas',
+						 'total', 'cantidadesXtratamiento', 'tratamientos', 'PublicRespels'
+					 ));
+					 break;
+                 case 'Conciliado':
+                    return view('solicitud-serv.rmplanta', compact(
 						 'SolicitudServicio', 'Residuos', 'GenerResiduos', 'Cliente',
 						 'SolSerConductor', 'Programaciones', 'ProgramacionesActivas',
 						 'total', 'cantidadesXtratamiento', 'tratamientos', 'PublicRespels'
@@ -4446,17 +4463,22 @@ public function changestatus(Request $request)
 
 			// Precintos: usar de Programaciones cuando haya vehículo asignado
 			if (!$Programaciones) {
-				$precintosString = 'No Aplica, el cliente trae en su propio equipo';
-			} elseif (!empty($Programaciones->ProgVehPrecintos)) {
-				$val = is_array($Programaciones->ProgVehPrecintos) ? $Programaciones->ProgVehPrecintos : json_decode($Programaciones->ProgVehPrecintos, true);
-				if (is_array($val) && count($val) > 0) {
-					$precintosString = implode(', ', $val);
-				} else {
-					$precintosString = 'No se asignó precinto';
-				}
-			} else {
-				$precintosString = 'No se asignó precinto';
-			}
+                $precintosString = 'No Aplica, el cliente trae en su propio equipo';
+            } elseif (!empty($Programaciones->ProgVehPrecintos)) {
+                $raw = $Programaciones->ProgVehPrecintos;
+                $val = is_array($raw) ? $raw : json_decode($raw, true);
+
+                // Si el valor decodificado sigue siendo un string, usamos el valor original o decodificado
+                if (is_string($val) && trim($val) !== '') {
+                    $precintosString = $val;
+                } elseif (is_array($val) && count($val) > 0) {
+                    $precintosString = implode(', ', $val);
+                } else {
+                    $precintosString = 'No se asignó precinto';
+                }
+            } else {
+                $precintosString = 'No se asignó precinto';
+            }
 
 
 			$Cliente = DB::table('clientes')
@@ -4675,16 +4697,19 @@ public function changestatus(Request $request)
 			->first();
 
 		if ($Precintos && !empty($Precintos->ProgVehPrecintos)) {
-			$val = is_array($Precintos->ProgVehPrecintos) ? $Precintos->ProgVehPrecintos : json_decode($Precintos->ProgVehPrecintos, true);
-			if (is_array($val) && count($val) > 0) {
-				$precintosString = implode(', ', $val);
-			} else {
-				$precintosString = 'No se asignó precinto';
-			}
-		} else {
-			$precintosString = 'No se asignó precinto';
-		}
+            $raw = $Precintos->ProgVehPrecintos;
+            $val = is_array($raw) ? $raw : json_decode($raw, true);
 
+            if (is_string($val) && trim($val) !== '') {
+                $precintosString = $val;
+            } elseif (is_array($val) && count($val) > 0) {
+                $precintosString = implode(', ', $val);
+            } else {
+                $precintosString = 'No se asignó precinto';
+            }
+        } else {
+            $precintosString = 'No se asignó precinto';
+        }
 
 		$Cliente = DB::table('clientes')
 			->join('sedes', 'clientes.ID_Cli', '=', 'sedes.FK_SedeCli')
