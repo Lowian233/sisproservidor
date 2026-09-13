@@ -42,8 +42,25 @@ class SolicitudExpressController extends Controller
 
                 $datos = ['idSolicitud' => $idSolicitud, 'tipoResiduo' => $tipoResiduo];
 
-                if ($request->has('idCliente'))        $datos['idCliente']        = $request->input('idCliente');
-                if ($request->filled('idSede'))        $this->aplicarSede($request->input('idSede'), $datos['idCliente'] ?? null, $datos);
+                if ($request->has('idCliente')) {
+                    $idCliente = $this->idNumerico($request->input('idCliente'));
+                    if ($idCliente === null) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'idCliente debe ser un ID numérico real; no envíes variables sin reemplazar.',
+                        ], 422);
+                    }
+                    $datos['idCliente'] = $idCliente;
+                }
+                if ($request->filled('idSede')) {
+                    if ($this->idNumerico($request->input('idSede')) === null) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'idSede debe ser una opción numérica real; no envíes variables sin reemplazar.',
+                        ], 422);
+                    }
+                    $this->aplicarSede($request->input('idSede'), $datos['idCliente'] ?? null, $datos);
+                }
                 if ($request->has('localidad'))        $datos['localidad']        = $request->input('localidad');
                 if ($request->has('estado'))           $datos['estado']           = $request->input('estado');
                 if ($request->has('RequiereContrato')) $datos['RequiereContrato'] = $request->input('RequiereContrato');
@@ -74,8 +91,23 @@ class SolicitudExpressController extends Controller
             $idSolicitud = (int) $idSolicitud;
             $datos       = [];
 
-            if ($request->has('idCliente'))        $datos['idCliente']        = $request->input('idCliente');
+            if ($request->has('idCliente')) {
+                $idCliente = $this->idNumerico($request->input('idCliente'));
+                if ($idCliente === null) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'idCliente debe ser un ID numérico real; no envíes variables sin reemplazar.',
+                    ], 422);
+                }
+                $datos['idCliente'] = $idCliente;
+            }
             if ($request->filled('idSede')) {
+                if ($this->idNumerico($request->input('idSede')) === null) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'idSede debe ser una opción numérica real; no envíes variables sin reemplazar.',
+                    ], 422);
+                }
                 $idClienteSede = $datos['idCliente']
                     ?? DB::table('solicitudes_express')->where('idSolicitud', $idSolicitud)->value('idCliente');
                 $this->aplicarSede($request->input('idSede'), $idClienteSede, $datos);
@@ -96,16 +128,19 @@ class SolicitudExpressController extends Controller
                 ], 422);
             }
 
-            $afectados = DB::table('solicitudes_express')
-                ->where('idSolicitud', $idSolicitud)
-                ->update($datos);
+            $consultaSolicitud = DB::table('solicitudes_express')
+                ->where('idSolicitud', $idSolicitud);
 
-            if ($afectados === 0) {
+            if (!$consultaSolicitud->exists()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No se encontraron registros para ese idSolicitud',
                 ], 404);
             }
+
+            $afectados = DB::table('solicitudes_express')
+                ->where('idSolicitud', $idSolicitud)
+                ->update($datos);
 
             /* if (isset($datos['estado']) && $datos['estado'] === 'Pagado') {
                 try {
@@ -177,6 +212,16 @@ class SolicitudExpressController extends Controller
         if ($sede && $sede->localidad) {
             $datos['localidad'] = $sede->localidad;
         }
+    }
+
+    private function idNumerico($valor): ?int
+    {
+        if ($valor === null || $valor === '' || !is_numeric($valor)) {
+            return null;
+        }
+
+        $id = (int) $valor;
+        return $id > 0 ? $id : null;
     }
 
      private function calcularPrecio(string $peso): int|string

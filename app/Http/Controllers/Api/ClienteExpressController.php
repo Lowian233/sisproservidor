@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\ClienteExpress;
 use App\SedeExpress;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ClienteExpressController extends Controller
@@ -256,10 +257,15 @@ class ClienteExpressController extends Controller
                 $cliente->update($datos);
             }
 
+            $sede = $cliente->sedes()->orderBy('id')->first();
+            $solicitud = $this->asociarSolicitud($request, $cliente, $sede);
+
             return response()->json([
                 'creado'      => false,
                 'actualizado' => true,
                 'cliente'     => $this->formatearCliente($cliente),
+                'sede'        => $sede ? $this->formatearSede($sede) : null,
+                'solicitud'   => $solicitud,
             ], 200);
         }
 
@@ -291,19 +297,59 @@ class ClienteExpressController extends Controller
             'localidad'              => 'nullable|string|max:255',
         ]);
 
-        $cliente = ClienteExpress::create($validated);
+        [$cliente, $sede, $solicitud] = DB::transaction(function () use ($validated, $request) {
+            $cliente = ClienteExpress::create($validated);
+            $sede = SedeExpress::create([
+                'idClienteExpress' => $cliente->id,
+                'nombreSede' => $cliente->nombreEmpresa,
+                'direccion' => $cliente->direccion,
+                'localidad' => $cliente->localidad,
+            ]);
+            $solicitud = $this->asociarSolicitud($request, $cliente, $sede);
 
-        if (!$cliente) {
-            return response()->json([
-                'creado' => false,
-                'mensaje' => 'No se pudo crear el cliente',
-            ], 500);
-        }
+            return [$cliente, $sede, $solicitud];
+        });
 
         return response()->json([
             'creado' => true,
             'cliente' => $this->formatearCliente($cliente),
+            'sede' => $this->formatearSede($sede),
+            'solicitud' => $solicitud,
         ], 201);
+    }
+
+    private function formatearSede(SedeExpress $sede): array
+    {
+        return [
+            'id' => $sede->id,
+            'nombreSede' => $sede->nombreSede,
+            'direccion' => $sede->direccion,
+            'localidad' => $sede->localidad,
+        ];
+    }
+
+    private function asociarSolicitud(Request $request, ClienteExpress $cliente, ?SedeExpress $sede): ?array
+    {
+        if (!$request->filled('idSolicitud') || !is_numeric($request->input('idSolicitud'))) {
+            return null;
+        }
+
+        $idSolicitud = (int) $request->input('idSolicitud');
+        $datos = ['idCliente' => $cliente->id];
+        if ($sede) {
+            $datos['idSede'] = $sede->id;
+        }
+
+        $afectados = DB::table('solicitudes_express')
+            ->where('idSolicitud', $idSolicitud)
+            ->update($datos);
+
+        return [
+            'idSolicitud' => $idSolicitud,
+            'idCliente' => $cliente->id,
+            'idSede' => $sede ? $sede->id : null,
+            'actualizada' => $afectados > 0,
+        ];
     }
 
     public function update(Request $request, $id)

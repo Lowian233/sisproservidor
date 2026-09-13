@@ -47,10 +47,12 @@ GET /api/v1/clientes/verificar-nit/{nit}
 ### 1.2 Upsert de cliente (crear o actualizar)
 ```
 POST /api/v1/clientes
-Body: { nit, nombreEmpresa, ciudadEmpresa?, direccion?, numeroEmpresa?, ... }
+Body: { idSolicitud?, nit, nombreEmpresa, ciudadEmpresa?, direccion?, numeroEmpresa?, ... }
 ```
 - Si el NIT ya existe: actualiza solo los campos enviados.
-- Si el NIT no existe y viene `nombreEmpresa`: crea el cliente.
+- Si el NIT no existe y viene `nombreEmpresa`: crea el cliente y una sede inicial asociada. La sede usa `nombreEmpresa` como `nombreSede`, y reutiliza `direccion` y `localidad` recibidas.
+- Si viene `idSolicitud` (el valor retornado por `POST /api/v1/solicitud`), actualiza esa solicitud con `idCliente` y el ID real de la sede (`idSede`). Esto aplica tanto al crear como al actualizar un cliente existente.
+- La respuesta incluye `cliente`, `sede` y `solicitud`; `solicitud.actualizada` confirma si se encontró la cotización indicada.
 - Si el NIT no existe y NO viene `nombreEmpresa`: retorna error 404 indicando que envie nombreEmpresa.
 
 ### 1.3 Consultar sede
