@@ -11,6 +11,8 @@ use App\ResiduosGener;
 use App\Observacion;
 use App\ProgramacionVehiculo;
 use App\SedeExpress;
+use App\Vehiculo;
+use App\Personal;
 use App\Mail\NewSolServEmailExpress;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -285,15 +287,47 @@ class CreateSolicitudExpressService
         $programacion->ProgVehEntrada = now();
         $programacion->ProgVehSalida = $fechaCalculada->format('Y-m-d') . ' 08:00:00';
         $programacion->ProgVehColor = null;
-        $programacion->FK_ProgVehiculo = 23;
+        $programacion->FK_ProgVehiculo = $this->resolveVehiculoExpressId();
         $programacion->FK_ProgMan = null;
         $programacion->FK_ProgServi = $solicitudServicio->ID_SolSer;
-        $programacion->FK_ProgConductor = 2951;
+        $programacion->FK_ProgConductor = $this->resolveConductorExpressId();
         $programacion->FK_ProgAyudante = null;
         $programacion->ProgVehDelete = 0;
         $programacion->ProgVehStatus = 'Autorizado';
         $programacion->save();
 
         return $programacion;
+    }
+
+    /**
+     * Vehiculo fijo usado para el servicio express (placa NUV-586).
+     * Se busca por placa en lugar de un ID fijo porque el ID_Vehic varia entre entornos.
+     */
+    private function resolveVehiculoExpressId(): int
+    {
+        $vehiculo = Vehiculo::where('VehicPlaca', 'NUV-586')->first();
+
+        if (!$vehiculo) {
+            throw new Exception('No se encontró el vehículo express (placa NUV-586). Verifique la tabla vehiculos.');
+        }
+
+        return $vehiculo->ID_Vehic;
+    }
+
+    /**
+     * Conductor fijo usado para el servicio express (Rafael Camacho Acevedo).
+     * Se busca por nombre en lugar de un ID fijo porque el ID_Pers varia entre entornos.
+     */
+    private function resolveConductorExpressId(): int
+    {
+        $conductor = Personal::where('PersFirstName', 'Rafael')
+            ->where('PersLastName', 'Camacho Acevedo')
+            ->first();
+
+        if (!$conductor) {
+            throw new Exception('No se encontró el conductor express (Rafael Camacho Acevedo). Verifique la tabla personals.');
+        }
+
+        return $conductor->ID_Pers;
     }
 }
