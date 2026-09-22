@@ -35,8 +35,8 @@ class RespelUpdateRequest extends FormRequest
                 'RespelIgrosidad'     => 'required|max:30|in:No peligroso,Corrosivo,Reactivo,Explosivo,Toxico,Inflamable,Patógeno - Infeccioso,Radiactivo',
                 'RespelEstado'        => 'required|max:12|string|in:Líquido,Sólido,Gaseoso,SemiSólido,Aerosol',
                 'RespelHojaSeguridad' => 'sometimes|max:10240|mimes:pdf|required_unless:RespelIgrosidad.*,No peligroso',
-                'ARespelClasf4741.*'    => 'nullable|max:6|in:A1010,A1020,A1030,A1040,A1050,A1060,A1070,A1080,A1090,A1100,A1110,A1120,A1130,A1140,A1150,A1160,A1170,A1180,A2010,A2020,A2030,A2040,A2050,A2060,A3010,A3020,A3030,A3040,A3050,A3060,A3070,A3080,A3090,A3100,A3110,A3120,A3130,A3140,A3150,A3160,A3170,A3180,A3190,A3200,A4010,A4020,A4030,A4040,A4050,A4060,A4070,A4080,A4090,A4100,A4110,A4120,A4130,A4140,A4150,A4160,A4060.1,A4060.2,A4060.3,A4060.4,A4060.5,A4060.6,A3020.1,A3020.2,A3020.3,A3020.4,A3020.5,A3020.6,A3020.7,A4020.1,A4020.2,A4020.3,A4020.4,A4030.1,A4030.2,A4030.3,A4030.4,A4030.5,A4030.6',
-                'YRespelClasf4741.*'    => 'nullable|max:6|in:Y1,Y2,Y3,Y4,Y5,Y6,Y7,Y8,Y9,Y10,Y11,Y12,Y13,Y14,Y15,Y16,Y17,Y18,Y19,Y20,Y21,Y22,Y23,Y24,Y25,Y26,Y27,Y28,Y29,Y30,Y31,Y32,Y33,Y34,Y35,Y36,Y37,Y38,Y39,Y40,Y41,Y42,Y43,Y44,Y45,Y9.1,Y9.2,Y9.3,Y9.4,Y9.5,Y9.6,Y8.1,Y8.2,Y8.3,Y8.4,Y8.5,Y8.6,Y8.7,Y4.1,Y4.2,Y4.3,Y4.4,Y4.5,Y4.6,Y1.1,Y1.2,Y1.3,Y1.4',
+                'ARespelClasf4741.*'    => 'nullable|max:12|in:A1010,A1020,A1030,A1040,A1050,A1060,A1070,A1080,A1090,A1100,A1110,A1120,A1130,A1140,A1150,A1160,A1170,A1181,A2010,A2020,A2030,A2040,A2050,A2060,A3010,A3020,A3030,A3040,A3050,A3060,A3070,A3080,A3090,A3100,A3110,A3120,A3130,A3140,A3150,A3160,A3170,A3180,A3190,A3200,A3210,A4010,A4020,A4030,A4040,A4050,A4060,A4070,A4080,A4090,A4100,A4110,A4120,A4130,A4140,A4150,A4160,A4060.1,A4060.2,A4060.3,A4060.4,A4060.5,A4060.6,A3020.1,A3020.2,A3020.3,A3020.4,A3020.5,A3020.6,A3020.7,A4020.1,A4020.2,A4020.3,A4020.4,A4030.1,A4030.2,A4030.3,A4030.4,A4030.5,A4030.6',
+                'YRespelClasf4741.*'    => 'nullable|max:12|in:Y1,Y2,Y3,Y4,Y5,Y6,Y7,Y8,Y9,Y10,Y11,Y12,Y13,Y14,Y15,Y16,Y17,Y18,Y19,Y20,Y21,Y22,Y23,Y24,Y25,Y26,Y27,Y28,Y29,Y30,Y31,Y32,Y33,Y34,Y35,Y36,Y37,Y38,Y39,Y40,Y41,Y42,Y43,Y44,Y45,Y9.1,Y9.2,Y9.3,Y9.4,Y9.5,Y9.6,Y8.1,Y8.2,Y8.3,Y8.4,Y8.5,Y8.6,Y8.7,Y4.1,Y4.2,Y4.3,Y4.4,Y4.5,Y4.6,Y1.1,Y1.2,Y1.3,Y1.4',
                 'RespelTarj'          => 'sometimes|max:5120|mimes:pdf',
                 'RespelFoto'          => 'sometimes|max:5120|mimes:jpg,jpeg,png',
                 'RespelDeclaracion'   => 'required|max:2',
@@ -52,7 +52,7 @@ class RespelUpdateRequest extends FormRequest
         }
 
     public function attributes()
-    {   
+    {
         $request = $this->instance()->all();
         $attributes = [
                 'RespelIgrosidad'     => 'Peligrosidad',

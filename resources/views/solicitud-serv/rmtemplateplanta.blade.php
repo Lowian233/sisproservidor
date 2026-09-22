@@ -259,7 +259,7 @@ footer {
                         @endphp
                         <td width=30% style='width:30.0%;padding:0cm 3.5pt 0cm 3.5pt;height:19.5pt'>
                             <p class=MsoNormal align=center style='margin-bottom:0cm;text-align:center;
-                            line-height:normal'><span style='font-size:10.0pt;font-family:"Arial",sans-serif'><b>FECHA RECOLECCIÓN</b>: {{ $fechaMostrar }}&nbsp;</span></p>
+                            line-height:normal'><span style='font-size:10.0pt;font-family:"Arial",sans-serif'><b>FECHA RECEPCIÓN</b>: {{ $fechaMostrar }}&nbsp;</span></p>
                         </td>
                         <td width=30% style='width:30.0%;padding:0cm 3.5pt 0cm 3.5pt;height:19.5pt'>
                             <p class=MsoNormal align=right style='margin-bottom:0cm;text-align:right;

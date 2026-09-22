@@ -54,7 +54,7 @@
 							</tr>
 							<tr>
 								<td>A1030</td>
-								<td>Desechos que tengan como constituyentes o contaminantes cualquiera de las siguientes sustancias: 
+								<td>Desechos que tengan como constituyentes o contaminantes cualquiera de las siguientes sustancias:
 									<ul>
 									    <li>Arsénico; compuestos de arsénico</li>
 									    <li>Mercurio; compuestos de mercurio</li>
@@ -119,7 +119,7 @@
 								<td>Acumuladores de desecho sin seleccionar excluidas mezclas de acumuladores sólo de la lista B. Los acumuladores de desecho no incluidos en la lista B que contengan constituyentes del anexo I en tal grado que los conviertan en peligrosos </td>
 							</tr>
 							<tr>
-								<td>A1180</td>
+								<td>A1181</td>
 								<td>Montajes eléctricos y electrónicos de desecho o restos de éstos que contengan componentes como acumuladores y otras baterías incluidos en la lista A, interruptores de mercurio, vidrios de tubos de rayos catódicos y otros vidrios activados y capacitadores de PCB, o contaminados con constituyentes del anexo I (por ejemplo, cadmio, mercurio, plomo, bifenilopoliclorado) en tal grado que posean alguna de las características del anexoIII (véase la entrada correspondiente en la lista B B1110)</td>
 							</tr>
 							<tr>
@@ -253,6 +253,10 @@
 							<tr>
 								<td>A3200</td>
 								<td>Material bituminoso (desechos de asfalto) con contenido de alquitrán resultantes de la construcción y e! mantenimiento de carreteras (obsérvese el artículo correspondiente B2130 de la lista B)</td>
+							</tr>
+                            <tr>
+								<td>A3210</td>
+								<td>Desechos plásticos, incuidas mezclas de estos de desechos</td>
 							</tr>
 							<tr>
 								<td>A4010</td>

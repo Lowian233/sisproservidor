@@ -21,7 +21,7 @@
 	<option value="A1150" {{$Respels->ARespelClasf4741 == 'A1150' ? 'selected' : '' }}>A1150</option>
 	<option value="A1160" {{$Respels->ARespelClasf4741 == 'A1160' ? 'selected' : '' }}>A1160</option>
 	<option value="A1170" {{$Respels->ARespelClasf4741 == 'A1170' ? 'selected' : '' }}>A1170</option>
-	<option value="A1180" {{$Respels->ARespelClasf4741 == 'A1180' ? 'selected' : '' }}>A1180</option>
+	<option value="A1181" {{$Respels->ARespelClasf4741 == 'A1181' ? 'selected' : '' }}>A1181</option>
 	<option value="A2010" {{$Respels->ARespelClasf4741 == 'A2010' ? 'selected' : '' }}>A2010</option>
 	<option value="A2020" {{$Respels->ARespelClasf4741 == 'A2020' ? 'selected' : '' }}>A2020</option>
 	<option value="A2030" {{$Respels->ARespelClasf4741 == 'A2030' ? 'selected' : '' }}>A2030</option>
@@ -48,6 +48,7 @@
 	<option value="A3180" {{$Respels->ARespelClasf4741 == 'A3180' ? 'selected' : '' }}>A3180</option>
 	<option value="A3190" {{$Respels->ARespelClasf4741 == 'A3190' ? 'selected' : '' }}>A3190</option>
 	<option value="A3200" {{$Respels->ARespelClasf4741 == 'A3200' ? 'selected' : '' }}>A3200</option>
+	<option value="A3210" {{$Respels->ARespelClasf4741 == 'A3210' ? 'selected' : '' }}>A3210</option>
 	<option value="A4010" {{$Respels->ARespelClasf4741 == 'A4010' ? 'selected' : '' }}>A4010</option>
 	<option value="A4020" {{$Respels->ARespelClasf4741 == 'A4020' ? 'selected' : '' }}>A4020</option>
 	<option value="A4030" {{$Respels->ARespelClasf4741 == 'A4030' ? 'selected' : '' }}>A4030</option>

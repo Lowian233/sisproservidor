@@ -48,7 +48,7 @@ ul
 </head>
 
 <body lang=ES-MX>
-    
+
  <header>
 
   <div class="encabezado">
@@ -59,12 +59,12 @@ ul
             <table width=100%>
               <tr>
                 <td style="vertical-align: bottom; text-align: right;" width=60%>
-                
+
                   <p class="MsoNormal" align="right" style="text-align:right; margin-bottom: 0;"><b><span lang="ES" style="font-size: 8.0pt; font-family: Arial, sans-serif;">PROSARC S.A. ESP</span></b></p>
                   <p class="MsoNormal" align="right" style="text-align:right; margin-bottom: 0;"><b><span lang="ES" style="font-size: 8.0pt; font-family: Arial, sans-serif;">NIT 900.079.188-0</span></b></p>
                   <br>
                   <p class="MsoNormal" align="right" style="text-align:right; margin-left:35.4pt; text-indent:-35.4pt; margin-bottom: 0;"><b><span lang="ES" style="font-size:12.0pt; font-family: Arial, sans-serif;">MANIFIESTA:</span></b></p>
-                  
+
                 </td>
                 <td style="font-size: 12px; text-align: right;" width=40%>
                   <img src="@pdfAsset('img/logoheaderTinyVersion.png')" style="width:100%; max-width:200px; text-align:right;"><br><br>
@@ -78,7 +78,7 @@ ul
       </table>
     </div>
   </div>
-</header>   
+</header>
 
 <div class=WordSection1>
 
@@ -559,7 +559,7 @@ switch ($mesfirma) {
     break;
 
     case 9:
-    $mesTexto = 'Setiembre';
+    $mesTexto = 'Septiembre';
     break;
 
     case 10:
