@@ -160,6 +160,26 @@
 								<td>Sustancias y artículos de desecho que contengan, o estén contaminados por, bifenilos policlorados (PCB), terfenilos policlorados (PCT) o bifenilos polibromados (PBB)</td>
 							</tr>
 							<tr>
+								<td>Y10.1</td>
+								<td>Equipos desechados: Equipos que hayan contenido o contengan aceites dieléctricos con una concentración mayor a 50 ppm de PCB o carcazas cuando la superficie sólida presente un contenido de PCB mayor o igual a 10 microgramos/dm2</td>
+							</tr>
+							<tr>
+								<td>Y10.2</td>
+								<td>Aceites dieléctricos que consistan, contengan o estén contaminados con PCB: Aceites dieléctricos con una concentración igual o mayor a 50 ppm de PCB</td>
+							</tr>
+							<tr>
+								<td>Y10.3</td>
+								<td>Desechos o residuos que contengan o estén contaminados con PCB: Elementos, sustancias, fluidos diferentes a los aceites dieléctricos y materiales con PCB en una concentración igual o superior a 50 ppm.</td>
+							</tr>
+							<tr>
+								<td>Y10.4</td>
+								<td>Envases, recipientes, canecas, bidones o contenedores que contienen o que están contaminados con PCB</td>
+							</tr>
+							<tr>
+								<td>Y10.5</td>
+								<td>Sustancias y artículos de desecho que contengan o estén contaminados con terfenilos policlorados (PCT), bifenilos polibromados (PBB), naftaleno policlorado (PCN) o cualquier otro compuesto polibromado análogo, con una concentración igual o superior a 50 ppm</td>
+							</tr>
+							<tr>
 								<td>Y11</td>
 								<td>Residuos alquitranados resultantes de la refinación, destilación o cualquier otro tratamiento pirolítico</td>
 							</tr>
@@ -236,6 +256,18 @@
 								<td>Desechos que tengan como constituyentes: Mercurio, compuestos de mercurio</td>
 							</tr>
 							<tr>
+								<td>Y29.1</td>
+								<td>Desechos que constan de mercurio o compuestos de mercurio</td>
+							</tr>
+							<tr>
+								<td>Y29.2</td>
+								<td>Desechos que contienen mercurio o compuestos de mercurio</td>
+							</tr>
+							<tr>
+								<td>Y29.3</td>
+								<td>Desechos contaminados con mercurio o compuestos de mercurio</td>
+							</tr>
+							<tr>
 								<td>Y30</td>
 								<td>Desechos que tengan como constituyentes: Talio, compuestos de talío</td>
 							</tr>
@@ -284,6 +316,14 @@
 								<td>Desechos que tengan como constituyentes: Solventes orgánicos halogenados</td>
 							</tr>
 							<tr>
+								<td>Y41.1</td>
+								<td>Desechos que tengan como constituyentes: Solventes orgánicos halogenados de sustancias clorofluorocarbonadas (CFC), hidroclorofluorocarbonadas (HCFC), hidrofluorocarbonadas (HFC), tetracloruro de carbono (TCC), metilcloroformo (1,1,1-tricloroetano) y mezclas de estas sustancias</td>
+							</tr>
+							<tr>
+								<td>Y41.2</td>
+								<td>Otros desechos que tengan como constituyentes: Solventes orgánicos halogenados</td>
+							</tr>
+							<tr>
 								<td>Y42</td>
 								<td>Desechos que tengan como constituyentes: Disolventes orgánicos, con exclusión de disolventes halogenados</td>
 							</tr>
@@ -298,6 +338,30 @@
 							<tr>
 								<td>Y45</td>
 								<td>Desechos que tengan como constituyentes: Compuestos organohalogenados, que no sean las sustancias mencionadas en los campos anteriores (por ejemplo, Y39, Y41, Y42, Y43, Y44).</td>
+							</tr>
+							<tr>
+								<td>Y45.1</td>
+								<td>Residuos o desechos de sustancias o contaminados con clorofluorocarbonos (CFC) utilizados como: Refrigerantes, agentes espumantes, propelentes o agentes de extinción de incendios</td>
+							</tr>
+							<tr>
+								<td>Y45.2</td>
+								<td>Residuos o desechos de sustancias o contaminados con hidroclorofluorocarbonos (HCFC) utilizados como: Refrigerantes, agentes espumantes, propelentes o agentes de extinción de incendios</td>
+							</tr>
+							<tr>
+								<td>Y45.3</td>
+								<td>Residuos o desechos de sustancias o contaminados con Hidrofluorocarbonos (HFC) utilizados como: Refrigerantes, agentes espumantes, propelentes o agentes de extinción de incendios</td>
+							</tr>
+							<tr>
+								<td>Y45.4</td>
+								<td>Residuos o desechos de sustancias o contaminados con halones utilizados como: Refrigerantes, agentes espumantes, propelentes o agentes de extinción de incendios</td>
+							</tr>
+							<tr>
+								<td>Y45.5</td>
+								<td>Residuos o desechos de mezclas de CFC, HCFC, HFC y halones</td>
+							</tr>
+							<tr>
+								<td>Y45.6</td>
+								<td>Envases o cilindros vacíos de refrigerantes, agentes espumantes, propelentes, solventes o agentes de extinción de incendios que hayan contenido sustancias CFC, HCFC, HFC y halones</td>
 							</tr>
 						</tbody>
 					</table>

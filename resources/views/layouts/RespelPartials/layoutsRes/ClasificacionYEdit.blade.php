@@ -37,6 +37,11 @@
 	<option value="Y9.5" {{$Respels->YRespelClasf4741 == 'Y9.5' ? 'selected' : '' }}>Y9.5</option>
 	<option value="Y9.6" {{$Respels->YRespelClasf4741 == 'Y9.6' ? 'selected' : '' }}>Y9.6</option>
 	<option value="Y10" {{$Respels->YRespelClasf4741 == 'Y10' ? 'selected' : '' }}>Y10</option>
+	<option value="Y10.1" {{$Respels->YRespelClasf4741 == 'Y10.1' ? 'selected' : '' }}>Y10.1</option>
+	<option value="Y10.2" {{$Respels->YRespelClasf4741 == 'Y10.2' ? 'selected' : '' }}>Y10.2</option>
+	<option value="Y10.3" {{$Respels->YRespelClasf4741 == 'Y10.3' ? 'selected' : '' }}>Y10.3</option>
+	<option value="Y10.4" {{$Respels->YRespelClasf4741 == 'Y10.4' ? 'selected' : '' }}>Y10.4</option>
+	<option value="Y10.5" {{$Respels->YRespelClasf4741 == 'Y10.5' ? 'selected' : '' }}>Y10.5</option>
 	<option value="Y11" {{$Respels->YRespelClasf4741 == 'Y11' ? 'selected' : '' }}>Y11</option>
 	<option value="Y12" {{$Respels->YRespelClasf4741 == 'Y12' ? 'selected' : '' }}>Y12</option>
 	<option value="Y13" {{$Respels->YRespelClasf4741 == 'Y13' ? 'selected' : '' }}>Y13</option>
@@ -56,6 +61,9 @@
 	<option value="Y27" {{$Respels->YRespelClasf4741 == 'Y27' ? 'selected' : '' }}>Y27</option>
 	<option value="Y28" {{$Respels->YRespelClasf4741 == 'Y28' ? 'selected' : '' }}>Y28</option>
 	<option value="Y29" {{$Respels->YRespelClasf4741 == 'Y29' ? 'selected' : '' }}>Y29</option>
+	<option value="Y29.1" {{$Respels->YRespelClasf4741 == 'Y29.1' ? 'selected' : '' }}>Y29.1</option>
+	<option value="Y29.2" {{$Respels->YRespelClasf4741 == 'Y29.2' ? 'selected' : '' }}>Y29.2</option>
+	<option value="Y29.3" {{$Respels->YRespelClasf4741 == 'Y29.3' ? 'selected' : '' }}>Y29.3</option>
 	<option value="Y30" {{$Respels->YRespelClasf4741 == 'Y30' ? 'selected' : '' }}>Y30</option>
 	<option value="Y31" {{$Respels->YRespelClasf4741 == 'Y31' ? 'selected' : '' }}>Y31</option>
 	<option value="Y32" {{$Respels->YRespelClasf4741 == 'Y32' ? 'selected' : '' }}>Y32</option>
@@ -68,9 +76,17 @@
 	<option value="Y39" {{$Respels->YRespelClasf4741 == 'Y39' ? 'selected' : '' }}>Y39</option>
 	<option value="Y40" {{$Respels->YRespelClasf4741 == 'Y40' ? 'selected' : '' }}>Y40</option>
 	<option value="Y41" {{$Respels->YRespelClasf4741 == 'Y41' ? 'selected' : '' }}>Y41</option>
+	<option value="Y41.1" {{$Respels->YRespelClasf4741 == 'Y41.1' ? 'selected' : '' }}>Y41.1</option>
+	<option value="Y41.2" {{$Respels->YRespelClasf4741 == 'Y41.2' ? 'selected' : '' }}>Y41.2</option>
 	<option value="Y42" {{$Respels->YRespelClasf4741 == 'Y42' ? 'selected' : '' }}>Y42</option>
 	<option value="Y43" {{$Respels->YRespelClasf4741 == 'Y43' ? 'selected' : '' }}>Y43</option>
 	<option value="Y44" {{$Respels->YRespelClasf4741 == 'Y44' ? 'selected' : '' }}>Y44</option>
 	<option value="Y45" {{$Respels->YRespelClasf4741 == 'Y45' ? 'selected' : '' }}>Y45</option>
+	<option value="Y45.1" {{$Respels->YRespelClasf4741 == 'Y45.1' ? 'selected' : '' }}>Y45.1</option>
+	<option value="Y45.2" {{$Respels->YRespelClasf4741 == 'Y45.2' ? 'selected' : '' }}>Y45.2</option>
+	<option value="Y45.3" {{$Respels->YRespelClasf4741 == 'Y45.3' ? 'selected' : '' }}>Y45.3</option>
+	<option value="Y45.4" {{$Respels->YRespelClasf4741 == 'Y45.4' ? 'selected' : '' }}>Y45.4</option>
+	<option value="Y45.5" {{$Respels->YRespelClasf4741 == 'Y45.5' ? 'selected' : '' }}>Y45.5</option>
+	<option value="Y45.6" {{$Respels->YRespelClasf4741 == 'Y45.6' ? 'selected' : '' }}>Y45.6</option>
 </select>
 <input type="text" hidden="" name="ARespelClasf4741" value="">

@@ -37,6 +37,11 @@
 	<option value="Y9.5">Y9.5</option>
 	<option value="Y9.6">Y9.6</option>
 	<option value="Y10">Y10</option>
+	<option value="Y10.1">Y10.1</option>
+	<option value="Y10.2">Y10.2</option>
+	<option value="Y10.3">Y10.3</option>
+	<option value="Y10.4">Y10.4</option>
+	<option value="Y10.5">Y10.5</option>
 	<option value="Y11">Y11</option>
 	<option value="Y12">Y12</option>
 	<option value="Y13">Y13</option>
@@ -56,6 +61,9 @@
 	<option value="Y27">Y27</option>
 	<option value="Y28">Y28</option>
 	<option value="Y29">Y29</option>
+	<option value="Y29.1">Y29.1</option>
+	<option value="Y29.2">Y29.2</option>
+	<option value="Y29.3">Y29.3</option>
 	<option value="Y30">Y30</option>
 	<option value="Y31">Y31</option>
 	<option value="Y32">Y32</option>
@@ -68,8 +76,16 @@
 	<option value="Y39">Y39</option>
 	<option value="Y40">Y40</option>
 	<option value="Y41">Y41</option>
+	<option value="Y41.1">Y41.1</option>
+	<option value="Y41.2">Y41.2</option>
 	<option value="Y42">Y42</option>
 	<option value="Y43">Y43</option>
 	<option value="Y44">Y44</option>
 	<option value="Y45">Y45</option>
+	<option value="Y45.1">Y45.1</option>
+	<option value="Y45.2">Y45.2</option>
+	<option value="Y45.3">Y45.3</option>
+	<option value="Y45.4">Y45.4</option>
+	<option value="Y45.5">Y45.5</option>
+	<option value="Y45.6">Y45.6</option>
 </select>

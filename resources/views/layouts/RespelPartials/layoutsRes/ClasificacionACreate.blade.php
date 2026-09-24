@@ -53,6 +53,11 @@
 	<option value="A3160">A3160</option>
 	<option value="A3170">A3170</option>
 	<option value="A3180">A3180</option>
+	<option value="A3180.1">A3180.1</option>
+	<option value="A3180.2">A3180.2</option>
+	<option value="A3180.3">A3180.3</option>
+	<option value="A3180.4">A3180.4</option>
+	<option value="A3180.5">A3180.5</option>
 	<option value="A3190">A3190</option>
 	<option value="A3200">A3200</option>
     <option value="A3210">A3210</option>
@@ -85,6 +90,7 @@
 	<option value="A4110">A4110</option>
 	<option value="A4120">A4120</option>
 	<option value="A4130">A4130</option>
+	<option value="A4130.1">A4130.1</option>
 	<option value="A4140">A4140</option>
 	<option value="A4150">A4150</option>
 	<option value="A4160">A4160</option>

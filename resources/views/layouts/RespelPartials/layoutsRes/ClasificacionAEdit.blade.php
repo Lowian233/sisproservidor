@@ -30,12 +30,12 @@
 	<option {{$Respels->ARespelClasf4741 == 'A2060' ? 'selected' : '' }}>A2060</option>
 	<option {{$Respels->ARespelClasf4741 == 'A3010' ? 'selected' : '' }}>A3010</option>
 	<option {{$Respels->ARespelClasf4741 == 'A3020' ? 'selected' : '' }}>A3020</option>
-	<option {{$Respels->ARespelClasf4741 == 'A4030.1' ? 'selected' : '' }}>A4030.1</option>
-	<option {{$Respels->ARespelClasf4741 == 'A4030.2' ? 'selected' : '' }}>A4030.2</option>
-	<option {{$Respels->ARespelClasf4741 == 'A4030.3' ? 'selected' : '' }}>A4030.3</option>
-	<option {{$Respels->ARespelClasf4741 == 'A4030.4' ? 'selected' : '' }}>A4030.4</option>
-	<option {{$Respels->ARespelClasf4741 == 'A4030.5' ? 'selected' : '' }}>A4030.5</option>
-	<option {{$Respels->ARespelClasf4741 == 'A4030.6' ? 'selected' : '' }}>A4030.6</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3020.1' ? 'selected' : '' }}>A3020.1</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3020.2' ? 'selected' : '' }}>A3020.2</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3020.3' ? 'selected' : '' }}>A3020.3</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3020.4' ? 'selected' : '' }}>A3020.4</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3020.5' ? 'selected' : '' }}>A3020.5</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3020.6' ? 'selected' : '' }}>A3020.6</option>
 	<option {{$Respels->ARespelClasf4741 == 'A3020.7' ? 'selected' : '' }}>A3020.7</option>
 	<option {{$Respels->ARespelClasf4741 == 'A3030' ? 'selected' : '' }}>A3030</option>
 	<option {{$Respels->ARespelClasf4741 == 'A3040' ? 'selected' : '' }}>A3040</option>
@@ -53,6 +53,11 @@
 	<option {{$Respels->ARespelClasf4741 == 'A3160' ? 'selected' : '' }}>A3160</option>
 	<option {{$Respels->ARespelClasf4741 == 'A3170' ? 'selected' : '' }}>A3170</option>
 	<option {{$Respels->ARespelClasf4741 == 'A3180' ? 'selected' : '' }}>A3180</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3180.1' ? 'selected' : '' }}>A3180.1</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3180.2' ? 'selected' : '' }}>A3180.2</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3180.3' ? 'selected' : '' }}>A3180.3</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3180.4' ? 'selected' : '' }}>A3180.4</option>
+	<option {{$Respels->ARespelClasf4741 == 'A3180.5' ? 'selected' : '' }}>A3180.5</option>
 	<option {{$Respels->ARespelClasf4741 == 'A3190' ? 'selected' : '' }}>A3190</option>
 	<option {{$Respels->ARespelClasf4741 == 'A3200' ? 'selected' : '' }}>A3200</option>
     <option {{$Respels->ARespelClasf4741 == 'A3210' ? 'selected' : '' }}>A3210</option>
@@ -85,6 +90,7 @@
 	<option {{$Respels->ARespelClasf4741 == 'A4110' ? 'selected' : '' }}>A4110</option>
 	<option {{$Respels->ARespelClasf4741 == 'A4120' ? 'selected' : '' }}>A4120</option>
 	<option {{$Respels->ARespelClasf4741 == 'A4130' ? 'selected' : '' }}>A4130</option>
+	<option {{$Respels->ARespelClasf4741 == 'A4130.1' ? 'selected' : '' }}>A4130.1</option>
 	<option {{$Respels->ARespelClasf4741 == 'A4140' ? 'selected' : '' }}>A4140</option>
 	<option {{$Respels->ARespelClasf4741 == 'A4150' ? 'selected' : '' }}>A4150</option>
 	<option {{$Respels->ARespelClasf4741 == 'A4160' ? 'selected' : '' }}>A4160</option>

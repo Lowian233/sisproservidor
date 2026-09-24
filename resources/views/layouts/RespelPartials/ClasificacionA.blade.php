@@ -247,6 +247,28 @@
 								<td>Desechos, sustancias y artículos que contienen, consisten o están contaminados con bifenilo policlorado (PCB), terfenilo policlorado (PCT),naftaleno policlorado (PCN) o bifenilopolibromado (PBB), o cualquier otro compuesto polibromado análogo, con una concentración de igual o superior a 50 mg/kg</td>
 							</tr>
 							<tr>
+								<td>A3180.1</td>
+								<td>Equipos desechados: Equipos que hayan contenido o contengan aceites dieléctricos con una concentración mayor a 50 ppm de PCB o carcazas cuando la superficie sólida presente un contenido de PCB mayor o igual a 10 microgramos/dm2</td>
+							</tr>
+							<tr>
+								<td>A3180.2</td>
+								<td>Aceites dieléctricos que consistan, contengan o estén contaminados con PCB: Aceites dieléctricos con una concentración igual o mayor a 50 ppm de PCB</td>
+							</tr>
+							<tr>
+								<td>A3180.3</td>
+								<td>Desechos o residuos que contengan o estén contaminados con PCB: Elementos, sustancias, fluidos diferentes a los aceites dieléctricos y materiales con PCB en una concentración igual o superior a 50 ppm.</td>
+							</tr>
+							<tr>
+								<td>A3180.4</td>
+								<td>Envases, recipientes, canecas, bidones o contenedores que contienen o que están contaminados con PCB</td>
+							</tr>
+							<tr>
+								<td>A3180.5</td>|
+								<td>
+								Sustancias y artículos de desecho que contengan o estén contaminados con terfenilos policlorados (PCT), bifenilos polibromados (PBB), naftaleno policlorado (PCN) o cualquier otro compuesto polibromado análogo, con una concentración igual o superior a 50 ppm
+								</td>
+							</tr>
+							<tr>
 								<td>A3190</td>
 								<td>Desechos de residuos alquitranados (con exclusión de los cementos asfálticos) resultantes de la refinación, destilación o cualquier otro tratamiento pirolíticode materiales orgánicos</td>
 							</tr>
@@ -379,6 +401,10 @@
 							<tr>
 								<td>A4130</td>
 								<td>Envases y contenedores de desechos que contienen sustancias incluidas en el anexo I, en concentraciones suficientes como para mostrar las características peligrosas del anexo III</td>
+							</tr>
+							<tr>
+								<td>A4130.1</td>
+								<td>Otros envases, recipientes, canecas, bidones o contenedores que contienen o que están contaminados con productos o sustancias químicas peligrosas, diferentes a plaguicidas, biocidas, productos fitofarmacéuticos (Y4.5/A4030.5), hidrocarburos (Y9.5/A4060.5), aceites usados (Y8.6/A3020.6), PCB (Y10.4/A3180.4), sustancias CFC, HCFC, HFC y halones (Y45.6)</td>
 							</tr>
 							<tr>
 								<td>A4140</td>
