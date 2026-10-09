@@ -202,6 +202,11 @@ class SolicitudExpressController extends Controller
                 }
             } */
 
+            // Wati corta el valor en "<"; se expone una versión sin ese carácter.
+            if (isset($datos['peso'])) {
+                $datos['pesoTexto'] = trim(preg_replace('/\s+/', ' ', str_replace('<', 'Menos de', $datos['peso'])));
+            }
+
             return response()->json([
                 'success'     => true,
                 'message'     => 'Solicitud actualizada correctamente',
