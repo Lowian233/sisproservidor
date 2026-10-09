@@ -31,16 +31,32 @@ class SolicitudExpressController extends Controller
                 'peso' => $request->input('peso'),
             ]);
 
-            // INSERT: llega tipoResiduo
-            if ($tipoResiduo) {
-                if (!$idSolicitud || !is_numeric($idSolicitud) || $idSolicitud == '@idSolicitud') {
-                    $maxId       = DB::table('solicitudes_express')->max('idSolicitud');
-                    $idSolicitud = $maxId ? $maxId + 1 : 1;
+            $sinIdSolicitud = !$idSolicitud || !is_numeric($idSolicitud) || $idSolicitud == '@idSolicitud';
+
+            // Mientras la fila tenga idSolicitud = 0, Wati la referencia con el id de la fila.
+            $placeholder = $sinIdSolicitud ? null
+                : SolicitudExpress::where('id', (int) $idSolicitud)->where('idSolicitud', 0)->first();
+
+            // Al llegar el residuo se le asigna su idSolicitud real y sigue el flujo normal.
+            if ($placeholder && $tipoResiduo) {
+                $idSolicitud = (int) DB::table('solicitudes_express')->max('idSolicitud') + 1;
+                $placeholder->update(['idSolicitud' => $idSolicitud]);
+                $placeholder = null;
+            }
+
+            // INSERT: llega tipoResiduo, o no hay idSolicitud válido (solo idCliente)
+            if ($tipoResiduo || $sinIdSolicitud) {
+                if ($sinIdSolicitud) {
+                    // Solo idCliente: placeholder en 0. Con residuo: idSolicitud nuevo.
+                    $idSolicitud = $tipoResiduo ? (int) DB::table('solicitudes_express')->max('idSolicitud') + 1 : 0;
                 } else {
                     $idSolicitud = (int) $idSolicitud;
                 }
 
-                $datos = ['idSolicitud' => $idSolicitud, 'tipoResiduo' => $tipoResiduo];
+                $datos = ['idSolicitud' => $idSolicitud];
+                if ($tipoResiduo && $tipoResiduo !== '@residuo') {
+                    $datos['tipoResiduo'] = $tipoResiduo;
+                }
 
                 if ($request->has('idCliente')) {
                     $idCliente = $this->idNumerico($request->input('idCliente'));
@@ -70,7 +86,31 @@ class SolicitudExpressController extends Controller
                     $datos['precio'] = $parsed['precio'];
                 }
 
-                $solicitud = SolicitudExpress::create($datos);
+                $solicitud = null;
+
+                if (!$sinIdSolicitud && isset($datos['tipoResiduo'])) {
+                    $base = SolicitudExpress::where('idSolicitud', $idSolicitud)->orderBy('id')->first();
+
+                    if ($base && $base->tipoResiduo === null) {
+                        // Fila creada en pasos previos sin residuo: se completa en vez de duplicar.
+                        $base->update($datos);
+                        $solicitud = $base->fresh();
+                    } elseif ($base) {
+                        // Residuo adicional: hereda los datos comunes de la solicitud.
+                        foreach (['idCliente', 'idSede', 'localidad', 'peso', 'precio', 'RequiereContrato'] as $campo) {
+                            if (!array_key_exists($campo, $datos) && $base->$campo !== null) {
+                                $datos[$campo] = $base->$campo;
+                            }
+                        }
+                    }
+                }
+
+                $solicitud = $solicitud ?? SolicitudExpress::create($datos);
+
+                // Placeholder: se devuelve el id de la fila como referencia para Wati.
+                if ($sinIdSolicitud && !$tipoResiduo) {
+                    $idSolicitud = $solicitud->id;
+                }
 
                 return response()->json([
                     'success'     => true,
@@ -90,6 +130,11 @@ class SolicitudExpressController extends Controller
 
             $idSolicitud = (int) $idSolicitud;
             $datos       = [];
+            $filas       = fn () => DB::table('solicitudes_express')->when(
+                $placeholder,
+                fn ($q) => $q->where('id', $placeholder->id),
+                fn ($q) => $q->where('idSolicitud', $idSolicitud)
+            );
 
             if ($request->has('idCliente')) {
                 $idCliente = $this->idNumerico($request->input('idCliente'));
@@ -109,7 +154,7 @@ class SolicitudExpressController extends Controller
                     ], 422);
                 }
                 $idClienteSede = $datos['idCliente']
-                    ?? DB::table('solicitudes_express')->where('idSolicitud', $idSolicitud)->value('idCliente');
+                    ?? $filas()->value('idCliente');
                 $this->aplicarSede($request->input('idSede'), $idClienteSede, $datos);
             }
             if ($request->has('localidad'))        $datos['localidad']        = $request->input('localidad');
@@ -128,19 +173,14 @@ class SolicitudExpressController extends Controller
                 ], 422);
             }
 
-            $consultaSolicitud = DB::table('solicitudes_express')
-                ->where('idSolicitud', $idSolicitud);
-
-            if (!$consultaSolicitud->exists()) {
+            if (!$filas()->exists()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No se encontraron registros para ese idSolicitud',
                 ], 404);
             }
 
-            $afectados = DB::table('solicitudes_express')
-                ->where('idSolicitud', $idSolicitud)
-                ->update($datos);
+            $afectados = $filas()->update($datos);
 
             /* if (isset($datos['estado']) && $datos['estado'] === 'Pagado') {
                 try {
