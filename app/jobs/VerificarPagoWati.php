@@ -354,9 +354,7 @@ class VerificarPagoWati implements ShouldQueue
 
                 foreach ($items as $message) {
                     // Solo mensajes recibidos del contacto, no enviados por el bot
-                    $owner     = strtolower((string) ($message['owner'] ?? ''));
-                    $eventType = strtolower((string) ($message['eventType'] ?? ''));
-                    if ($owner === 'us' || $eventType === 'sent') continue;
+                    if ($this->esMensajeSaliente($message)) continue;
 
                     $type        = strtolower((string) ($message['type'] ?? ''));
                     $dataPath    = (string) ($message['data'] ?? $message['mediaUrl'] ?? $message['fileName'] ?? '');
@@ -399,6 +397,22 @@ class VerificarPagoWati implements ShouldQueue
         }
 
         return [null, null];
+    }
+
+    /** WATI marca los mensajes del bot/operador con owner=true (booleano), no solo "us". */
+    private function esMensajeSaliente(array $message): bool
+    {
+        $owner = $message['owner'] ?? null;
+        if ($owner === true || in_array(strtolower(trim((string) $owner)), ['1', 'true', 'us'], true)) {
+            return true;
+        }
+
+        $eventType = strtolower((string) ($message['eventType'] ?? ''));
+        if (in_array($eventType, ['sent', 'broadcast', 'broadcastmessage', 'template', 'templatemessage'], true)) {
+            return true;
+        }
+
+        return !empty($message['isOwner']);
     }
 
     private function telefonosConsulta(): array
